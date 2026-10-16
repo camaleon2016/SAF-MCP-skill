@@ -3,6 +3,13 @@ import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkAccess, getClientIp } from "../governance/access.js";
+import {
+  PolicyError,
+  setNetworkMode,
+  enforceStartupPolicy,
+  checkBrowserSafety,
+  corsHeaders,
+} from "../governance/policy.js";
 import { info, audit, error as logError } from "../governance/logger.js";
 import {
   analyzeArchitecture,
@@ -40,15 +47,27 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = parseInt(process.env["PORT"] ?? "3002", 10);
 const HOST = process.env["HOST"] ?? "127.0.0.1";
 
+setNetworkMode(HOST);
+try {
+  enforceStartupPolicy(HOST);
+} catch (err) {
+  console.error(`Refusing to start: ${err instanceof Error ? err.message : String(err)}`);
+  process.exit(1);
+}
+
 function json(res: import("node:http").ServerResponse, status: number, body: unknown): void {
   const data = JSON.stringify(body, null, 2);
-  res.writeHead(status, {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type, X-Api-Key, Authorization",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  });
+  // CORS headers, when any, are set per request from SAFE_MCP_CORS_ORIGINS.
+  res.writeHead(status, { "Content-Type": "application/json" });
   res.end(data);
+}
+
+function discoveryError(res: import("node:http").ServerResponse, err: unknown): void {
+  if (err instanceof PolicyError) {
+    json(res, 403, { error: "Blocked by policy", detail: err.message });
+    return;
+  }
+  json(res, 502, { error: "Discovery failed", detail: err instanceof Error ? err.message : String(err) });
 }
 
 async function readBody(req: import("node:http").IncomingMessage): Promise<unknown> {
@@ -68,9 +87,18 @@ const httpServer = createServer(async (req, res) => {
   const clientIp = getClientIp(req);
   const start = performance.now();
 
-  // CORS preflight
+  // CORS: only origins the operator listed in SAFE_MCP_CORS_ORIGINS
+  const cors = corsHeaders(req);
+  for (const [k, v] of Object.entries(cors)) res.setHeader(k, v);
   if (req.method === "OPTIONS") {
-    json(res, 204, "");
+    res.writeHead(Object.keys(cors).length > 0 ? 204 : 403).end();
+    return;
+  }
+
+  // Browser and DNS rebinding protection, before anything else
+  const browser = checkBrowserSafety(req);
+  if (!browser.allowed) {
+    json(res, browser.reason?.startsWith("Content-Type") ? 415 : 403, { error: browser.reason });
     return;
   }
 
@@ -191,7 +219,7 @@ const httpServer = createServer(async (req, res) => {
         json(res, 200, result);
         audit("rest_call", { clientIp, toolName: "discover_and_analyze_stdio", duration: Math.round(performance.now() - start) });
       } catch (discErr) {
-        json(res, 502, { error: "Discovery failed", detail: discErr instanceof Error ? discErr.message : String(discErr) });
+        discoveryError(res, discErr);
       }
       return;
     }
@@ -202,7 +230,7 @@ const httpServer = createServer(async (req, res) => {
         json(res, 200, result);
         audit("rest_call", { clientIp, toolName: "discover_and_analyze_http", duration: Math.round(performance.now() - start) });
       } catch (discErr) {
-        json(res, 502, { error: "Discovery failed", detail: discErr instanceof Error ? discErr.message : String(discErr) });
+        discoveryError(res, discErr);
       }
       return;
     }
@@ -213,7 +241,7 @@ const httpServer = createServer(async (req, res) => {
         json(res, 200, result);
         audit("rest_call", { clientIp, toolName: "discover_and_analyze_config", duration: Math.round(performance.now() - start) });
       } catch (discErr) {
-        json(res, 502, { error: "Discovery failed", detail: discErr instanceof Error ? discErr.message : String(discErr) });
+        discoveryError(res, discErr);
       }
       return;
     }

@@ -325,7 +325,13 @@ srv.registerTool(
   {
     title: "Discover & Analyze MCP Server (stdio)",
     description:
-      "Connect to a local MCP server via stdio, automatically enumerate all its tools, and run a full SAFE-MCP security analysis. No manual JSON needed — just provide the command to start the server.",
+      "Connect to a local MCP server via stdio, automatically enumerate all its tools, and run a full SAFE-MCP security analysis. WARNING: this starts the given command as a child process on the host, so only call it for a server the user has asked to analyze and would be willing to run.",
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
     inputSchema: {
       command: z.string().describe("Command to start the MCP server (e.g., 'node', 'python')"),
       args: z.array(z.string()).optional().describe("Arguments for the command (e.g., ['dist/index.js'])"),
@@ -350,6 +356,10 @@ srv.registerTool(
     title: "Discover & Analyze MCP Server (HTTP/SSE)",
     description:
       "Connect to a remote MCP server via HTTP or SSE, automatically enumerate all its tools, and run a full SAFE-MCP security analysis. Provide the server URL — the skill handles the rest.",
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       url: z.string().describe("MCP server URL (e.g., 'http://localhost:3001/v1/mcp')"),
       headers: z.record(z.string(), z.string()).optional().describe("Custom HTTP headers (e.g., for authentication)"),
@@ -370,6 +380,12 @@ srv.registerTool(
     title: "Discover & Analyze from Config File",
     description:
       "Parse an MCP client config (Claude Desktop, VS Code, etc.), connect to every server defined in it, enumerate all tools, and run a full architecture-level SAFE-MCP security analysis across all servers.",
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
     inputSchema: {
       configJson: z.string().describe("The JSON content of the MCP client config file (e.g., claude_desktop_config.json or VS Code settings.json mcp section)"),
     },

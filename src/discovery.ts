@@ -12,6 +12,7 @@ import type {
   AgentArchitecture,
   AnalysisResult,
 } from "./engine/rules.js";
+import { assertCommandDiscoveryAllowed, assertUrlAllowed } from "./governance/policy.js";
 
 // ── Shared Helpers ──────────────────────────────────────────────────
 
@@ -101,6 +102,7 @@ export interface DiscoveryResult {
 export async function discoverAndAnalyzeStdio(
   input: StdioDiscoveryInput,
 ): Promise<DiscoveryResult> {
+  assertCommandDiscoveryAllowed();
   const client = new Client({ name: "safe-mcp-discovery", version: "1.0.0" });
   const stdioParams: Record<string, unknown> = { command: input.command, stderr: "pipe" };
   if (input.args) stdioParams.args = input.args;
@@ -136,8 +138,8 @@ export interface HttpDiscoveryInput {
 export async function discoverAndAnalyzeHttp(
   input: HttpDiscoveryInput,
 ): Promise<DiscoveryResult> {
+  const url = await assertUrlAllowed(input.url);
   const client = new Client({ name: "safe-mcp-discovery", version: "1.0.0" });
-  const url = new URL(input.url);
 
   const opts = input.headers
     ? { requestInit: { headers: input.headers } }
@@ -229,8 +231,8 @@ export async function discoverAndAnalyzeConfig(
 
       if (entry.url) {
         // HTTP/SSE server
+        const url = await assertUrlAllowed(entry.url);
         const client = new Client({ name: "safe-mcp-discovery", version: "1.0.0" });
-        const url = new URL(entry.url);
         try {
           const transport = new StreamableHTTPClientTransport(url);
           discovered = await discoverViaClient(client, transport);
@@ -249,7 +251,8 @@ export async function discoverAndAnalyzeConfig(
           }),
         );
       } else if (entry.command) {
-        // Stdio server
+        // Stdio server: spawns a process, so it obeys the command discovery policy
+        assertCommandDiscoveryAllowed();
         const client = new Client({ name: "safe-mcp-discovery", version: "1.0.0" });
         const stdParams: Record<string, unknown> = { command: entry.command, stderr: "pipe" };
         if (entry.args) stdParams.args = entry.args;
