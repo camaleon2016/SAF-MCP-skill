@@ -1,0 +1,5 @@
+{
+  "repository": "https://github.com/safe-agentic-framework/safe-mcp",
+  "commit": "d3d40297c478d2680d315399b6aaf317e5aa15b8",
+  "note": "Pinned SAF-MCP commit that src/data mitigation links are generated from. Bump deliberately, rerun the sync, and review docs/mitigation-link-report.md."
+}

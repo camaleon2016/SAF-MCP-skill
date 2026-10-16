@@ -61,3 +61,26 @@ jobs:
 
       - name: npm audit
         run: npm audit --audit-level=high
+
+  catalog-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check out pinned SAF-MCP upstream
+        run: |
+          COMMIT=$(node -p "require('./scripts/upstream.json').commit")
+          git clone --filter=blob:none --quiet https://github.com/safe-agentic-framework/safe-mcp.git ../safe-mcp
+          git -C ../safe-mcp checkout --quiet "$COMMIT"
+
+      - name: Verify mitigation links match upstream
+        run: npx tsx scripts/sync-mitigation-links.ts --upstream ../safe-mcp --check

@@ -1,0 +1,4 @@
+# Generated catalog files: keep LF everywhere so the sync script's output
+# matches the checked out files byte for byte on every platform.
+src/data/*.json text eol=lf
+docs/mitigation-link-*.md text eol=lf

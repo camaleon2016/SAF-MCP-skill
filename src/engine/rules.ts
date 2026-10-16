@@ -83,11 +83,27 @@ interface Rule {
   test: (input: AgentArchitecture) => string | null;
 }
 
+const EFFECTIVENESS_RANK: Record<string, number> = {
+  "High (Provable Security)": 0,
+  High: 1,
+  "Medium-High": 2,
+  Medium: 3,
+};
+
+/** Strongest controls first, then by mitigation number, so the top of the list is what to do first. */
+function sortByEffectiveness(list: Mitigation[]): Mitigation[] {
+  const num = (id: string): number => Number(id.split("-").pop());
+  return [...list].sort(
+    (a, b) =>
+      (EFFECTIVENESS_RANK[a.effectiveness] ?? 9) - (EFFECTIVENESS_RANK[b.effectiveness] ?? 9) || num(a.id) - num(b.id),
+  );
+}
+
 function buildFinding(rule: Rule, evidence: string): Finding | null {
   const technique = getTechnique(rule.techniqueId);
   if (!technique) return null;
 
-  const mitigations = getMitigationsForTechnique(rule.techniqueId).map((m) => ({
+  const mitigations = sortByEffectiveness(getMitigationsForTechnique(rule.techniqueId)).map((m) => ({
     id: m.id,
     name: m.name,
     effectiveness: m.effectiveness,
@@ -719,6 +735,11 @@ function computeCoverageScore(findings: Finding[]): number {
 }
 
 // ── Public API ──────────────────────────────────────────────────────
+
+/** Rule id to technique id, for tests and documentation. */
+export function listRules(): Array<{ id: string; techniqueId: string }> {
+  return rules.map((r) => ({ id: r.id, techniqueId: r.techniqueId }));
+}
 
 export function analyzeArchitecture(input: AgentArchitecture): AnalysisResult {
   const findings: Finding[] = [];

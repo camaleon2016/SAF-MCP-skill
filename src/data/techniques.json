@@ -6,7 +6,7 @@
     "website": "https://www.safemcp.org/",
     "totalTactics": 14,
     "totalTechniques": 85,
-    "totalMitigations": 47
+    "totalMitigations": 61
   },
   "tactics": [
     {
@@ -88,7 +88,13 @@
       "tacticName": "Resource Development",
       "severity": "Critical",
       "description": "Attackers contaminate training data used to develop AI models for MCP tools, implanting backdoors that activate during specific conditions",
-      "mitigations": ["SAFE-M-33", "SAFE-M-34", "SAFE-M-35", "SAFE-M-36"],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-33",
+        "SAFE-M-34",
+        "SAFE-M-35",
+        "SAFE-M-36"
+      ],
       "mitreAttackMapping": []
     },
     {
@@ -135,15 +141,44 @@
           "description": "Exploiting interactions between multiple tools via chain attacks, permission escalation, and context pollution"
         }
       ],
-      "mitigations": ["SAFE-M-1", "SAFE-M-2", "SAFE-M-3", "SAFE-M-4", "SAFE-M-5", "SAFE-M-6", "SAFE-M-7", "SAFE-M-8", "SAFE-M-9", "SAFE-M-10", "SAFE-M-11", "SAFE-M-12"],
+      "mitigations": [
+        "SAFE-M-1",
+        "SAFE-M-2",
+        "SAFE-M-3",
+        "SAFE-M-4",
+        "SAFE-M-5",
+        "SAFE-M-6",
+        "SAFE-M-7",
+        "SAFE-M-8",
+        "SAFE-M-9",
+        "SAFE-M-10",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-30",
+        "SAFE-M-33",
+        "SAFE-M-34",
+        "SAFE-M-35",
+        "SAFE-M-36",
+        "SAFE-M-53",
+        "SAFE-M-69",
+        "SAFE-M-70"
+      ],
       "impact": {
         "confidentiality": "High",
         "integrity": "High",
         "availability": "Low",
         "scope": "Network-wide"
       },
-      "mitreAttackMapping": ["T1195", "T1055"],
-      "relatedTechniques": ["SAFE-T1102", "SAFE-T1002", "SAFE-T1401"],
+      "mitreAttackMapping": [
+        "T1195",
+        "T1055"
+      ],
+      "relatedTechniques": [
+        "SAFE-T1102",
+        "SAFE-T1002",
+        "SAFE-T1401"
+      ],
       "realWorldIncidents": [
         "WhatsApp MCP Data Exfiltration (April 2025)",
         "GitHub MCP Private Repository Breach (May 2025)",
@@ -169,15 +204,32 @@
           "Dependency confusion attacks in monorepo environments"
         ]
       },
-      "mitigations": ["SAFE-M-13", "SAFE-M-14", "SAFE-M-15", "SAFE-M-16", "SAFE-M-17", "SAFE-M-18", "SAFE-M-19", "SAFE-M-20", "SAFE-M-21", "SAFE-M-22"],
+      "mitigations": [
+        "SAFE-M-2",
+        "SAFE-M-6",
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-24",
+        "SAFE-M-29",
+        "SAFE-M-33",
+        "SAFE-M-45"
+      ],
       "impact": {
         "confidentiality": "Critical",
         "integrity": "Critical",
         "availability": "High",
         "scope": "Network-wide"
       },
-      "mitreAttackMapping": ["T1195", "T1195.001", "T1195.002"],
-      "relatedTechniques": ["SAFE-T1001", "SAFE-T1003", "SAFE-T1006"]
+      "mitreAttackMapping": [
+        "T1195",
+        "T1195.001",
+        "T1195.002"
+      ],
+      "relatedTechniques": [
+        "SAFE-T1001",
+        "SAFE-T1003",
+        "SAFE-T1006"
+      ]
     },
     {
       "id": "SAFE-T1003",
@@ -196,15 +248,32 @@
           "Forum posts and blog articles promoting malicious tools"
         ]
       },
-      "mitigations": ["SAFE-M-23", "SAFE-M-24", "SAFE-M-25", "SAFE-M-26", "SAFE-M-27", "SAFE-M-28", "SAFE-M-29", "SAFE-M-30", "SAFE-M-31", "SAFE-M-32"],
+      "mitigations": [
+        "SAFE-M-2",
+        "SAFE-M-6",
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-24",
+        "SAFE-M-29",
+        "SAFE-M-45"
+      ],
       "impact": {
         "confidentiality": "Critical",
         "integrity": "Critical",
         "availability": "High",
         "scope": "Local to Network-wide"
       },
-      "mitreAttackMapping": ["T1566", "T1204", "T1204.002"],
-      "relatedTechniques": ["SAFE-T1002", "SAFE-T1006", "SAFE-T1203"]
+      "mitreAttackMapping": [
+        "T1566",
+        "T1204",
+        "T1204.002"
+      ],
+      "relatedTechniques": [
+        "SAFE-T1002",
+        "SAFE-T1006",
+        "SAFE-T1203"
+      ]
     },
     {
       "id": "SAFE-T1004",
@@ -224,15 +293,32 @@
           "Service redeployment windows where identity checks are temporarily bypassed"
         ]
       },
-      "mitigations": ["SAFE-M-14", "SAFE-M-2", "SAFE-M-6", "SAFE-M-45", "SAFE-M-29", "SAFE-M-12", "SAFE-M-20", "SAFE-M-11"],
+      "mitigations": [
+        "SAFE-M-2",
+        "SAFE-M-6",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-20",
+        "SAFE-M-45"
+      ],
       "impact": {
         "confidentiality": "High",
         "integrity": "High",
         "availability": "Medium",
         "scope": "Network-wide"
       },
-      "mitreAttackMapping": ["T1557", "T1557.002", "T1565.002", "T1071.004"],
-      "relatedTechniques": ["SAFE-T1301", "SAFE-T1407", "SAFE-T1005", "SAFE-T1704"]
+      "mitreAttackMapping": [
+        "T1557",
+        "T1557.002",
+        "T1565.002",
+        "T1071.004"
+      ],
+      "relatedTechniques": [
+        "SAFE-T1301",
+        "SAFE-T1407",
+        "SAFE-T1005",
+        "SAFE-T1704"
+      ]
     },
     {
       "id": "SAFE-T1005",
@@ -250,16 +336,31 @@
           "Reverse tunneling tools inadvertently exposing MCP servers"
         ]
       },
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-20",
+        "SAFE-M-29"
+      ],
       "impact": {
         "confidentiality": "High",
         "integrity": "High",
         "availability": "Medium",
         "scope": "Depends on tooling and deployment"
       },
-      "mitreAttackMapping": ["T1190", "T1133", "T1595"],
+      "mitreAttackMapping": [
+        "T1190",
+        "T1133",
+        "T1595"
+      ],
       "relatedTechniques": [],
-      "cves": ["CVE-2025-66416", "CVE-2025-52882", "CVE-2025-54073"]
+      "cves": [
+        "CVE-2025-66416",
+        "CVE-2025-52882",
+        "CVE-2025-54073"
+      ]
     },
     {
       "id": "SAFE-T1006",
@@ -276,15 +377,30 @@
           "Compromised Installer distribution"
         ]
       },
-      "mitigations": ["SAFE-M-2", "SAFE-M-6", "SAFE-M-9", "SAFE-M-11", "SAFE-M-12"],
+      "mitigations": [
+        "SAFE-M-6",
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-15",
+        "SAFE-M-29",
+        "SAFE-M-45"
+      ],
       "impact": {
         "confidentiality": "High",
         "integrity": "High",
         "availability": "Medium",
         "scope": "Individual machines to production environments"
       },
-      "mitreAttackMapping": ["T1566", "T1195"],
-      "relatedTechniques": ["SAFE-T1001", "SAFE-T1004", "SAFE-T1207"]
+      "mitreAttackMapping": [
+        "T1566",
+        "T1195"
+      ],
+      "relatedTechniques": [
+        "SAFE-T1001",
+        "SAFE-T1004",
+        "SAFE-T1207"
+      ]
     },
     {
       "id": "SAFE-T1007",
@@ -302,15 +418,32 @@
           "Supply chain attacks on MCP server registries"
         ]
       },
-      "mitigations": ["SAFE-M-13", "SAFE-M-14", "SAFE-M-15", "SAFE-M-16", "SAFE-M-17", "SAFE-M-18", "SAFE-M-19", "SAFE-M-20"],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-15",
+        "SAFE-M-16",
+        "SAFE-M-17",
+        "SAFE-M-18",
+        "SAFE-M-19",
+        "SAFE-M-37",
+        "SAFE-M-38"
+      ],
       "impact": {
         "confidentiality": "High",
         "integrity": "High",
         "availability": "Medium",
         "scope": "Network-wide"
       },
-      "mitreAttackMapping": ["T1566", "T1539"],
-      "relatedTechniques": ["SAFE-T1004", "SAFE-T1006", "SAFE-T1202"]
+      "mitreAttackMapping": [
+        "T1566",
+        "T1539"
+      ],
+      "relatedTechniques": [
+        "SAFE-T1004",
+        "SAFE-T1006",
+        "SAFE-T1202"
+      ]
     },
     {
       "id": "SAFE-T1008",
@@ -329,15 +462,34 @@
           "Cross-origin tool invocation"
         ]
       },
-      "mitigations": ["SAFE-M-1", "SAFE-M-51", "SAFE-M-52"],
+      "mitigations": [
+        "SAFE-M-1",
+        "SAFE-M-2",
+        "SAFE-M-6",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-21",
+        "SAFE-M-29",
+        "SAFE-M-45",
+        "SAFE-M-72"
+      ],
       "impact": {
         "confidentiality": "High",
         "integrity": "High",
         "availability": "Medium",
         "scope": "Network-wide"
       },
-      "mitreAttackMapping": ["T1055", "T1134", "T1036"],
-      "relatedTechniques": ["SAFE-T1001", "SAFE-T1301", "SAFE-T1102"]
+      "mitreAttackMapping": [
+        "T1055",
+        "T1134",
+        "T1036"
+      ],
+      "relatedTechniques": [
+        "SAFE-T1001",
+        "SAFE-T1301",
+        "SAFE-T1102"
+      ]
     },
     {
       "id": "SAFE-T1009",
@@ -356,15 +508,39 @@
           "International Domain Name (IDN) homograph attacks"
         ]
       },
-      "mitigations": ["SAFE-M-13", "SAFE-M-14", "SAFE-M-15", "SAFE-M-18", "SAFE-M-19", "SAFE-M-20"],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-16",
+        "SAFE-M-17",
+        "SAFE-M-18",
+        "SAFE-M-19",
+        "SAFE-M-31",
+        "SAFE-M-38"
+      ],
       "impact": {
         "confidentiality": "Critical",
         "integrity": "High",
         "availability": "Medium",
         "scope": "Network-wide"
       },
-      "mitreAttackMapping": ["T1566.002", "T1539", "T1190"],
-      "relatedTechniques": ["SAFE-T1007", "SAFE-T1004", "SAFE-T1006", "SAFE-T1306", "SAFE-T1307", "SAFE-T1308", "SAFE-T1408", "SAFE-T1202", "SAFE-T1506", "SAFE-T1507"]
+      "mitreAttackMapping": [
+        "T1566.002",
+        "T1539",
+        "T1190"
+      ],
+      "relatedTechniques": [
+        "SAFE-T1007",
+        "SAFE-T1004",
+        "SAFE-T1006",
+        "SAFE-T1306",
+        "SAFE-T1307",
+        "SAFE-T1308",
+        "SAFE-T1408",
+        "SAFE-T1202",
+        "SAFE-T1506",
+        "SAFE-T1507"
+      ]
     },
     {
       "id": "SAFE-T1101",
@@ -382,15 +558,35 @@
           "SSRF to credential theft/RCE via internal services"
         ]
       },
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-5",
+        "SAFE-M-9",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-15",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-74"
+      ],
       "impact": {
         "confidentiality": "High",
         "integrity": "High",
         "availability": "High",
         "scope": "Network-wide"
       },
-      "mitreAttackMapping": ["T1059", "T1059.004", "T1059.003", "T1190"],
-      "relatedTechniques": ["SAFE-T1102", "SAFE-T1103", "SAFE-T1105", "SAFE-T1001"]
+      "mitreAttackMapping": [
+        "T1059",
+        "T1059.004",
+        "T1059.003",
+        "T1190"
+      ],
+      "relatedTechniques": [
+        "SAFE-T1102",
+        "SAFE-T1103",
+        "SAFE-T1105",
+        "SAFE-T1001"
+      ]
     },
     {
       "id": "SAFE-T1102",
@@ -399,9 +595,38 @@
       "tacticName": "Execution",
       "severity": "Critical",
       "description": "Malicious instructions injected through various vectors to manipulate AI behavior via MCP",
-      "mitigations": ["SAFE-M-5", "SAFE-M-7", "SAFE-M-10", "SAFE-M-11", "SAFE-M-21", "SAFE-M-22", "SAFE-M-23"],
+      "mitigations": [
+        "SAFE-M-1",
+        "SAFE-M-3",
+        "SAFE-M-4",
+        "SAFE-M-5",
+        "SAFE-M-7",
+        "SAFE-M-10",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-21",
+        "SAFE-M-22",
+        "SAFE-M-23",
+        "SAFE-M-29",
+        "SAFE-M-35",
+        "SAFE-M-36",
+        "SAFE-M-49",
+        "SAFE-M-50",
+        "SAFE-M-51",
+        "SAFE-M-52",
+        "SAFE-M-53",
+        "SAFE-M-54",
+        "SAFE-M-63",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-72",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1001", "SAFE-T1101"]
+      "relatedTechniques": [
+        "SAFE-T1001",
+        "SAFE-T1101"
+      ]
     },
     {
       "id": "SAFE-T1103",
@@ -410,9 +635,22 @@
       "tacticName": "Execution",
       "severity": "High",
       "description": "Adversary forges JSON that mimics an MCP function-call message, tricking the host into running a tool that was never offered",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-6",
+        "SAFE-M-12",
+        "SAFE-M-21",
+        "SAFE-M-22",
+        "SAFE-M-23",
+        "SAFE-M-29",
+        "SAFE-M-45",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1101"]
+      "relatedTechniques": [
+        "SAFE-T1101"
+      ]
     },
     {
       "id": "SAFE-T1104",
@@ -421,7 +659,16 @@
       "tacticName": "Execution",
       "severity": "High",
       "description": "Legit tool (e.g. Shell) runs with broader OS rights than necessary; LLM can be induced to perform arbitrary commands",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-71",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -432,9 +679,17 @@
       "tacticName": "Execution",
       "severity": "High",
       "description": "File-handling tool accepts relative paths like ../../secret.key; attacker leaks host secrets",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-29",
+        "SAFE-M-52",
+        "SAFE-M-69",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1101"]
+      "relatedTechniques": [
+        "SAFE-T1101"
+      ]
     },
     {
       "id": "SAFE-T1106",
@@ -443,7 +698,15 @@
       "tacticName": "Execution",
       "severity": "Medium",
       "description": "Craft prompts that push an agent into infinite self-invoke loop to exhaust CPU or hit rate limits (DoS)",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-70",
+        "SAFE-M-73",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -454,10 +717,21 @@
       "tacticName": "Execution",
       "severity": "Critical",
       "description": "Browser-based remote code execution via vulnerable MCP Inspector (CVE-2025-49596)",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-6",
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-29",
+        "SAFE-M-45",
+        "SAFE-M-52",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": [],
-      "cves": ["CVE-2025-49596"]
+      "cves": [
+        "CVE-2025-49596"
+      ]
     },
     {
       "id": "SAFE-T1110",
@@ -466,7 +740,21 @@
       "tacticName": "Execution",
       "severity": "High",
       "description": "Embedding malicious instructions within image or audio content to manipulate multimodal AI behavior",
-      "mitigations": ["SAFE-M-49", "SAFE-M-50", "SAFE-M-51", "SAFE-M-52", "SAFE-M-53", "SAFE-M-54"],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-21",
+        "SAFE-M-22",
+        "SAFE-M-29",
+        "SAFE-M-36",
+        "SAFE-M-49",
+        "SAFE-M-50",
+        "SAFE-M-51",
+        "SAFE-M-52",
+        "SAFE-M-53",
+        "SAFE-M-54",
+        "SAFE-M-69",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -477,7 +765,15 @@
       "tacticName": "Execution",
       "severity": "High",
       "description": "Malicious exploitation of AI coding assistant CLI tools with dangerous flags for reconnaissance and data exfiltration",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -488,9 +784,24 @@
       "tacticName": "Persistence",
       "severity": "High",
       "description": "Time-delayed malicious tool definition changes after initial approval. Tools function legitimately initially then silently change behavior.",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-2",
+        "SAFE-M-6",
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-24",
+        "SAFE-M-29",
+        "SAFE-M-30",
+        "SAFE-M-34",
+        "SAFE-M-45",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1001"]
+      "relatedTechniques": [
+        "SAFE-T1001"
+      ]
     },
     {
       "id": "SAFE-T1202",
@@ -499,9 +810,21 @@
       "tacticName": "Persistence",
       "severity": "High",
       "description": "Theft and reuse of OAuth access/refresh tokens for persistent access to MCP-connected services, including replay of refresh tokens after legitimate client sessions end",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-16",
+        "SAFE-M-18",
+        "SAFE-M-19",
+        "SAFE-M-20",
+        "SAFE-M-31",
+        "SAFE-M-37",
+        "SAFE-M-38"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1007"]
+      "relatedTechniques": [
+        "SAFE-T1007"
+      ]
     },
     {
       "id": "SAFE-T1203",
@@ -510,9 +833,20 @@
       "tacticName": "Persistence",
       "severity": "Critical",
       "description": "Inserts cron job or reverse shell on install; persists even if MCP service is uninstalled",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-20",
+        "SAFE-M-24",
+        "SAFE-M-29",
+        "SAFE-M-45",
+        "SAFE-M-70"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1003"]
+      "relatedTechniques": [
+        "SAFE-T1003"
+      ]
     },
     {
       "id": "SAFE-T1204",
@@ -521,9 +855,21 @@
       "tacticName": "Persistence",
       "severity": "High",
       "description": "Malicious agent writes itself into long-term vector store; re-loaded in every future session",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-5",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-30",
+        "SAFE-M-32",
+        "SAFE-M-51",
+        "SAFE-M-69"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T2106"]
+      "relatedTechniques": [
+        "SAFE-T2106"
+      ]
     },
     {
       "id": "SAFE-T1205",
@@ -532,7 +878,17 @@
       "tacticName": "Persistence",
       "severity": "High",
       "description": "Attacker modifies server's tool metadata to keep hidden commands across restarts",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-2",
+        "SAFE-M-6",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-29",
+        "SAFE-M-45",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -543,7 +899,17 @@
       "tacticName": "Persistence",
       "severity": "High",
       "description": "Adds attacker's API/SSH keys to server .env, giving re-entry",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-6",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-29",
+        "SAFE-M-31",
+        "SAFE-M-37",
+        "SAFE-M-45",
+        "SAFE-M-70"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -554,9 +920,19 @@
       "tacticName": "Persistence",
       "severity": "High",
       "description": "Man-in-the-middle an auto-update channel to re-install malicious build later on",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-6",
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-24",
+        "SAFE-M-29",
+        "SAFE-M-45"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1006"]
+      "relatedTechniques": [
+        "SAFE-T1006"
+      ]
     },
     {
       "id": "SAFE-T2106",
@@ -565,9 +941,20 @@
       "tacticName": "Persistence",
       "severity": "High",
       "description": "Attackers manipulate vector databases storing long-term memory for AI agents, creating persistent malicious content that contaminates knowledge across all future sessions",
-      "mitigations": ["SAFE-M-30", "SAFE-M-32"],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-22",
+        "SAFE-M-29",
+        "SAFE-M-30",
+        "SAFE-M-32",
+        "SAFE-M-51",
+        "SAFE-M-69",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1204"]
+      "relatedTechniques": [
+        "SAFE-T1204"
+      ]
     },
     {
       "id": "SAFE-T1301",
@@ -576,9 +963,23 @@
       "tacticName": "Privilege Escalation",
       "severity": "High",
       "description": "Malicious MCP servers override legitimate tool calls to gain elevated privileges",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-1",
+        "SAFE-M-2",
+        "SAFE-M-6",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-29",
+        "SAFE-M-45",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1008", "SAFE-T1004"]
+      "relatedTechniques": [
+        "SAFE-T1008",
+        "SAFE-T1004"
+      ]
     },
     {
       "id": "SAFE-T1302",
@@ -587,7 +988,16 @@
       "tacticName": "Privilege Escalation",
       "severity": "High",
       "description": "Invoke a VM-level or root tool from normal user context",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -598,7 +1008,18 @@
       "tacticName": "Privilege Escalation",
       "severity": "Critical",
       "description": "Exploit vulnerable server to break container/seccomp isolation",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-1",
+        "SAFE-M-9",
+        "SAFE-M-10",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-52",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -609,7 +1030,17 @@
       "tacticName": "Privilege Escalation",
       "severity": "High",
       "description": "Use one tool to steal tokens, feed them to second tool with higher privileges",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-16",
+        "SAFE-M-18",
+        "SAFE-M-19",
+        "SAFE-M-20",
+        "SAFE-M-31",
+        "SAFE-M-37",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -620,7 +1051,17 @@
       "tacticName": "Privilege Escalation",
       "severity": "Critical",
       "description": "Achieve root via misconfigured service running as root, then alter host",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-9",
+        "SAFE-M-10",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-52",
+        "SAFE-M-69"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -631,9 +1072,21 @@
       "tacticName": "Privilege Escalation",
       "severity": "Critical",
       "description": "Malicious MCP server redirects OAuth flows to attacker-controlled AS that ignores audience restrictions and Proof of Possession (PoP), minting overly-permissive super-tokens with expanded scopes",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-18",
+        "SAFE-M-19",
+        "SAFE-M-20",
+        "SAFE-M-31",
+        "SAFE-M-37"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1009"]
+      "relatedTechniques": [
+        "SAFE-T1009"
+      ]
     },
     {
       "id": "SAFE-T1307",
@@ -642,9 +1095,21 @@
       "tacticName": "Privilege Escalation",
       "severity": "High",
       "description": "MCP server receives token for one user (Alice) and forwards it to another user's (Bob) MCP instance, allowing Bob to perform actions as Alice by exploiting the server's trusted position",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-16",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-31",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1009"]
+      "relatedTechniques": [
+        "SAFE-T1009"
+      ]
     },
     {
       "id": "SAFE-T1308",
@@ -653,9 +1118,21 @@
       "tacticName": "Privilege Escalation",
       "severity": "High",
       "description": "Attacker swaps a limited-scope token with one that has broader permissions but same audience, exploiting insufficient scope validation to gain elevated privileges",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-16",
+        "SAFE-M-18",
+        "SAFE-M-19",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-31",
+        "SAFE-M-37"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1009"]
+      "relatedTechniques": [
+        "SAFE-T1009"
+      ]
     },
     {
       "id": "SAFE-T1309",
@@ -664,7 +1141,19 @@
       "tacticName": "Privilege Escalation",
       "severity": "High",
       "description": "Adversary manipulates MCP agent prompts to bypass safety rules and invoke privileged tools",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-1",
+        "SAFE-M-3",
+        "SAFE-M-5",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -675,9 +1164,29 @@
       "tacticName": "Defense Evasion",
       "severity": "Medium",
       "description": "Bypassing security checkpoints through context injection before tool invocation",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-1",
+        "SAFE-M-2",
+        "SAFE-M-3",
+        "SAFE-M-4",
+        "SAFE-M-6",
+        "SAFE-M-7",
+        "SAFE-M-10",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-45",
+        "SAFE-M-54",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1001"]
+      "relatedTechniques": [
+        "SAFE-T1001"
+      ]
     },
     {
       "id": "SAFE-T1402",
@@ -686,9 +1195,29 @@
       "tacticName": "Defense Evasion",
       "severity": "High",
       "description": "Zero-width chars/HTML comments hide directives in tool metadata",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-3",
+        "SAFE-M-4",
+        "SAFE-M-5",
+        "SAFE-M-7",
+        "SAFE-M-8",
+        "SAFE-M-10",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-21",
+        "SAFE-M-29",
+        "SAFE-M-49",
+        "SAFE-M-50",
+        "SAFE-M-53",
+        "SAFE-M-54",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1001"]
+      "relatedTechniques": [
+        "SAFE-T1001"
+      ]
     },
     {
       "id": "SAFE-T1403",
@@ -697,7 +1226,20 @@
       "tacticName": "Defense Evasion",
       "severity": "Medium",
       "description": "Repeated benign prompts desensitize user; crucial request hidden mid-flow",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-15",
+        "SAFE-M-16",
+        "SAFE-M-18",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-73",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -708,7 +1250,19 @@
       "tacticName": "Defense Evasion",
       "severity": "High",
       "description": "Model instructed not to mention risky action, keeping UI output harmless",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-1",
+        "SAFE-M-2",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-20",
+        "SAFE-M-21",
+        "SAFE-M-22",
+        "SAFE-M-29",
+        "SAFE-M-45",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -719,7 +1273,19 @@
       "tacticName": "Defense Evasion",
       "severity": "Medium",
       "description": "Malicious tool named Utils-Helper to blend in among 30 legit tools",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-2",
+        "SAFE-M-6",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-45",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -730,7 +1296,20 @@
       "tacticName": "Defense Evasion",
       "severity": "Medium",
       "description": "Strip safety flags or lower risk scores in tool manifest before host logs it",
-      "mitigations": ["SAFE-M-37", "SAFE-M-38"],
+      "mitigations": [
+        "SAFE-M-2",
+        "SAFE-M-6",
+        "SAFE-M-10",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-45",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -741,9 +1320,21 @@
       "tacticName": "Defense Evasion",
       "severity": "High",
       "description": "Malicious server silently proxies legit API so traffic looks normal in network logs",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-6",
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-18",
+        "SAFE-M-20",
+        "SAFE-M-31",
+        "SAFE-M-45"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1004"]
+      "relatedTechniques": [
+        "SAFE-T1004"
+      ]
     },
     {
       "id": "SAFE-T1408",
@@ -752,9 +1343,21 @@
       "tacticName": "Defense Evasion",
       "severity": "High",
       "description": "Attacker forces use of less secure OAuth 2.0 implicit flow instead of authorization code flow, bypassing PKCE protections and enabling easier token theft",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-16",
+        "SAFE-M-17",
+        "SAFE-M-18",
+        "SAFE-M-19",
+        "SAFE-M-20",
+        "SAFE-M-31",
+        "SAFE-M-38"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1009"]
+      "relatedTechniques": [
+        "SAFE-T1009"
+      ]
     },
     {
       "id": "SAFE-T1501",
@@ -763,9 +1366,15 @@
       "tacticName": "Credential Access",
       "severity": "Critical",
       "description": "Exploitation of entire MCP tool schema beyond descriptions for credential theft",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-2",
+        "SAFE-M-15",
+        "SAFE-M-63"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1001"]
+      "relatedTechniques": [
+        "SAFE-T1001"
+      ]
     },
     {
       "id": "SAFE-T1502",
@@ -774,7 +1383,15 @@
       "tacticName": "Credential Access",
       "severity": "High",
       "description": "Use file tools to read SSH keys, cloud creds",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-15",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-37",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -785,7 +1402,16 @@
       "tacticName": "Credential Access",
       "severity": "High",
       "description": "Ask read_file for .env; exfil API secrets",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-9",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-63",
+        "SAFE-M-72",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -796,7 +1422,14 @@
       "tacticName": "Credential Access",
       "severity": "High",
       "description": "Prompt LLM to call session.token tool, then leak result",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-37",
+        "SAFE-M-72"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -807,7 +1440,17 @@
       "tacticName": "Credential Access",
       "severity": "High",
       "description": "Query vector store for api_key embedding strings",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-37",
+        "SAFE-M-52",
+        "SAFE-M-63",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -818,9 +1461,20 @@
       "tacticName": "Credential Access",
       "severity": "High",
       "description": "Steal OAuth/session tokens from logs, TLS termination proxies, or other infrastructure components where tokens may be inadvertently stored or exposed, then replay at intended service",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-13",
+        "SAFE-M-16",
+        "SAFE-M-17",
+        "SAFE-M-24",
+        "SAFE-M-29",
+        "SAFE-M-31",
+        "SAFE-M-37",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1009"]
+      "relatedTechniques": [
+        "SAFE-T1009"
+      ]
     },
     {
       "id": "SAFE-T1507",
@@ -829,9 +1483,20 @@
       "tacticName": "Credential Access",
       "severity": "High",
       "description": "Man-in-the-browser attack steals OAuth authorization codes during the redirect flow and attempts to exchange them at the token endpoint before the legitimate client",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-16",
+        "SAFE-M-17",
+        "SAFE-M-18",
+        "SAFE-M-19",
+        "SAFE-M-37",
+        "SAFE-M-38"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1009"]
+      "relatedTechniques": [
+        "SAFE-T1009"
+      ]
     },
     {
       "id": "SAFE-T1601",
@@ -840,7 +1505,16 @@
       "tacticName": "Discovery",
       "severity": "Medium",
       "description": "Unauthorized discovery and mapping of available MCP servers and tools",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-20",
+        "SAFE-M-23",
+        "SAFE-M-29",
+        "SAFE-M-45"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -851,7 +1525,14 @@
       "tacticName": "Discovery",
       "severity": "Medium",
       "description": "Call tools/list to see available functions",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-16",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-37"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -862,7 +1543,15 @@
       "tacticName": "Discovery",
       "severity": "Medium",
       "description": "Adversaries attempt to extract internal system prompts and security policies governing AI agent behavior through multi-turn conversational attacks exploiting LLM sycophancy",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-1",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-29",
+        "SAFE-M-36",
+        "SAFE-M-37"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -873,7 +1562,12 @@
       "tacticName": "Discovery",
       "severity": "Low",
       "description": "GET /version or header analysis for vulnerable builds",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-20",
+        "SAFE-M-29"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -884,7 +1578,14 @@
       "tacticName": "Discovery",
       "severity": "Medium",
       "description": "Ask 'what can you do?'; model outlines high-value tools",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-16",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-37"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -895,7 +1596,14 @@
       "tacticName": "Discovery",
       "severity": "Medium",
       "description": "List root dir to find sensitive paths",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -906,7 +1614,18 @@
       "tacticName": "Lateral Movement",
       "severity": "High",
       "description": "Using compromised MCP tools to access other connected services and systems",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-1",
+        "SAFE-M-5",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-21",
+        "SAFE-M-22",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -917,9 +1636,19 @@
       "tacticName": "Lateral Movement",
       "severity": "High",
       "description": "Write false tasks to shared vector DB so peer agents execute them",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-21",
+        "SAFE-M-29",
+        "SAFE-M-30",
+        "SAFE-M-32",
+        "SAFE-M-69",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T2106"]
+      "relatedTechniques": [
+        "SAFE-T2106"
+      ]
     },
     {
       "id": "SAFE-T1703",
@@ -928,7 +1657,17 @@
       "tacticName": "Lateral Movement",
       "severity": "High",
       "description": "Compromise low-priv tool, then leverage it to call another privileged tool indirectly",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-2",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-21",
+        "SAFE-M-22",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -939,9 +1678,22 @@
       "tacticName": "Lateral Movement",
       "severity": "High",
       "description": "Use hijacked server as beachhead to infect other hosts in same IDE/workspace",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-2",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-21",
+        "SAFE-M-22",
+        "SAFE-M-29",
+        "SAFE-M-45",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1004"]
+      "relatedTechniques": [
+        "SAFE-T1004"
+      ]
     },
     {
       "id": "SAFE-T1705",
@@ -950,7 +1702,18 @@
       "tacticName": "Lateral Movement",
       "severity": "High",
       "description": "Inject directives in multi-agent message bus to seize control of cooperating agents",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-1",
+        "SAFE-M-5",
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-21",
+        "SAFE-M-22",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -961,9 +1724,16 @@
       "tacticName": "Lateral Movement",
       "severity": "High",
       "description": "Attacker reuses OAuth tokens across different services by exploiting either shared Authorization Server trust or Resource Servers that fail to validate audience claims, enabling unauthorized cross-service access",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-16",
+        "SAFE-M-19",
+        "SAFE-M-31",
+        "SAFE-M-37"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1009"]
+      "relatedTechniques": [
+        "SAFE-T1009"
+      ]
     },
     {
       "id": "SAFE-T1707",
@@ -972,9 +1742,16 @@
       "tacticName": "Lateral Movement",
       "severity": "High",
       "description": "Leaked OAuth token is passed via Cross-Site Request Forgery to access different resources on the same Resource Server (e.g., pivoting between GCP projects under same Google AS)",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-13",
+        "SAFE-M-18",
+        "SAFE-M-38"
+      ],
       "mitreAttackMapping": [],
-      "relatedTechniques": ["SAFE-T1009"]
+      "relatedTechniques": [
+        "SAFE-T1009"
+      ]
     },
     {
       "id": "SAFE-T1801",
@@ -983,7 +1760,15 @@
       "tacticName": "Collection",
       "severity": "High",
       "description": "Systematic data collection through manipulated MCP tool calls",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-71",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -994,7 +1779,15 @@
       "tacticName": "Collection",
       "severity": "High",
       "description": "Batch-read sensitive files for later exfil",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-71",
+        "SAFE-M-72",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1005,7 +1798,14 @@
       "tacticName": "Collection",
       "severity": "Critical",
       "description": "Use SQL tool to SELECT * from prod DB",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-71",
+        "SAFE-M-72"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1016,7 +1816,16 @@
       "tacticName": "Collection",
       "severity": "High",
       "description": "Loop over customer REST endpoints via HTTP tool",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-71",
+        "SAFE-M-72"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1027,7 +1836,17 @@
       "tacticName": "Collection",
       "severity": "High",
       "description": "Query vector store embeddings wholesale",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-20",
+        "SAFE-M-21",
+        "SAFE-M-29",
+        "SAFE-M-32",
+        "SAFE-M-37",
+        "SAFE-M-69",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1038,7 +1857,17 @@
       "tacticName": "Command and Control",
       "severity": "High",
       "description": "LLM calls http.post to attacker URL with commands/results",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-17",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1049,7 +1878,15 @@
       "tacticName": "Command and Control",
       "severity": "Medium",
       "description": "Encode data in whitespace or markdown links returned to chat",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-4",
+        "SAFE-M-5",
+        "SAFE-M-7",
+        "SAFE-M-17",
+        "SAFE-M-22",
+        "SAFE-M-29",
+        "SAFE-M-72"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1060,7 +1897,18 @@
       "tacticName": "Command and Control",
       "severity": "High",
       "description": "Attacker operates rogue server; every tool call doubles as heartbeat",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-6",
+        "SAFE-M-9",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-24",
+        "SAFE-M-29",
+        "SAFE-M-45",
+        "SAFE-M-69",
+        "SAFE-M-70"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1071,7 +1919,15 @@
       "tacticName": "Command and Control",
       "severity": "Medium",
       "description": "LLM embeds base64 blobs in normal answers that another bot decodes",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1082,7 +1938,16 @@
       "tacticName": "Exfiltration",
       "severity": "High",
       "description": "Data smuggling through tool parameters, error messages, or legitimate-appearing operations",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-22",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-72",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1093,7 +1958,16 @@
       "tacticName": "Exfiltration",
       "severity": "High",
       "description": "Sneak secrets into unused JSON arg (note)",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-72",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1104,7 +1978,18 @@
       "tacticName": "Exfiltration",
       "severity": "Medium",
       "description": "Hide data in code blocks shown to user then copied elsewhere",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-4",
+        "SAFE-M-7",
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-21",
+        "SAFE-M-22",
+        "SAFE-M-34",
+        "SAFE-M-49",
+        "SAFE-M-54",
+        "SAFE-M-72"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1115,7 +2000,17 @@
       "tacticName": "Exfiltration",
       "severity": "High",
       "description": "Use outbound web tool to POST to attacker server",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-17",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-72",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1126,7 +2021,20 @@
       "tacticName": "Exfiltration",
       "severity": "High",
       "description": "Chain two tools so second one emails data out",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-5",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-17",
+        "SAFE-M-21",
+        "SAFE-M-22",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-72",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1137,7 +2045,17 @@
       "tacticName": "Exfiltration",
       "severity": "High",
       "description": "Multi-chain asset transfers using bridges and DEXs to obscure provenance and evade detection",
-      "mitigations": ["SAFE-M-46", "SAFE-M-47", "SAFE-M-48"],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-29",
+        "SAFE-M-46",
+        "SAFE-M-47",
+        "SAFE-M-48",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1148,7 +2066,14 @@
       "tacticName": "Impact",
       "severity": "Critical",
       "description": "delete_file or drop_table commands wipe assets",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1159,7 +2084,15 @@
       "tacticName": "Impact",
       "severity": "High",
       "description": "Flood external API causing rate-limit or DoS",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-9",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-29",
+        "SAFE-M-70",
+        "SAFE-M-73",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1170,7 +2103,15 @@
       "tacticName": "Impact",
       "severity": "Critical",
       "description": "Agent commits malicious PR into repo",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-9",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1181,7 +2122,14 @@
       "tacticName": "Impact",
       "severity": "Critical",
       "description": "Payment-tool instructed to move funds",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-12",
+        "SAFE-M-16",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-70",
+        "SAFE-M-74"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1192,7 +2140,16 @@
       "tacticName": "Impact",
       "severity": "High",
       "description": "Manipulate LLM to generate false or harmful content to downstream consumers",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-3",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-22",
+        "SAFE-M-30",
+        "SAFE-M-32",
+        "SAFE-M-36",
+        "SAFE-M-51"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
     },
@@ -1203,396 +2160,18 @@
       "tacticName": "Impact",
       "severity": "High",
       "description": "Implanting covert triggers in RAG pipeline to manipulate retrieval and generation under specific conditions",
-      "mitigations": [],
+      "mitigations": [
+        "SAFE-M-3",
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-22",
+        "SAFE-M-29",
+        "SAFE-M-30",
+        "SAFE-M-32",
+        "SAFE-M-51"
+      ],
       "mitreAttackMapping": [],
       "relatedTechniques": []
-    }
-  ],
-  "mitigations": [
-    {
-      "id": "SAFE-M-1",
-      "name": "Control/Data Flow Separation",
-      "category": "Architectural Defense",
-      "effectiveness": "High (Provable Security)",
-      "description": "Implementing control/data flow separation through systems like CaMeL provides provable security against prompt injection by ensuring untrusted tool descriptions cannot influence program execution"
-    },
-    {
-      "id": "SAFE-M-2",
-      "name": "Cryptographic Integrity for Tool Descriptions",
-      "category": "Cryptographic Control",
-      "effectiveness": "High",
-      "description": "Tool descriptions should be cryptographically hashed and signed by trusted authorities, with signature verification before loading"
-    },
-    {
-      "id": "SAFE-M-3",
-      "name": "AI-Powered Content Analysis",
-      "category": "AI-Based Defense",
-      "effectiveness": "Medium-High",
-      "description": "Deploy LLM-based systems to analyze tool descriptions for semantic anomalies and hidden instructions before they reach production systems"
-    },
-    {
-      "id": "SAFE-M-4",
-      "name": "Unicode Sanitization and Filtering",
-      "category": "Input Validation",
-      "effectiveness": "Medium-High",
-      "description": "Implement filtering for Private Use Area characters, Bidirectional control characters, and all non-essential Unicode characters from untrusted sources"
-    },
-    {
-      "id": "SAFE-M-5",
-      "name": "Content Sanitization",
-      "category": "Input Validation",
-      "effectiveness": "Medium",
-      "description": "Filter tool descriptions to remove hidden content and instruction patterns. Note: pattern-based filtering alone is insufficient"
-    },
-    {
-      "id": "SAFE-M-6",
-      "name": "Tool Registry Verification",
-      "category": "Supply Chain Security",
-      "effectiveness": "High",
-      "description": "Install MCP servers only from verified sources with cryptographic signatures"
-    },
-    {
-      "id": "SAFE-M-7",
-      "name": "Content Rendering Parity",
-      "category": "UI Security",
-      "effectiveness": "Medium-High",
-      "description": "Ensure displayed content matches content sent to the LLM"
-    },
-    {
-      "id": "SAFE-M-8",
-      "name": "Visual Validation",
-      "category": "UI Security",
-      "effectiveness": "Medium",
-      "description": "Compare visual rendering of descriptions with actual content to detect invisible characters"
-    },
-    {
-      "id": "SAFE-M-9",
-      "name": "Sandboxed Testing",
-      "category": "Isolation and Containment",
-      "effectiveness": "High",
-      "description": "Test new tools in isolated environments with monitoring before production deployment"
-    },
-    {
-      "id": "SAFE-M-10",
-      "name": "Automated Scanning",
-      "category": "Detective Control",
-      "effectiveness": "Medium",
-      "description": "Regularly scan tool descriptions for known malicious patterns and hidden content"
-    },
-    {
-      "id": "SAFE-M-11",
-      "name": "Behavioral Monitoring",
-      "category": "Detective Control",
-      "effectiveness": "High",
-      "description": "Monitor LLM behavior for unexpected tool usage patterns"
-    },
-    {
-      "id": "SAFE-M-12",
-      "name": "Audit Logging",
-      "category": "Detective Control",
-      "effectiveness": "Medium-High",
-      "description": "Log all tool descriptions loaded and their full content"
-    },
-    {
-      "id": "SAFE-M-13",
-      "name": "OAuth Flow Verification",
-      "category": "Preventive Control",
-      "effectiveness": "High",
-      "description": "Implement protocol-level verification of OAuth authorization servers and callback URLs"
-    },
-    {
-      "id": "SAFE-M-14",
-      "name": "Server Allowlisting",
-      "category": "Preventive Control",
-      "effectiveness": "High",
-      "description": "Maintain and enforce a list of trusted MCP server domains"
-    },
-    {
-      "id": "SAFE-M-15",
-      "name": "User Warning Systems",
-      "category": "Preventive Control",
-      "effectiveness": "Medium",
-      "description": "Display clear warnings when OAuth flows are initiated, showing the requesting server and target service"
-    },
-    {
-      "id": "SAFE-M-16",
-      "name": "Token Scope Limiting",
-      "category": "Preventive Control",
-      "effectiveness": "High",
-      "description": "Enforce minimal OAuth scopes and warn on broad permission requests"
-    },
-    {
-      "id": "SAFE-M-17",
-      "name": "Callback URL Restrictions",
-      "category": "Preventive Control",
-      "effectiveness": "High",
-      "description": "Validate that OAuth callback URLs match the configured MCP server domain"
-    },
-    {
-      "id": "SAFE-M-18",
-      "name": "OAuth Flow Monitoring",
-      "category": "Detective Control",
-      "effectiveness": "Medium",
-      "description": "Log and analyze all OAuth authorization attempts through MCP"
-    },
-    {
-      "id": "SAFE-M-19",
-      "name": "Token Usage Tracking",
-      "category": "Detective Control",
-      "effectiveness": "Medium",
-      "description": "Monitor usage patterns of OAuth tokens obtained through MCP"
-    },
-    {
-      "id": "SAFE-M-20",
-      "name": "Anomaly Detection",
-      "category": "Detective Control",
-      "effectiveness": "High",
-      "description": "Identify unusual patterns in OAuth requests across MCP servers"
-    },
-    {
-      "id": "SAFE-M-21",
-      "name": "Output Context Isolation",
-      "category": "Architectural Control",
-      "effectiveness": "High",
-      "description": "Isolate tool output contexts to prevent cross-contamination"
-    },
-    {
-      "id": "SAFE-M-22",
-      "name": "Semantic Output Validation",
-      "category": "Input Validation",
-      "effectiveness": "Medium-High",
-      "description": "Validate tool outputs for semantic consistency and hidden instructions"
-    },
-    {
-      "id": "SAFE-M-23",
-      "name": "Tool Output Truncation",
-      "category": "Preventive Control",
-      "effectiveness": "Medium",
-      "description": "Truncate tool outputs to prevent oversized payloads from being processed"
-    },
-    {
-      "id": "SAFE-M-24",
-      "name": "SBOM Generation and Verification",
-      "category": "Supply Chain Security",
-      "effectiveness": "High",
-      "description": "Generate and verify Software Bill of Materials for MCP packages and dependencies"
-    },
-    {
-      "id": "SAFE-M-25",
-      "name": "AI-Specific Risk Modeling",
-      "category": "Risk Management",
-      "effectiveness": "Medium-High",
-      "description": "Model AI-specific risks in MCP deployments"
-    },
-    {
-      "id": "SAFE-M-26",
-      "name": "Data Provenance Tracking",
-      "category": "Data Security",
-      "effectiveness": "High",
-      "description": "Track and verify the provenance of data flowing through MCP tools"
-    },
-    {
-      "id": "SAFE-M-27",
-      "name": "Social Engineering Awareness Training",
-      "category": "Human Factors",
-      "effectiveness": "Medium",
-      "description": "Train users to recognize social engineering attacks targeting MCP installations"
-    },
-    {
-      "id": "SAFE-M-28",
-      "name": "Pre-Authentication Tool Concealment",
-      "category": "Preventive Control",
-      "effectiveness": "High",
-      "description": "Conceal tool capabilities until proper authentication is established"
-    },
-    {
-      "id": "SAFE-M-29",
-      "name": "Explicit Privilege Boundaries",
-      "category": "Architectural Control",
-      "effectiveness": "High",
-      "description": "Define and enforce explicit privilege boundaries for MCP tools and servers"
-    },
-    {
-      "id": "SAFE-M-30",
-      "name": "Vector Store Integrity Verification",
-      "category": "Cryptographic Control",
-      "effectiveness": "High",
-      "description": "Cryptographically verify the integrity of vector store contents"
-    },
-    {
-      "id": "SAFE-M-31",
-      "name": "OAuth Token Validation",
-      "category": "Input Validation",
-      "effectiveness": "High",
-      "description": "Improve OAuth security mitigations with code quality and type safety"
-    },
-    {
-      "id": "SAFE-M-32",
-      "name": "Continuous Vector Store Monitoring",
-      "category": "Detective Control",
-      "effectiveness": "Medium-High",
-      "description": "Continuously monitor vector stores for contamination and unauthorized modifications"
-    },
-    {
-      "id": "SAFE-M-33",
-      "name": "Training Data Provenance Verification",
-      "category": "Data Security",
-      "effectiveness": "High",
-      "description": "Verify the provenance and integrity of training data used for AI models in MCP tools"
-    },
-    {
-      "id": "SAFE-M-34",
-      "name": "AI Model Integrity Validation",
-      "category": "Cryptographic Control",
-      "effectiveness": "High",
-      "description": "Validate AI model integrity through cryptographic checksums and signatures"
-    },
-    {
-      "id": "SAFE-M-35",
-      "name": "Adversarial Training Data Detection",
-      "category": "AI-Based Defense",
-      "effectiveness": "Medium-High",
-      "description": "Detect adversarial manipulations in training data using AI-based analysis"
-    },
-    {
-      "id": "SAFE-M-36",
-      "name": "Model Behavior Monitoring",
-      "category": "Detective Control",
-      "effectiveness": "Medium-High",
-      "description": "Monitor AI model behavior for deviations indicating poisoning or compromise"
-    },
-    {
-      "id": "SAFE-M-37",
-      "name": "Metadata Sanitization",
-      "category": "Input Validation",
-      "effectiveness": "High",
-      "description": "Sanitize tool metadata to remove or flag suspicious properties"
-    },
-    {
-      "id": "SAFE-M-38",
-      "name": "Schema Validation",
-      "category": "Input Validation",
-      "effectiveness": "Medium-High",
-      "description": "Validate tool schemas against expected patterns and structures"
-    },
-    {
-      "id": "SAFE-M-39",
-      "name": "Prompt Context Validation",
-      "category": "Architectural Control",
-      "effectiveness": "High",
-      "description": "Validate prompt context integrity before processing"
-    },
-    {
-      "id": "SAFE-M-40",
-      "name": "Clear UI Patterns",
-      "category": "UI Security",
-      "effectiveness": "Medium-High",
-      "description": "Implement clear UI patterns to help users identify security-relevant actions"
-    },
-    {
-      "id": "SAFE-M-41",
-      "name": "Tool and Package Pinning",
-      "category": "Supply Chain Control",
-      "effectiveness": "High",
-      "description": "Pin tool and package versions to prevent unauthorized updates"
-    },
-    {
-      "id": "SAFE-M-42",
-      "name": "Cross-Server Protection",
-      "category": "Architectural Control",
-      "effectiveness": "High",
-      "description": "Implement protections against cross-server attacks and tool interference"
-    },
-    {
-      "id": "SAFE-M-43",
-      "name": "Steganography Scanner",
-      "category": "Detective Control",
-      "effectiveness": "Medium-High",
-      "description": "Scan for steganographic content in tool descriptions and outputs"
-    },
-    {
-      "id": "SAFE-M-44",
-      "name": "Behavioural Monitoring",
-      "category": "Detective Control",
-      "effectiveness": "Medium-High",
-      "description": "Advanced behavioral monitoring for MCP tool and server activities"
-    },
-    {
-      "id": "SAFE-M-45",
-      "name": "Tool Manifest Signing & Server Attestation",
-      "category": "Supply Chain Security",
-      "effectiveness": "High",
-      "description": "Validate server identity and manifest integrity before accepting tools"
-    },
-    {
-      "id": "SAFE-M-46",
-      "name": "Bridge Risk Management",
-      "category": "Preventive Control",
-      "effectiveness": "High",
-      "description": "Manage risks associated with cross-chain bridge operations"
-    },
-    {
-      "id": "SAFE-M-47",
-      "name": "Cross-Chain Transaction Graph Analysis",
-      "category": "Detective Control",
-      "effectiveness": "High",
-      "description": "Analyze cross-chain transaction graphs for suspicious patterns"
-    },
-    {
-      "id": "SAFE-M-48",
-      "name": "Custodial Off-Ramp Monitoring",
-      "category": "Detective Control",
-      "effectiveness": "Medium-High",
-      "description": "Monitor custodial off-ramp activities for suspicious transactions"
-    },
-    {
-      "id": "SAFE-M-49",
-      "name": "Multimodal Input Scanning",
-      "category": "Input Validation",
-      "effectiveness": "Medium-High",
-      "description": "Scan multimodal inputs (images, audio) for embedded malicious instructions"
-    },
-    {
-      "id": "SAFE-M-50",
-      "name": "Multimodal Content Isolation",
-      "category": "Architectural Defense",
-      "effectiveness": "High",
-      "description": "Isolate multimodal content processing from instruction execution"
-    },
-    {
-      "id": "SAFE-M-51",
-      "name": "Embedding Anomaly Detection",
-      "category": "AI-Based Defense",
-      "effectiveness": "Medium-High",
-      "description": "Detect anomalies in embedding patterns indicating potential attacks"
-    },
-    {
-      "id": "SAFE-M-52",
-      "name": "Input Validation Pipeline",
-      "category": "Preventive Control",
-      "effectiveness": "High",
-      "description": "Multi-stage input validation pipeline for comprehensive threat detection"
-    },
-    {
-      "id": "SAFE-M-53",
-      "name": "Multimodal Watermarking",
-      "category": "Detective Control",
-      "effectiveness": "Medium",
-      "description": "Apply watermarking to multimodal content for provenance tracking"
-    },
-    {
-      "id": "SAFE-M-54",
-      "name": "Cross-Modal Consistency Check",
-      "category": "Detective Control",
-      "effectiveness": "Medium-High",
-      "description": "Verify consistency between different modalities to detect injection attempts"
-    },
-    {
-      "id": "SAFE-M-63",
-      "name": "Technique Name Standardization",
-      "category": "Preventive Control",
-      "effectiveness": "Medium",
-      "description": "Standardize technique naming conventions for consistent reference"
     }
   ],
   "tacticDistribution": {
@@ -1610,27 +2189,5 @@
     "Command and Control": 4,
     "Exfiltration": 6,
     "Impact": 6
-  },
-  "mitigationStats": {
-    "total": 47,
-    "highEffectiveness": 26,
-    "mediumHighEffectiveness": 15,
-    "mediumEffectiveness": 6,
-    "lowEffectiveness": 0
-  },
-  "mitigationCategoryDistribution": {
-    "Detective Control": 12,
-    "Preventive Control": 7,
-    "Input Validation": 6,
-    "Cryptographic Control": 3,
-    "Architectural Defense": 2,
-    "UI Security": 3,
-    "AI-Based Defense": 2,
-    "Supply Chain Security": 4,
-    "Data Security": 2,
-    "Architectural Control": 4,
-    "Isolation and Containment": 1,
-    "Risk Management": 1,
-    "Human Factors": 1
   }
 }
