@@ -224,7 +224,7 @@ This produces compiled JavaScript in `dist/`. The project is fully portable — 
 ### Verify the Build
 
 ```bash
-npm run ci          # typecheck → build → test (34 red-team tests)
+npm run ci          # typecheck → build → test (red-team, catalog, and governance suites)
 ```
 
 ## Running the Skill
@@ -543,7 +543,7 @@ safe-mcp-skill/
 ├── src/
 │   ├── data/
 │   │   ├── techniques.json          # 85 SAFE-MCP techniques, 14 tactics
-│   │   └── mitigations.json         # 54 mitigations with detail
+│   │   └── mitigations.json         # 61 mitigations, links generated from upstream
 │   ├── engine/
 │   │   ├── analyze.ts               # Lookups, search, threat profiling
 │   │   └── rules.ts                 # 32-rule analysis engine
@@ -561,23 +561,43 @@ safe-mcp-skill/
 │   │   ├── nist-ai-rmf.ts           # NIST AI RMF mapping
 │   │   └── index.ts                 # Unified mapping lookup + coverage
 │   ├── tests/
-│   │   └── redteam.ts               # 34 red-team test cases
+│   │   ├── redteam.ts               # 34 red-team test cases
+│   │   ├── catalog.ts               # Catalog integrity checks
+│   │   └── governance.ts            # Security model tests
 │   ├── types.ts                     # TypeScript type definitions
 │   ├── discovery.ts                 # Auto-discovery via stdio, HTTP, or config
 │   ├── server.ts                    # MCP server (18 tools)
 │   ├── http.ts                      # MCP HTTP transport
 │   ├── openai.ts                    # OpenAI function definitions
 │   └── index.ts                     # Stdio entry point + re-exports
+├── scripts/
+│   ├── sync-mitigation-links.ts     # Regenerates catalog links from upstream SAF-MCP
+│   └── upstream.json                # Pinned upstream commit
 ├── plugins/
 │   └── csharp/
 │       └── SafeMcpSkill/            # C# Semantic Kernel plugin
 ├── docs/
-│   └── github-mcp-demo.md          # GitHub MCP Server scanning demo
+│   ├── github-mcp-demo.md          # GitHub MCP Server scanning demo
+│   ├── mitigation-link-report.md   # Generated: catalog links vs upstream
+│   └── mitigation-link-changes.md  # Generated: what the last sync changed
 ├── .github/workflows/ci.yml         # CI pipeline (Node 20 + 22)
 ├── .env.example
 ├── package.json
 └── tsconfig.json
 ```
+
+## Catalog Data
+
+`src/data/techniques.json` and `src/data/mitigations.json` hold the SAFE-MCP catalog the engine reads. Technique to mitigation links are **generated, not hand edited**: `scripts/sync-mitigation-links.ts` reads a pinned commit of the upstream [SAF-MCP](https://github.com/safe-agentic-framework/safe-mcp) repository (recorded in `scripts/upstream.json`) and takes the union of two upstream sources, the canonical registry (`research/framework-model.yml`) and each mitigation page's "Mitigates" section. Links are written to both sides, so `technique.mitigations` and `mitigation.mitigates` always agree.
+
+```bash
+git clone https://github.com/safe-agentic-framework/safe-mcp.git ../safe-mcp
+git -C ../safe-mcp checkout "$(node -p "require('./scripts/upstream.json').commit")"
+npm run sync:mitigations -- --upstream ../safe-mcp            # regenerate
+npm run sync:mitigations -- --upstream ../safe-mcp --check    # verify (CI runs this)
+```
+
+`docs/mitigation-link-report.md` describes the current data against upstream; `docs/mitigation-link-changes.md` records what the last sync changed, including any local links it dropped. To add or correct a link, propose it upstream, then bump the pinned commit and rerun the sync.
 
 ## MCP Tools
 
@@ -763,22 +783,26 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
 
 </details>
 
-**What comes back:** The engine returns **Critical** risk with 3 findings. Here's a trimmed view of the response:
+**What comes back:** The engine returns **Critical** risk with 3 findings. Here's a trimmed view of the response (each finding lists every linked mitigation, strongest first; the first three are shown, and the full mappings are cut for space):
 
 ```json
 {
   "summary": {
-    "overallRisk": "critical",
-    "findingsCount": 3
+    "overallRisk": "Critical",
+    "totalFindings": 3,
+    "bySeverity": { "Critical": 2, "Medium": 1 }
   },
   "findings": [
     {
       "ruleId": "RULE-001",
-      "severity": "critical",
-      "technique": "SAFE-T1001",
-      "title": "Tool Poisoning Attack",
-      "description": "Tool description contains injected instructions that could manipulate agent behavior",
-      "mitigations": ["SAFE-M-1", "SAFE-M-2", "SAFE-M-6"],
+      "severity": "Critical",
+      "technique": { "id": "SAFE-T1001", "name": "Tool Poisoning Attack (TPA)" },
+      "evidence": "Suspicious patterns in tool descriptions — execute_code: ignore\\s+(previous|above|all)\\s+instructions, ...",
+      "mitigations": [
+        { "id": "SAFE-M-1", "name": "Control/Data Flow Separation", "effectiveness": "High (Provable Security)" },
+        { "id": "SAFE-M-2", "name": "Cryptographic Integrity for Tool Descriptions", "effectiveness": "High" },
+        { "id": "SAFE-M-6", "name": "Tool Registry Verification", "effectiveness": "High" }
+      ],
       "mappings": {
         "stride": ["T", "S"],
         "atlas": [{ "id": "AML.T0110", "name": "AI Agent Tool Poisoning" }],
@@ -788,11 +812,14 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
     },
     {
       "ruleId": "RULE-006",
-      "severity": "critical",
-      "technique": "SAFE-T1101",
-      "title": "Command Injection via Shell Tools",
-      "description": "Tool enables arbitrary shell command execution — attackers can pivot to the host OS",
-      "mitigations": ["SAFE-M-8", "SAFE-M-13"],
+      "severity": "Critical",
+      "technique": { "id": "SAFE-T1101", "name": "Command Injection" },
+      "evidence": "Tools with shell/exec capabilities: execute_code",
+      "mitigations": [
+        { "id": "SAFE-M-9", "name": "Sandboxed Testing", "effectiveness": "High" },
+        { "id": "SAFE-M-11", "name": "Behavioral Monitoring", "effectiveness": "High" },
+        { "id": "SAFE-M-14", "name": "Server Allowlisting", "effectiveness": "High" }
+      ],
       "mappings": {
         "stride": ["E", "T"],
         "atlas": [{ "id": "AML.T0053", "name": "AI Agent Tool Invocation" }],
@@ -802,11 +829,14 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
     },
     {
       "ruleId": "RULE-027",
-      "severity": "high",
-      "technique": "SAFE-T1603",
-      "title": "System Prompt Disclosure",
-      "description": "Prompt override pattern detected in tool description ('Ignore previous instructions...')",
-      "mitigations": ["SAFE-M-6", "SAFE-M-31"],
+      "severity": "Medium",
+      "technique": { "id": "SAFE-T1603", "name": "System Prompt Disclosure" },
+      "evidence": "Tools referencing system prompts/instructions — prompt disclosure risk: execute_code",
+      "mitigations": [
+        { "id": "SAFE-M-1", "name": "Control/Data Flow Separation", "effectiveness": "High (Provable Security)" },
+        { "id": "SAFE-M-14", "name": "Server Allowlisting", "effectiveness": "High" },
+        { "id": "SAFE-M-16", "name": "Token Scope Limiting", "effectiveness": "High" }
+      ],
       "mappings": {
         "stride": ["I"],
         "atlas": [{ "id": "AML.T0054", "name": "LLM Jailbreak" }],
@@ -1279,7 +1309,7 @@ curl.exe http://127.0.0.1:3002/v1/threat-profile
 
 #### 12. Get Framework Statistics
 
-Returns totals (85 techniques, 14 tactics, 47 mitigations), tactic distribution, and defense-in-depth guidance:
+Returns totals (85 techniques, 14 tactics, 61 mitigations), tactic distribution, and defense-in-depth guidance:
 
 ```bash
 curl http://127.0.0.1:3002/v1/framework/stats
@@ -1334,7 +1364,7 @@ In a separate terminal:
 npm test
 ```
 
-Runs 34 attack-pattern test cases and prints pass/fail for each rule.
+Runs the 34 attack-pattern test cases, the catalog integrity checks, and the security model tests, printing pass/fail for each.
 
 #### 15. Stop the Server
 
@@ -1372,7 +1402,7 @@ Run from the project root directory:
 
 ```bash
 cd safe-mcp-skill
-npm test                # Run 34 red-team test cases
+npm test                # Red-team, catalog integrity, and governance suites
 npm run typecheck       # Type-check without emitting
 npm run ci              # Full pipeline: typecheck → build → test
 ```

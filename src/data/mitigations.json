@@ -2,10 +2,10 @@
   "framework": {
     "name": "SAFE-MCP",
     "repository": "https://github.com/safe-agentic-framework/safe-mcp",
-    "totalMitigations": 47,
-    "highEffectiveness": 26,
-    "mediumHighEffectiveness": 15,
-    "mediumEffectiveness": 6,
+    "totalMitigations": 61,
+    "highEffectiveness": 32,
+    "mediumHighEffectiveness": 19,
+    "mediumEffectiveness": 10,
     "lowEffectiveness": 0
   },
   "categories": [
@@ -25,19 +25,20 @@
     "Supply Chain Control"
   ],
   "categoryDistribution": {
-    "Detective Control": 12,
-    "Preventive Control": 7,
-    "Input Validation": 6,
-    "Cryptographic Control": 3,
     "Architectural Defense": 2,
+    "Cryptographic Control": 3,
+    "AI-Based Defense": 3,
+    "Input Validation": 7,
+    "Supply Chain Security": 3,
     "UI Security": 3,
-    "AI-Based Defense": 2,
-    "Supply Chain Security": 4,
-    "Data Security": 2,
+    "Isolation and Containment": 2,
+    "Detective Control": 15,
+    "Preventive Control": 13,
     "Architectural Control": 4,
-    "Isolation and Containment": 1,
     "Risk Management": 1,
-    "Human Factors": 1
+    "Data Security": 3,
+    "Human Factors": 1,
+    "Supply Chain Control": 1
   },
   "mitigations": [
     {
@@ -48,7 +49,19 @@
       "implementationComplexity": "High",
       "firstPublished": "2025-01-03",
       "description": "Architectural defense that creates a protective system layer around LLMs by explicitly separating control flow (from trusted queries) from data flow (including untrusted tool descriptions). Ensures malicious instructions embedded in data cannot influence program execution. The most notable implementation is CaMeL (Control and Memory Language), developed by Google researchers, demonstrating 77% task completion with provable security guarantees.",
-      "mitigates": ["SAFE-T1001", "SAFE-T1102", "SAFE-T1401", "SAFE-T1008"],
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1008",
+        "SAFE-T1102",
+        "SAFE-T1301",
+        "SAFE-T1303",
+        "SAFE-T1309",
+        "SAFE-T1401",
+        "SAFE-T1404",
+        "SAFE-T1603",
+        "SAFE-T1701",
+        "SAFE-T1705"
+      ],
       "corePrinciples": [
         "Explicit Control Flow Extraction: Parse and extract control flow from trusted sources only",
         "Data Isolation: Treat all external inputs as pure data",
@@ -64,7 +77,10 @@
         "Complexity: Requires significant architectural changes",
         "Not Universal: Some tasks may be incompatible with strict separation"
       ],
-      "relatedMitigations": ["SAFE-M-2", "SAFE-M-3"],
+      "relatedMitigations": [
+        "SAFE-M-2",
+        "SAFE-M-3"
+      ],
       "references": [
         "Defeating Prompt Injections by Design - Google Research (2025) - https://arxiv.org/abs/2503.18813"
       ]
@@ -77,7 +93,23 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-03",
       "description": "Ensures MCP tool descriptions cannot be tampered with by implementing digital signatures and hash verification. Tool descriptions are signed by trusted authorities, and clients verify signatures before loading any tool, preventing unauthorized modifications at any point in the supply chain.",
-      "mitigates": ["SAFE-T1001", "SAFE-T1002", "SAFE-T1003"],
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1002",
+        "SAFE-T1003",
+        "SAFE-T1004",
+        "SAFE-T1008",
+        "SAFE-T1201",
+        "SAFE-T1205",
+        "SAFE-T1301",
+        "SAFE-T1401",
+        "SAFE-T1404",
+        "SAFE-T1405",
+        "SAFE-T1406",
+        "SAFE-T1501",
+        "SAFE-T1703",
+        "SAFE-T1704"
+      ],
       "implementationPhases": [
         "Phase 1: Infrastructure Setup - Deploy CA or use existing PKI, create key management procedures, set up secure key storage (HSM recommended)",
         "Phase 2: Tool Signing - Implement signing tools for developers, create CI/CD integration for automated signing",
@@ -100,7 +132,10 @@
           "Trust expired certificates"
         ]
       },
-      "relatedMitigations": ["SAFE-M-6", "SAFE-M-9"],
+      "relatedMitigations": [
+        "SAFE-M-6",
+        "SAFE-M-9"
+      ],
       "references": [
         "NIST SP 800-57: Key Management",
         "NIST SP 800-204D: Software Supply Chain Security in DevSecOps",
@@ -116,7 +151,15 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-03",
       "description": "Uses specialized LLMs or fine-tuned models to analyze tool descriptions and other inputs for semantic anomalies, hidden instructions, and potential prompt injection attempts before they reach production systems. Can detect novel attack patterns that signature-based systems miss.",
-      "mitigates": ["SAFE-T1001", "SAFE-T1102", "SAFE-T1401", "SAFE-T1402"],
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1102",
+        "SAFE-T1309",
+        "SAFE-T1401",
+        "SAFE-T1402",
+        "SAFE-T2105",
+        "SAFE-T3001"
+      ],
       "implementationApproaches": [
         "Dedicated Security LLM: Isolated model specifically for security analysis with risk scoring",
         "Ensemble Approach: Multiple specialized detectors (prompt injection, semantic anomaly, hidden instruction, Unicode abuse)",
@@ -134,7 +177,11 @@
         "Context Loss: Analyzes descriptions in isolation",
         "Model Drift: Requires regular updates as attack patterns evolve"
       ],
-      "relatedMitigations": ["SAFE-M-1", "SAFE-M-4", "SAFE-M-5"],
+      "relatedMitigations": [
+        "SAFE-M-1",
+        "SAFE-M-4",
+        "SAFE-M-5"
+      ],
       "references": [
         "LLM01:2025 Prompt Injection - OWASP",
         "NIST AI Risk Management Framework",
@@ -149,7 +196,14 @@
       "implementationComplexity": "Low-Medium",
       "firstPublished": "2025-01-03",
       "description": "Removes or normalizes potentially malicious Unicode characters from tool descriptions and other inputs before they reach LLMs. Filters invisible characters, bidirectional control characters, and characters from Private Use Areas that attackers use to hide malicious instructions.",
-      "mitigates": ["SAFE-T1001", "SAFE-T1102", "SAFE-T1401", "SAFE-T1402"],
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1102",
+        "SAFE-T1401",
+        "SAFE-T1402",
+        "SAFE-T1902",
+        "SAFE-T1912"
+      ],
       "charactersFiltered": {
         "invisibleCharacters": [
           "Zero-width space (U+200B)",
@@ -185,7 +239,10 @@
         "Performance impact on large texts",
         "Some attacks use allowed characters creatively"
       ],
-      "relatedMitigations": ["SAFE-M-5", "SAFE-M-7"],
+      "relatedMitigations": [
+        "SAFE-M-5",
+        "SAFE-M-7"
+      ],
       "references": [
         "Unicode Security Considerations (Unicode.org) - https://www.unicode.org/reports/tr36/",
         "Invisible Prompt Injection Research - https://www.promptfoo.dev/blog/invisible-unicode-threats/",
@@ -200,8 +257,22 @@
       "implementationComplexity": "Low-Medium",
       "firstPublished": "2025-01-03",
       "description": "Filters MCP-related content (tool descriptions, tool outputs, error messages, and other data) to remove hidden content and instruction patterns using pattern-based detection combined with structural analysis. Note: pattern-based filtering alone is insufficient and should be combined with other mitigations.",
-      "mitigates": ["SAFE-T1001", "SAFE-T1102"],
-      "relatedMitigations": ["SAFE-M-3", "SAFE-M-4"],
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1101",
+        "SAFE-T1102",
+        "SAFE-T1204",
+        "SAFE-T1309",
+        "SAFE-T1402",
+        "SAFE-T1701",
+        "SAFE-T1705",
+        "SAFE-T1902",
+        "SAFE-T1914"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-3",
+        "SAFE-M-4"
+      ],
       "references": [
         "OWASP Input Validation Cheat Sheet"
       ]
@@ -214,8 +285,30 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-03",
       "description": "Ensures MCP servers are only installed from verified sources with cryptographic signatures, implementing a trusted registry system similar to package managers like npm or Docker Hub.",
-      "mitigates": ["SAFE-T1002", "SAFE-T1003", "SAFE-T1004"],
-      "relatedMitigations": ["SAFE-M-2", "SAFE-M-9"],
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1002",
+        "SAFE-T1003",
+        "SAFE-T1004",
+        "SAFE-T1006",
+        "SAFE-T1008",
+        "SAFE-T1103",
+        "SAFE-T1109",
+        "SAFE-T1201",
+        "SAFE-T1205",
+        "SAFE-T1206",
+        "SAFE-T1207",
+        "SAFE-T1301",
+        "SAFE-T1401",
+        "SAFE-T1405",
+        "SAFE-T1406",
+        "SAFE-T1407",
+        "SAFE-T1903"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-2",
+        "SAFE-M-9"
+      ],
       "references": [
         "The Update Framework (TUF) - https://theupdateframework.io/",
         "SLSA Supply Chain Security Framework - https://slsa.dev/"
@@ -229,8 +322,18 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-03",
       "description": "Ensures displayed content matches content sent to the LLM, preventing attackers from hiding malicious instructions that are invisible to users but processed by the model.",
-      "mitigates": ["SAFE-T1001", "SAFE-T1102"],
-      "relatedMitigations": ["SAFE-M-4", "SAFE-M-8"]
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1102",
+        "SAFE-T1401",
+        "SAFE-T1402",
+        "SAFE-T1902",
+        "SAFE-T1912"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-4",
+        "SAFE-M-8"
+      ]
     },
     {
       "id": "SAFE-M-8",
@@ -240,8 +343,14 @@
       "implementationComplexity": "Low",
       "firstPublished": "2025-01-03",
       "description": "Compare visual rendering of descriptions with actual content to detect invisible characters. Helps identify Unicode-based injection attempts.",
-      "mitigates": ["SAFE-T1001"],
-      "relatedMitigations": ["SAFE-M-4", "SAFE-M-7"],
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1402"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-4",
+        "SAFE-M-7"
+      ],
       "references": [
         "Promptfoo Research on invisible Unicode threats"
       ]
@@ -254,8 +363,33 @@
       "implementationComplexity": "Medium-High",
       "firstPublished": "2025-01-03",
       "description": "Test new MCP tools in isolated environments with comprehensive monitoring before production deployment, allowing detection of malicious behavior without risk to production systems.",
-      "mitigates": ["SAFE-T1001", "SAFE-T1003", "SAFE-T1201"],
-      "relatedMitigations": ["SAFE-M-6", "SAFE-M-11"],
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1002",
+        "SAFE-T1003",
+        "SAFE-T1006",
+        "SAFE-T1101",
+        "SAFE-T1104",
+        "SAFE-T1109",
+        "SAFE-T1111",
+        "SAFE-T1201",
+        "SAFE-T1203",
+        "SAFE-T1207",
+        "SAFE-T1303",
+        "SAFE-T1305",
+        "SAFE-T1502",
+        "SAFE-T1503",
+        "SAFE-T1505",
+        "SAFE-T1601",
+        "SAFE-T1705",
+        "SAFE-T1903",
+        "SAFE-T2102",
+        "SAFE-T2103"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-6",
+        "SAFE-M-11"
+      ],
       "references": [
         "NIST SP 800-53 Rev. 5 - SC-39: Process Isolation",
         "NSA/CISA Kubernetes Hardening Guidance",
@@ -271,8 +405,19 @@
       "implementationComplexity": "Low-Medium",
       "firstPublished": "2025-01-03",
       "description": "Regularly scan tool descriptions for known malicious patterns and hidden content using automated tools.",
-      "mitigates": ["SAFE-T1001", "SAFE-T1102"],
-      "relatedMitigations": ["SAFE-M-11", "SAFE-M-12"]
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1102",
+        "SAFE-T1303",
+        "SAFE-T1305",
+        "SAFE-T1401",
+        "SAFE-T1402",
+        "SAFE-T1406"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-11",
+        "SAFE-M-12"
+      ]
     },
     {
       "id": "SAFE-M-11",
@@ -282,8 +427,34 @@
       "implementationComplexity": "Medium-High",
       "firstPublished": "2025-01-03",
       "description": "Tracks LLM behavior patterns to detect unexpected tool usage, suspicious sequences of operations, or deviations from normal behavior that may indicate compromise or attack. Includes monitoring for prompt injection signs such as sudden context switches, execution of unrelated commands, or acknowledgment of instructions not visible in the original user request.",
-      "mitigates": ["SAFE-T1001", "SAFE-T1101", "SAFE-T1102", "SAFE-T1701"],
-      "relatedMitigations": ["SAFE-M-10", "SAFE-M-12"],
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1008",
+        "SAFE-T1101",
+        "SAFE-T1102",
+        "SAFE-T1106",
+        "SAFE-T1204",
+        "SAFE-T1303",
+        "SAFE-T1305",
+        "SAFE-T1309",
+        "SAFE-T1401",
+        "SAFE-T1402",
+        "SAFE-T1403",
+        "SAFE-T1404",
+        "SAFE-T1405",
+        "SAFE-T1406",
+        "SAFE-T1503",
+        "SAFE-T1701",
+        "SAFE-T1904",
+        "SAFE-T2102",
+        "SAFE-T2103",
+        "SAFE-T2105",
+        "SAFE-T3001"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-10",
+        "SAFE-M-12"
+      ],
       "references": [
         "MITRE CAR - Cyber Analytics Repository",
         "Large Language Models for Forecasting and Anomaly Detection (2024)",
@@ -298,8 +469,93 @@
       "implementationComplexity": "Low-Medium",
       "firstPublished": "2025-01-03",
       "description": "Log all tool descriptions loaded and their full content, along with all tool invocations, parameters, and results for forensic analysis and anomaly detection.",
-      "mitigates": ["SAFE-T1001", "SAFE-T1004"],
-      "relatedMitigations": ["SAFE-M-10", "SAFE-M-11"]
+      "mitigates": [
+        "SAFE-T2107",
+        "SAFE-T1001",
+        "SAFE-T1002",
+        "SAFE-T1003",
+        "SAFE-T1004",
+        "SAFE-T1005",
+        "SAFE-T1006",
+        "SAFE-T1007",
+        "SAFE-T1008",
+        "SAFE-T1009",
+        "SAFE-T1101",
+        "SAFE-T1102",
+        "SAFE-T1103",
+        "SAFE-T1104",
+        "SAFE-T1105",
+        "SAFE-T1106",
+        "SAFE-T1109",
+        "SAFE-T1110",
+        "SAFE-T1111",
+        "SAFE-T1201",
+        "SAFE-T1202",
+        "SAFE-T1203",
+        "SAFE-T1204",
+        "SAFE-T1205",
+        "SAFE-T1206",
+        "SAFE-T1207",
+        "SAFE-T2106",
+        "SAFE-T1301",
+        "SAFE-T1302",
+        "SAFE-T1303",
+        "SAFE-T1304",
+        "SAFE-T1305",
+        "SAFE-T1306",
+        "SAFE-T1307",
+        "SAFE-T1308",
+        "SAFE-T1309",
+        "SAFE-T1401",
+        "SAFE-T1402",
+        "SAFE-T1403",
+        "SAFE-T1404",
+        "SAFE-T1405",
+        "SAFE-T1406",
+        "SAFE-T1407",
+        "SAFE-T1408",
+        "SAFE-T1502",
+        "SAFE-T1503",
+        "SAFE-T1504",
+        "SAFE-T1505",
+        "SAFE-T1507",
+        "SAFE-T1601",
+        "SAFE-T1602",
+        "SAFE-T1603",
+        "SAFE-T1604",
+        "SAFE-T1605",
+        "SAFE-T1606",
+        "SAFE-T1701",
+        "SAFE-T1702",
+        "SAFE-T1703",
+        "SAFE-T1704",
+        "SAFE-T1705",
+        "SAFE-T1707",
+        "SAFE-T1801",
+        "SAFE-T1802",
+        "SAFE-T1803",
+        "SAFE-T1804",
+        "SAFE-T1805",
+        "SAFE-T1901",
+        "SAFE-T1903",
+        "SAFE-T1904",
+        "SAFE-T1910",
+        "SAFE-T1911",
+        "SAFE-T1912",
+        "SAFE-T1913",
+        "SAFE-T1914",
+        "SAFE-T1915",
+        "SAFE-T2101",
+        "SAFE-T2102",
+        "SAFE-T2103",
+        "SAFE-T2104",
+        "SAFE-T2105",
+        "SAFE-T3001"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-10",
+        "SAFE-M-11"
+      ]
     },
     {
       "id": "SAFE-M-13",
@@ -309,8 +565,29 @@
       "implementationComplexity": "High",
       "firstPublished": "2025-01-06",
       "description": "Implement protocol-level verification of OAuth authorization servers and callback URLs to prevent OAuth phishing attacks through malicious MCP servers. Includes RFC 9207 Authorization Server Issuer Identification validation.",
-      "mitigates": ["SAFE-T1007", "SAFE-T1009"],
-      "relatedMitigations": ["SAFE-M-14", "SAFE-M-16", "SAFE-M-17"],
+      "mitigates": [
+        "SAFE-T1005",
+        "SAFE-T1007",
+        "SAFE-T1009",
+        "SAFE-T1202",
+        "SAFE-T1304",
+        "SAFE-T1306",
+        "SAFE-T1307",
+        "SAFE-T1308",
+        "SAFE-T1403",
+        "SAFE-T1407",
+        "SAFE-T1408",
+        "SAFE-T1506",
+        "SAFE-T1507",
+        "SAFE-T1602",
+        "SAFE-T1605",
+        "SAFE-T1707"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-17"
+      ],
       "references": [
         "RFC 9207 - OAuth 2.0 Authorization Server Issuer Identification",
         "OAuth 2.0 Security Best Current Practice - IETF Draft"
@@ -324,8 +601,41 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-06",
       "description": "Maintain and enforce a list of trusted MCP server domains to prevent connections to malicious servers. Reject OAuth flows to non-allowlisted domains regardless of configuration.",
-      "mitigates": ["SAFE-T1007", "SAFE-T1004", "SAFE-T1009"],
-      "relatedMitigations": ["SAFE-M-13"]
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1003",
+        "SAFE-T1004",
+        "SAFE-T1005",
+        "SAFE-T1006",
+        "SAFE-T1008",
+        "SAFE-T1101",
+        "SAFE-T1109",
+        "SAFE-T1203",
+        "SAFE-T1205",
+        "SAFE-T1206",
+        "SAFE-T1207",
+        "SAFE-T1301",
+        "SAFE-T1302",
+        "SAFE-T1305",
+        "SAFE-T1306",
+        "SAFE-T1401",
+        "SAFE-T1405",
+        "SAFE-T1406",
+        "SAFE-T1407",
+        "SAFE-T1601",
+        "SAFE-T1603",
+        "SAFE-T1703",
+        "SAFE-T1704",
+        "SAFE-T1804",
+        "SAFE-T1901",
+        "SAFE-T1903",
+        "SAFE-T1911",
+        "SAFE-T1913",
+        "SAFE-T1914"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-13"
+      ]
     },
     {
       "id": "SAFE-M-15",
@@ -335,8 +645,18 @@
       "implementationComplexity": "Low-Medium",
       "firstPublished": "2025-01-06",
       "description": "Display clear warnings when OAuth flows are initiated, showing the requesting server and target service. Show full URL with visual indicators for security-critical characters.",
-      "mitigates": ["SAFE-T1007", "SAFE-T1009"],
-      "relatedMitigations": ["SAFE-M-13", "SAFE-M-14"]
+      "mitigates": [
+        "SAFE-T1006",
+        "SAFE-T1007",
+        "SAFE-T1101",
+        "SAFE-T1403",
+        "SAFE-T1501",
+        "SAFE-T1502"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-13",
+        "SAFE-M-14"
+      ]
     },
     {
       "id": "SAFE-M-16",
@@ -346,8 +666,52 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-06",
       "description": "Enforce minimal OAuth scopes and warn on broad permission requests. Follow principle of least privilege for token permissions.",
-      "mitigates": ["SAFE-T1007"],
-      "relatedMitigations": ["SAFE-M-13", "SAFE-M-17"]
+      "mitigates": [
+        "SAFE-T1005",
+        "SAFE-T1007",
+        "SAFE-T1009",
+        "SAFE-T1104",
+        "SAFE-T1111",
+        "SAFE-T1202",
+        "SAFE-T1206",
+        "SAFE-T1302",
+        "SAFE-T1304",
+        "SAFE-T1306",
+        "SAFE-T1307",
+        "SAFE-T1308",
+        "SAFE-T1309",
+        "SAFE-T1403",
+        "SAFE-T1407",
+        "SAFE-T1408",
+        "SAFE-T1504",
+        "SAFE-T1505",
+        "SAFE-T1506",
+        "SAFE-T1507",
+        "SAFE-T1601",
+        "SAFE-T1602",
+        "SAFE-T1603",
+        "SAFE-T1604",
+        "SAFE-T1605",
+        "SAFE-T1706",
+        "SAFE-T1801",
+        "SAFE-T1804",
+        "SAFE-T1805",
+        "SAFE-T1901",
+        "SAFE-T1903",
+        "SAFE-T1904",
+        "SAFE-T1910",
+        "SAFE-T1911",
+        "SAFE-T1912",
+        "SAFE-T1913",
+        "SAFE-T1914",
+        "SAFE-T1915",
+        "SAFE-T2101",
+        "SAFE-T2104"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-13",
+        "SAFE-M-17"
+      ]
     },
     {
       "id": "SAFE-M-17",
@@ -357,8 +721,21 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-06",
       "description": "Validate that OAuth callback URLs match the configured MCP server domain. Enforce strict redirect URI matching and reject wildcards and open redirects.",
-      "mitigates": ["SAFE-T1007"],
-      "relatedMitigations": ["SAFE-M-13", "SAFE-M-14"]
+      "mitigates": [
+        "SAFE-T1007",
+        "SAFE-T1009",
+        "SAFE-T1408",
+        "SAFE-T1506",
+        "SAFE-T1507",
+        "SAFE-T1901",
+        "SAFE-T1902",
+        "SAFE-T1913",
+        "SAFE-T1914"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-13",
+        "SAFE-M-14"
+      ]
     },
     {
       "id": "SAFE-M-18",
@@ -368,8 +745,23 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-06",
       "description": "Log and analyze all OAuth authorization attempts through MCP, including full URLs, issuer parameters, and certificate details.",
-      "mitigates": ["SAFE-T1007", "SAFE-T1009"],
-      "relatedMitigations": ["SAFE-M-19", "SAFE-M-20"]
+      "mitigates": [
+        "SAFE-T1007",
+        "SAFE-T1009",
+        "SAFE-T1202",
+        "SAFE-T1304",
+        "SAFE-T1306",
+        "SAFE-T1308",
+        "SAFE-T1403",
+        "SAFE-T1407",
+        "SAFE-T1408",
+        "SAFE-T1507",
+        "SAFE-T1707"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-19",
+        "SAFE-M-20"
+      ]
     },
     {
       "id": "SAFE-M-19",
@@ -379,8 +771,21 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-06",
       "description": "Monitor usage patterns of OAuth tokens obtained through MCP to identify potentially compromised tokens.",
-      "mitigates": ["SAFE-T1007", "SAFE-T1009"],
-      "relatedMitigations": ["SAFE-M-18", "SAFE-M-20"]
+      "mitigates": [
+        "SAFE-T1007",
+        "SAFE-T1009",
+        "SAFE-T1202",
+        "SAFE-T1304",
+        "SAFE-T1306",
+        "SAFE-T1308",
+        "SAFE-T1408",
+        "SAFE-T1507",
+        "SAFE-T1706"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-18",
+        "SAFE-M-20"
+      ]
     },
     {
       "id": "SAFE-M-20",
@@ -390,8 +795,45 @@
       "implementationComplexity": "High",
       "firstPublished": "2025-01-06",
       "description": "Deploy behavioral analytics to detect unusual OAuth patterns such as first-seen domains, geographic anomalies, or multiple AS configurations. Identify unusual patterns in OAuth requests across MCP servers.",
-      "mitigates": ["SAFE-T1007", "SAFE-T1004", "SAFE-T1009"],
-      "relatedMitigations": ["SAFE-M-18", "SAFE-M-19"]
+      "mitigates": [
+        "SAFE-T1004",
+        "SAFE-T1005",
+        "SAFE-T1106",
+        "SAFE-T1202",
+        "SAFE-T1203",
+        "SAFE-T1204",
+        "SAFE-T1302",
+        "SAFE-T1303",
+        "SAFE-T1304",
+        "SAFE-T1305",
+        "SAFE-T1306",
+        "SAFE-T1307",
+        "SAFE-T1308",
+        "SAFE-T1309",
+        "SAFE-T1401",
+        "SAFE-T1403",
+        "SAFE-T1404",
+        "SAFE-T1405",
+        "SAFE-T1406",
+        "SAFE-T1407",
+        "SAFE-T1408",
+        "SAFE-T1502",
+        "SAFE-T1503",
+        "SAFE-T1504",
+        "SAFE-T1505",
+        "SAFE-T1601",
+        "SAFE-T1602",
+        "SAFE-T1604",
+        "SAFE-T1605",
+        "SAFE-T1606",
+        "SAFE-T1802",
+        "SAFE-T1805",
+        "SAFE-T1901"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-18",
+        "SAFE-M-19"
+      ]
     },
     {
       "id": "SAFE-M-21",
@@ -401,8 +843,26 @@
       "implementationComplexity": "Medium-High",
       "firstPublished": "2025-01-03",
       "description": "Isolate tool output contexts to prevent cross-contamination between tool results and system instructions.",
-      "mitigates": ["SAFE-T1102"],
-      "relatedMitigations": ["SAFE-M-1", "SAFE-M-22"]
+      "mitigates": [
+        "SAFE-T1008",
+        "SAFE-T1102",
+        "SAFE-T1103",
+        "SAFE-T1110",
+        "SAFE-T1402",
+        "SAFE-T1404",
+        "SAFE-T1701",
+        "SAFE-T1702",
+        "SAFE-T1703",
+        "SAFE-T1704",
+        "SAFE-T1705",
+        "SAFE-T1805",
+        "SAFE-T1912",
+        "SAFE-T1914"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-1",
+        "SAFE-M-22"
+      ]
     },
     {
       "id": "SAFE-M-22",
@@ -412,8 +872,27 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-03",
       "description": "Validate tool outputs for semantic consistency and hidden instructions before they are processed by the LLM.",
-      "mitigates": ["SAFE-T1102"],
-      "relatedMitigations": ["SAFE-M-21", "SAFE-M-23"]
+      "mitigates": [
+        "SAFE-T1102",
+        "SAFE-T1103",
+        "SAFE-T1110",
+        "SAFE-T2106",
+        "SAFE-T1404",
+        "SAFE-T1701",
+        "SAFE-T1703",
+        "SAFE-T1704",
+        "SAFE-T1705",
+        "SAFE-T1902",
+        "SAFE-T1910",
+        "SAFE-T1912",
+        "SAFE-T1914",
+        "SAFE-T2105",
+        "SAFE-T3001"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-21",
+        "SAFE-M-23"
+      ]
     },
     {
       "id": "SAFE-M-23",
@@ -423,8 +902,15 @@
       "implementationComplexity": "Low",
       "firstPublished": "2025-01-03",
       "description": "Truncate tool outputs to prevent oversized payloads from being processed, reducing the attack surface for output-based injection.",
-      "mitigates": ["SAFE-T1102"],
-      "relatedMitigations": ["SAFE-M-21", "SAFE-M-22"]
+      "mitigates": [
+        "SAFE-T1102",
+        "SAFE-T1103",
+        "SAFE-T1601"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-21",
+        "SAFE-M-22"
+      ]
     },
     {
       "id": "SAFE-M-24",
@@ -434,8 +920,19 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-03",
       "description": "Generate and verify Software Bill of Materials (SBOM) for MCP packages and dependencies to maintain comprehensive inventory and detect unauthorized components.",
-      "mitigates": ["SAFE-T1002", "SAFE-T1003"],
-      "relatedMitigations": ["SAFE-M-6", "SAFE-M-2"]
+      "mitigates": [
+        "SAFE-T1002",
+        "SAFE-T1003",
+        "SAFE-T1201",
+        "SAFE-T1203",
+        "SAFE-T1207",
+        "SAFE-T1506",
+        "SAFE-T1903"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-6",
+        "SAFE-M-2"
+      ]
     },
     {
       "id": "SAFE-M-25",
@@ -446,7 +943,9 @@
       "firstPublished": "2025-01-03",
       "description": "Model AI-specific risks in MCP deployments, incorporating threat modeling tailored to LLM and agent-based systems.",
       "mitigates": [],
-      "relatedMitigations": ["SAFE-M-26"]
+      "relatedMitigations": [
+        "SAFE-M-26"
+      ]
     },
     {
       "id": "SAFE-M-26",
@@ -457,7 +956,10 @@
       "firstPublished": "2025-01-03",
       "description": "Track and verify the provenance of data flowing through MCP tools to ensure data integrity and detect unauthorized modifications.",
       "mitigates": [],
-      "relatedMitigations": ["SAFE-M-33", "SAFE-M-24"]
+      "relatedMitigations": [
+        "SAFE-M-33",
+        "SAFE-M-24"
+      ]
     },
     {
       "id": "SAFE-M-27",
@@ -467,8 +969,10 @@
       "implementationComplexity": "Low",
       "firstPublished": "2025-01-03",
       "description": "Train users to recognize social engineering attacks targeting MCP installations, including phishing attempts to install malicious MCP servers.",
-      "mitigates": ["SAFE-T1006"],
-      "relatedMitigations": ["SAFE-M-15"]
+      "mitigates": [],
+      "relatedMitigations": [
+        "SAFE-M-15"
+      ]
     },
     {
       "id": "SAFE-M-28",
@@ -478,8 +982,10 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-03",
       "description": "Conceal tool capabilities until proper authentication is established, preventing unauthorized tool discovery and enumeration.",
-      "mitigates": ["SAFE-T1601", "SAFE-T1602"],
-      "relatedMitigations": ["SAFE-M-29"]
+      "mitigates": [],
+      "relatedMitigations": [
+        "SAFE-M-29"
+      ]
     },
     {
       "id": "SAFE-M-29",
@@ -489,8 +995,81 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-01-03",
       "description": "Define and enforce explicit privilege boundaries for MCP tools and servers, limiting blast radius if a spoofed or compromised endpoint is accepted.",
-      "mitigates": ["SAFE-T1004", "SAFE-T1104", "SAFE-T1302"],
-      "relatedMitigations": ["SAFE-M-1", "SAFE-M-42"]
+      "mitigates": [
+        "SAFE-T1002",
+        "SAFE-T1003",
+        "SAFE-T1005",
+        "SAFE-T1006",
+        "SAFE-T1008",
+        "SAFE-T1101",
+        "SAFE-T1102",
+        "SAFE-T1103",
+        "SAFE-T1104",
+        "SAFE-T1105",
+        "SAFE-T1106",
+        "SAFE-T1109",
+        "SAFE-T1110",
+        "SAFE-T1111",
+        "SAFE-T1201",
+        "SAFE-T1203",
+        "SAFE-T1204",
+        "SAFE-T1205",
+        "SAFE-T1206",
+        "SAFE-T1207",
+        "SAFE-T2106",
+        "SAFE-T1301",
+        "SAFE-T1302",
+        "SAFE-T1303",
+        "SAFE-T1305",
+        "SAFE-T1307",
+        "SAFE-T1308",
+        "SAFE-T1309",
+        "SAFE-T1401",
+        "SAFE-T1402",
+        "SAFE-T1403",
+        "SAFE-T1404",
+        "SAFE-T1405",
+        "SAFE-T1406",
+        "SAFE-T1502",
+        "SAFE-T1503",
+        "SAFE-T1504",
+        "SAFE-T1505",
+        "SAFE-T1506",
+        "SAFE-T1601",
+        "SAFE-T1602",
+        "SAFE-T1603",
+        "SAFE-T1604",
+        "SAFE-T1605",
+        "SAFE-T1606",
+        "SAFE-T1701",
+        "SAFE-T1702",
+        "SAFE-T1703",
+        "SAFE-T1704",
+        "SAFE-T1705",
+        "SAFE-T1801",
+        "SAFE-T1802",
+        "SAFE-T1803",
+        "SAFE-T1804",
+        "SAFE-T1805",
+        "SAFE-T1901",
+        "SAFE-T1902",
+        "SAFE-T1903",
+        "SAFE-T1904",
+        "SAFE-T1910",
+        "SAFE-T1911",
+        "SAFE-T1913",
+        "SAFE-T1914",
+        "SAFE-T1915",
+        "SAFE-T2101",
+        "SAFE-T2102",
+        "SAFE-T2103",
+        "SAFE-T2104",
+        "SAFE-T3001"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-1",
+        "SAFE-M-42"
+      ]
     },
     {
       "id": "SAFE-M-30",
@@ -500,8 +1079,19 @@
       "implementationComplexity": "Medium-High",
       "firstPublished": "2025-07-01",
       "description": "Cryptographically verify the integrity of vector store contents to detect unauthorized modifications or contamination of long-term AI agent memory.",
-      "mitigates": ["SAFE-T2106", "SAFE-T1204"],
-      "relatedMitigations": ["SAFE-M-32", "SAFE-M-2"]
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1201",
+        "SAFE-T1204",
+        "SAFE-T2106",
+        "SAFE-T1702",
+        "SAFE-T2105",
+        "SAFE-T3001"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-32",
+        "SAFE-M-2"
+      ]
     },
     {
       "id": "SAFE-M-31",
@@ -511,8 +1101,23 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-08-01",
       "description": "Validate OAuth tokens with improved code quality and type safety to prevent token-based attacks.",
-      "mitigates": ["SAFE-T1202", "SAFE-T1506"],
-      "relatedMitigations": ["SAFE-M-13", "SAFE-M-16"]
+      "mitigates": [
+        "SAFE-T1009",
+        "SAFE-T1202",
+        "SAFE-T1206",
+        "SAFE-T1304",
+        "SAFE-T1306",
+        "SAFE-T1307",
+        "SAFE-T1308",
+        "SAFE-T1407",
+        "SAFE-T1408",
+        "SAFE-T1506",
+        "SAFE-T1706"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-13",
+        "SAFE-M-16"
+      ]
     },
     {
       "id": "SAFE-M-32",
@@ -522,8 +1127,18 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-07-01",
       "description": "Continuously monitor vector stores for contamination and unauthorized modifications that could affect AI agent behavior across sessions.",
-      "mitigates": ["SAFE-T2106", "SAFE-T1204"],
-      "relatedMitigations": ["SAFE-M-30", "SAFE-M-11"]
+      "mitigates": [
+        "SAFE-T1204",
+        "SAFE-T2106",
+        "SAFE-T1702",
+        "SAFE-T1805",
+        "SAFE-T2105",
+        "SAFE-T3001"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-30",
+        "SAFE-M-11"
+      ]
     },
     {
       "id": "SAFE-M-33",
@@ -533,8 +1148,15 @@
       "implementationComplexity": "High",
       "firstPublished": "2025-06-01",
       "description": "Verify the provenance and integrity of training data used for AI models in MCP tools to prevent training data poisoning attacks.",
-      "mitigates": ["SAFE-T2107"],
-      "relatedMitigations": ["SAFE-M-26", "SAFE-M-34"]
+      "mitigates": [
+        "SAFE-T2107",
+        "SAFE-T1001",
+        "SAFE-T1002"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-26",
+        "SAFE-M-34"
+      ]
     },
     {
       "id": "SAFE-M-34",
@@ -544,8 +1166,16 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-06-01",
       "description": "Validate AI model integrity through cryptographic checksums and signatures to detect tampering or unauthorized model replacement.",
-      "mitigates": ["SAFE-T2107"],
-      "relatedMitigations": ["SAFE-M-33", "SAFE-M-2"]
+      "mitigates": [
+        "SAFE-T2107",
+        "SAFE-T1001",
+        "SAFE-T1201",
+        "SAFE-T1912"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-33",
+        "SAFE-M-2"
+      ]
     },
     {
       "id": "SAFE-M-35",
@@ -555,8 +1185,15 @@
       "implementationComplexity": "High",
       "firstPublished": "2025-06-01",
       "description": "Detect adversarial manipulations in training data using AI-based analysis to identify poisoned samples before they affect model behavior.",
-      "mitigates": ["SAFE-T2107"],
-      "relatedMitigations": ["SAFE-M-33", "SAFE-M-36"]
+      "mitigates": [
+        "SAFE-T2107",
+        "SAFE-T1001",
+        "SAFE-T1102"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-33",
+        "SAFE-M-36"
+      ]
     },
     {
       "id": "SAFE-M-36",
@@ -566,8 +1203,18 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-06-01",
       "description": "Monitor AI model behavior for deviations indicating poisoning or compromise, including statistical analysis of model outputs over time.",
-      "mitigates": ["SAFE-T2107"],
-      "relatedMitigations": ["SAFE-M-35", "SAFE-M-11"]
+      "mitigates": [
+        "SAFE-T2107",
+        "SAFE-T1001",
+        "SAFE-T1102",
+        "SAFE-T1110",
+        "SAFE-T1603",
+        "SAFE-T2105"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-35",
+        "SAFE-M-11"
+      ]
     },
     {
       "id": "SAFE-M-37",
@@ -577,8 +1224,28 @@
       "implementationComplexity": "Low-Medium",
       "firstPublished": "2025-08-01",
       "description": "Sanitize tool metadata to remove or flag suspicious properties that could be used for defense evasion or manipulation attacks.",
-      "mitigates": ["SAFE-T1406"],
-      "relatedMitigations": ["SAFE-M-38", "SAFE-M-4"]
+      "mitigates": [
+        "SAFE-T1007",
+        "SAFE-T1202",
+        "SAFE-T1206",
+        "SAFE-T1304",
+        "SAFE-T1306",
+        "SAFE-T1308",
+        "SAFE-T1502",
+        "SAFE-T1504",
+        "SAFE-T1505",
+        "SAFE-T1506",
+        "SAFE-T1507",
+        "SAFE-T1602",
+        "SAFE-T1603",
+        "SAFE-T1605",
+        "SAFE-T1706",
+        "SAFE-T1805"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-38",
+        "SAFE-M-4"
+      ]
     },
     {
       "id": "SAFE-M-38",
@@ -588,8 +1255,18 @@
       "implementationComplexity": "Low-Medium",
       "firstPublished": "2025-08-01",
       "description": "Validate tool schemas against expected patterns and structures to detect anomalies or malicious modifications.",
-      "mitigates": ["SAFE-T1406", "SAFE-T1501"],
-      "relatedMitigations": ["SAFE-M-37", "SAFE-M-5"]
+      "mitigates": [
+        "SAFE-T1007",
+        "SAFE-T1009",
+        "SAFE-T1202",
+        "SAFE-T1408",
+        "SAFE-T1507",
+        "SAFE-T1707"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-37",
+        "SAFE-M-5"
+      ]
     },
     {
       "id": "SAFE-M-39",
@@ -599,8 +1276,11 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-08-01",
       "description": "Validate prompt context integrity before processing to detect context manipulation or injection attempts.",
-      "mitigates": ["SAFE-T1102", "SAFE-T1401"],
-      "relatedMitigations": ["SAFE-M-1", "SAFE-M-21"]
+      "mitigates": [],
+      "relatedMitigations": [
+        "SAFE-M-1",
+        "SAFE-M-21"
+      ]
     },
     {
       "id": "SAFE-M-40",
@@ -610,8 +1290,12 @@
       "implementationComplexity": "Low-Medium",
       "firstPublished": "2025-08-01",
       "description": "Implement clear UI patterns to help users identify security-relevant actions, reducing consent fatigue and improving user awareness of risks.",
-      "mitigates": ["SAFE-T1403", "SAFE-T1404"],
-      "relatedMitigations": ["SAFE-M-7", "SAFE-M-8", "SAFE-M-15"]
+      "mitigates": [],
+      "relatedMitigations": [
+        "SAFE-M-7",
+        "SAFE-M-8",
+        "SAFE-M-15"
+      ]
     },
     {
       "id": "SAFE-M-41",
@@ -621,8 +1305,12 @@
       "implementationComplexity": "Low",
       "firstPublished": "2025-08-01",
       "description": "Pin tool and package versions to prevent unauthorized updates, protecting against rug pull attacks and supply chain compromise via auto-update mechanisms.",
-      "mitigates": ["SAFE-T1201", "SAFE-T1207", "SAFE-T1002"],
-      "relatedMitigations": ["SAFE-M-6", "SAFE-M-2", "SAFE-M-45"]
+      "mitigates": [],
+      "relatedMitigations": [
+        "SAFE-M-6",
+        "SAFE-M-2",
+        "SAFE-M-45"
+      ]
     },
     {
       "id": "SAFE-M-42",
@@ -632,8 +1320,11 @@
       "implementationComplexity": "High",
       "firstPublished": "2025-08-01",
       "description": "Implement protections against cross-server attacks and tool interference, ensuring tool isolation between different MCP server instances.",
-      "mitigates": ["SAFE-T1008", "SAFE-T1301", "SAFE-T1701"],
-      "relatedMitigations": ["SAFE-M-1", "SAFE-M-29"]
+      "mitigates": [],
+      "relatedMitigations": [
+        "SAFE-M-1",
+        "SAFE-M-29"
+      ]
     },
     {
       "id": "SAFE-M-43",
@@ -643,8 +1334,11 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-08-01",
       "description": "Scan for steganographic content in tool descriptions and outputs, including zero-width characters, HTML comments, and other encoding techniques used to hide malicious instructions.",
-      "mitigates": ["SAFE-T1402", "SAFE-T1001"],
-      "relatedMitigations": ["SAFE-M-4", "SAFE-M-10"]
+      "mitigates": [],
+      "relatedMitigations": [
+        "SAFE-M-4",
+        "SAFE-M-10"
+      ]
     },
     {
       "id": "SAFE-M-44",
@@ -654,8 +1348,11 @@
       "implementationComplexity": "Medium-High",
       "firstPublished": "2025-08-01",
       "description": "Advanced behavioral monitoring specifically for MCP tool and server activities, complementing general behavioral monitoring with MCP-specific patterns.",
-      "mitigates": ["SAFE-T1008", "SAFE-T1301"],
-      "relatedMitigations": ["SAFE-M-11", "SAFE-M-12"]
+      "mitigates": [],
+      "relatedMitigations": [
+        "SAFE-M-11",
+        "SAFE-M-12"
+      ]
     },
     {
       "id": "SAFE-M-45",
@@ -665,8 +1362,33 @@
       "implementationComplexity": "High",
       "firstPublished": "2025-09-01",
       "description": "Validate server identity and manifest integrity before accepting tools. Combines cryptographic signing of tool manifests with server attestation to ensure both the server and its tools are authentic.",
-      "mitigates": ["SAFE-T1004", "SAFE-T1003", "SAFE-T1205"],
-      "relatedMitigations": ["SAFE-M-2", "SAFE-M-6"]
+      "mitigates": [
+        "SAFE-T1002",
+        "SAFE-T1003",
+        "SAFE-T1004",
+        "SAFE-T1006",
+        "SAFE-T1008",
+        "SAFE-T1103",
+        "SAFE-T1109",
+        "SAFE-T1201",
+        "SAFE-T1203",
+        "SAFE-T1205",
+        "SAFE-T1206",
+        "SAFE-T1207",
+        "SAFE-T1301",
+        "SAFE-T1401",
+        "SAFE-T1404",
+        "SAFE-T1405",
+        "SAFE-T1406",
+        "SAFE-T1407",
+        "SAFE-T1601",
+        "SAFE-T1704",
+        "SAFE-T1903"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-2",
+        "SAFE-M-6"
+      ]
     },
     {
       "id": "SAFE-M-46",
@@ -676,8 +1398,13 @@
       "implementationComplexity": "High",
       "firstPublished": "2025-09-01",
       "description": "Manage risks associated with cross-chain bridge operations, including monitoring bridge contracts, validating cross-chain messages, and implementing rate limits on transfers.",
-      "mitigates": ["SAFE-T1915"],
-      "relatedMitigations": ["SAFE-M-47", "SAFE-M-48"]
+      "mitigates": [
+        "SAFE-T1915"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-47",
+        "SAFE-M-48"
+      ]
     },
     {
       "id": "SAFE-M-47",
@@ -687,8 +1414,13 @@
       "implementationComplexity": "High",
       "firstPublished": "2025-09-01",
       "description": "Analyze cross-chain transaction graphs for suspicious patterns indicative of laundering or asset obfuscation through bridges and DEXs.",
-      "mitigates": ["SAFE-T1915"],
-      "relatedMitigations": ["SAFE-M-46", "SAFE-M-48"]
+      "mitigates": [
+        "SAFE-T1915"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-46",
+        "SAFE-M-48"
+      ]
     },
     {
       "id": "SAFE-M-48",
@@ -698,8 +1430,13 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-09-01",
       "description": "Monitor custodial off-ramp activities for suspicious transactions that may indicate laundered or stolen funds being converted to fiat currency.",
-      "mitigates": ["SAFE-T1915"],
-      "relatedMitigations": ["SAFE-M-46", "SAFE-M-47"]
+      "mitigates": [
+        "SAFE-T1915"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-46",
+        "SAFE-M-47"
+      ]
     },
     {
       "id": "SAFE-M-49",
@@ -709,8 +1446,16 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-07-01",
       "description": "Scan multimodal inputs (images, audio) for embedded malicious instructions before they are processed by multimodal AI models.",
-      "mitigates": ["SAFE-T1110"],
-      "relatedMitigations": ["SAFE-M-50", "SAFE-M-52"]
+      "mitigates": [
+        "SAFE-T1102",
+        "SAFE-T1110",
+        "SAFE-T1402",
+        "SAFE-T1912"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-50",
+        "SAFE-M-52"
+      ]
     },
     {
       "id": "SAFE-M-50",
@@ -720,8 +1465,15 @@
       "implementationComplexity": "High",
       "firstPublished": "2025-07-01",
       "description": "Isolate multimodal content processing from instruction execution to prevent cross-modal prompt injection attacks.",
-      "mitigates": ["SAFE-T1110"],
-      "relatedMitigations": ["SAFE-M-1", "SAFE-M-49"]
+      "mitigates": [
+        "SAFE-T1102",
+        "SAFE-T1110",
+        "SAFE-T1402"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-1",
+        "SAFE-M-49"
+      ]
     },
     {
       "id": "SAFE-M-51",
@@ -731,8 +1483,18 @@
       "implementationComplexity": "Medium-High",
       "firstPublished": "2025-07-01",
       "description": "Detect anomalies in embedding patterns that may indicate tool shadowing, content injection, or other manipulation attempts.",
-      "mitigates": ["SAFE-T1110", "SAFE-T1008"],
-      "relatedMitigations": ["SAFE-M-3", "SAFE-M-44"]
+      "mitigates": [
+        "SAFE-T1102",
+        "SAFE-T1110",
+        "SAFE-T1204",
+        "SAFE-T2106",
+        "SAFE-T2105",
+        "SAFE-T3001"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-3",
+        "SAFE-M-44"
+      ]
     },
     {
       "id": "SAFE-M-52",
@@ -742,8 +1504,20 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-07-01",
       "description": "Multi-stage input validation pipeline for comprehensive threat detection across all input types and modalities. Validates tool descriptions and metadata for suspicious patterns before registration.",
-      "mitigates": ["SAFE-T1110", "SAFE-T1008"],
-      "relatedMitigations": ["SAFE-M-4", "SAFE-M-5", "SAFE-M-49"]
+      "mitigates": [
+        "SAFE-T1102",
+        "SAFE-T1105",
+        "SAFE-T1109",
+        "SAFE-T1110",
+        "SAFE-T1303",
+        "SAFE-T1305",
+        "SAFE-T1505"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-4",
+        "SAFE-M-5",
+        "SAFE-M-49"
+      ]
     },
     {
       "id": "SAFE-M-53",
@@ -753,8 +1527,16 @@
       "implementationComplexity": "Medium",
       "firstPublished": "2025-07-01",
       "description": "Apply watermarking to multimodal content for provenance tracking and tamper detection.",
-      "mitigates": ["SAFE-T1110"],
-      "relatedMitigations": ["SAFE-M-26", "SAFE-M-54"]
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1102",
+        "SAFE-T1110",
+        "SAFE-T1402"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-26",
+        "SAFE-M-54"
+      ]
     },
     {
       "id": "SAFE-M-54",
@@ -764,8 +1546,17 @@
       "implementationComplexity": "Medium-High",
       "firstPublished": "2025-07-01",
       "description": "Verify consistency between different modalities (text, image, audio) to detect injection attempts where malicious content is hidden in one modality.",
-      "mitigates": ["SAFE-T1110"],
-      "relatedMitigations": ["SAFE-M-51", "SAFE-M-53"]
+      "mitigates": [
+        "SAFE-T1102",
+        "SAFE-T1110",
+        "SAFE-T1401",
+        "SAFE-T1402",
+        "SAFE-T1912"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-51",
+        "SAFE-M-53"
+      ]
     },
     {
       "id": "SAFE-M-63",
@@ -775,8 +1566,289 @@
       "implementationComplexity": "Low",
       "firstPublished": "2025-08-01",
       "description": "Standardize technique naming conventions for consistent reference across the framework and organizational documentation.",
-      "mitigates": [],
+      "mitigates": [
+        "SAFE-T1102",
+        "SAFE-T1501",
+        "SAFE-T1503",
+        "SAFE-T1505"
+      ],
       "relatedMitigations": []
+    },
+    {
+      "id": "SAFE-M-69",
+      "name": "Out-of-Band Authorization for Privileged Tool Invocations",
+      "category": "Preventive Control",
+      "effectiveness": "High",
+      "implementationComplexity": "Medium-High",
+      "firstPublished": "2026-04-14",
+      "description": "Out-of-Band Authorization for Privileged Tool Invocations is a host-side control that requires every call to a privileged MCP tool to pass through an authorization step whose decision is made and enforced outside the model's context window.",
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1101",
+        "SAFE-T1102",
+        "SAFE-T1103",
+        "SAFE-T1104",
+        "SAFE-T1105",
+        "SAFE-T1110",
+        "SAFE-T1111",
+        "SAFE-T1201",
+        "SAFE-T1204",
+        "SAFE-T1205",
+        "SAFE-T2106",
+        "SAFE-T1301",
+        "SAFE-T1302",
+        "SAFE-T1305",
+        "SAFE-T1307",
+        "SAFE-T1309",
+        "SAFE-T1401",
+        "SAFE-T1402",
+        "SAFE-T1403",
+        "SAFE-T1405",
+        "SAFE-T1406",
+        "SAFE-T1606",
+        "SAFE-T1701",
+        "SAFE-T1702",
+        "SAFE-T1703",
+        "SAFE-T1704",
+        "SAFE-T1705",
+        "SAFE-T1801",
+        "SAFE-T1802",
+        "SAFE-T1803",
+        "SAFE-T1804",
+        "SAFE-T1805",
+        "SAFE-T1901",
+        "SAFE-T1903",
+        "SAFE-T1904",
+        "SAFE-T1910",
+        "SAFE-T1911",
+        "SAFE-T1913",
+        "SAFE-T1914",
+        "SAFE-T1915",
+        "SAFE-T2101",
+        "SAFE-T2103",
+        "SAFE-T2104"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-1",
+        "SAFE-M-12",
+        "SAFE-M-14",
+        "SAFE-M-16",
+        "SAFE-M-29"
+      ],
+      "references": [
+        "https://github.com/safe-agentic-framework/safe-mcp/tree/d3d40297c478d2680d315399b6aaf317e5aa15b8/mitigations/SAF-M-69"
+      ]
+    },
+    {
+      "id": "SAFE-M-70",
+      "name": "Tool-Invocation Anomaly Detection & Baselining",
+      "category": "Detective Control",
+      "effectiveness": "Medium-High",
+      "implementationComplexity": "Medium",
+      "firstPublished": "2026-04-14",
+      "description": "Tool-Invocation Anomaly Detection & Baselining is a detective control that profiles per-agent, per-user, per-tool baselines of MCP tool-call behavior and raises alerts when live invocations deviate from those baselines along one or more feature dimensions.",
+      "mitigates": [
+        "SAFE-T1001",
+        "SAFE-T1102",
+        "SAFE-T1103",
+        "SAFE-T1104",
+        "SAFE-T1106",
+        "SAFE-T1111",
+        "SAFE-T1201",
+        "SAFE-T1203",
+        "SAFE-T1205",
+        "SAFE-T1206",
+        "SAFE-T1301",
+        "SAFE-T1302",
+        "SAFE-T1303",
+        "SAFE-T1307",
+        "SAFE-T1309",
+        "SAFE-T1401",
+        "SAFE-T1402",
+        "SAFE-T1403",
+        "SAFE-T1404",
+        "SAFE-T1405",
+        "SAFE-T1406",
+        "SAFE-T1606",
+        "SAFE-T1701",
+        "SAFE-T1703",
+        "SAFE-T1704",
+        "SAFE-T1705",
+        "SAFE-T1801",
+        "SAFE-T1803",
+        "SAFE-T1804",
+        "SAFE-T1901",
+        "SAFE-T1903",
+        "SAFE-T1904",
+        "SAFE-T1910",
+        "SAFE-T1911",
+        "SAFE-T1913",
+        "SAFE-T1914",
+        "SAFE-T1915",
+        "SAFE-T2101",
+        "SAFE-T2102",
+        "SAFE-T2103",
+        "SAFE-T2104"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-20",
+        "SAFE-M-29",
+        "SAFE-M-36"
+      ],
+      "references": [
+        "https://github.com/safe-agentic-framework/safe-mcp/tree/d3d40297c478d2680d315399b6aaf317e5aa15b8/mitigations/SAF-M-70"
+      ]
+    },
+    {
+      "id": "SAFE-M-71",
+      "name": "Query Guardrails & Result Limits",
+      "category": "Preventive Control",
+      "effectiveness": "High",
+      "implementationComplexity": "Medium",
+      "firstPublished": "2026-04-14",
+      "description": "Query Guardrails & Result Limits is a preventive control for MCP tools that execute queries against databases, data warehouses, or other structured stores.",
+      "mitigates": [
+        "SAFE-T1104",
+        "SAFE-T1801",
+        "SAFE-T1802",
+        "SAFE-T1803",
+        "SAFE-T1804"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-16",
+        "SAFE-M-23",
+        "SAFE-M-29",
+        "SAFE-M-72"
+      ],
+      "references": [
+        "https://github.com/safe-agentic-framework/safe-mcp/tree/d3d40297c478d2680d315399b6aaf317e5aa15b8/mitigations/SAF-M-71"
+      ]
+    },
+    {
+      "id": "SAFE-M-72",
+      "name": "Data Loss Prevention on Tool Outputs",
+      "category": "Data Security",
+      "effectiveness": "Medium-High",
+      "implementationComplexity": "Medium-High",
+      "firstPublished": "2026-04-14",
+      "description": "Data Loss Prevention (DLP) on Tool Outputs applies column-level classification, masking, tokenization, and sensitive-content detection to the results returned by MCP tools before those results enter the agent's context window or are surfaced to a user.",
+      "mitigates": [
+        "SAFE-T1008",
+        "SAFE-T1102",
+        "SAFE-T1503",
+        "SAFE-T1504",
+        "SAFE-T1802",
+        "SAFE-T1803",
+        "SAFE-T1804",
+        "SAFE-T1902",
+        "SAFE-T1910",
+        "SAFE-T1911",
+        "SAFE-T1912",
+        "SAFE-T1913",
+        "SAFE-T1914"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-5",
+        "SAFE-M-16",
+        "SAFE-M-22",
+        "SAFE-M-23",
+        "SAFE-M-63",
+        "SAFE-M-71"
+      ],
+      "references": [
+        "https://github.com/safe-agentic-framework/safe-mcp/tree/d3d40297c478d2680d315399b6aaf317e5aa15b8/mitigations/SAF-M-72"
+      ]
+    },
+    {
+      "id": "SAFE-M-73",
+      "name": "Sampling Budget and Iteration Caps",
+      "category": "Preventive Control",
+      "effectiveness": "High",
+      "implementationComplexity": "Low",
+      "firstPublished": "2026-04-14",
+      "description": "Sampling Budget and Iteration Caps enforces hard, client-side limits on how much nested model work an MCP server can trigger through sampling/createMessage during a single user-intent flow or session.",
+      "mitigates": [
+        "SAFE-T1106",
+        "SAFE-T1403",
+        "SAFE-T2102"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-11",
+        "SAFE-M-12",
+        "SAFE-M-15",
+        "SAFE-M-21",
+        "SAFE-M-29"
+      ],
+      "references": [
+        "https://github.com/safe-agentic-framework/safe-mcp/tree/d3d40297c478d2680d315399b6aaf317e5aa15b8/mitigations/SAF-M-73"
+      ]
+    },
+    {
+      "id": "SAFE-M-74",
+      "name": "Per-Invocation Capability Brokering",
+      "category": "Isolation and Containment",
+      "effectiveness": "High",
+      "implementationComplexity": "Medium",
+      "firstPublished": "2026-06-15",
+      "description": "Per-Invocation Capability Brokering interposes a supervisor between an MCP server and the host OS for every individual tool call.",
+      "mitigates": [
+        "SAFE-T1101",
+        "SAFE-T1102",
+        "SAFE-T1103",
+        "SAFE-T1104",
+        "SAFE-T1105",
+        "SAFE-T1106",
+        "SAFE-T1109",
+        "SAFE-T1110",
+        "SAFE-T1111",
+        "SAFE-T1201",
+        "SAFE-T1205",
+        "SAFE-T2106",
+        "SAFE-T1301",
+        "SAFE-T1302",
+        "SAFE-T1303",
+        "SAFE-T1304",
+        "SAFE-T1307",
+        "SAFE-T1309",
+        "SAFE-T1401",
+        "SAFE-T1402",
+        "SAFE-T1403",
+        "SAFE-T1404",
+        "SAFE-T1405",
+        "SAFE-T1406",
+        "SAFE-T1502",
+        "SAFE-T1503",
+        "SAFE-T1505",
+        "SAFE-T1506",
+        "SAFE-T1606",
+        "SAFE-T1701",
+        "SAFE-T1702",
+        "SAFE-T1703",
+        "SAFE-T1704",
+        "SAFE-T1705",
+        "SAFE-T1801",
+        "SAFE-T1802",
+        "SAFE-T1805",
+        "SAFE-T1901",
+        "SAFE-T1904",
+        "SAFE-T1910",
+        "SAFE-T1911",
+        "SAFE-T1913",
+        "SAFE-T1914",
+        "SAFE-T1915",
+        "SAFE-T2101",
+        "SAFE-T2102",
+        "SAFE-T2103",
+        "SAFE-T2104"
+      ],
+      "relatedMitigations": [
+        "SAFE-M-9"
+      ],
+      "references": [
+        "https://github.com/safe-agentic-framework/safe-mcp/tree/d3d40297c478d2680d315399b6aaf317e5aa15b8/mitigations/SAF-M-74"
+      ]
     }
   ],
   "implementationGuidance": {
@@ -789,11 +1861,21 @@
     "priorityImplementation": {
       "critical": {
         "label": "Implement First",
-        "mitigations": ["SAFE-M-1", "SAFE-M-2", "SAFE-M-6", "SAFE-M-11"]
+        "mitigations": [
+          "SAFE-M-1",
+          "SAFE-M-2",
+          "SAFE-M-6",
+          "SAFE-M-11"
+        ]
       },
       "important": {
         "label": "Implement Second",
-        "mitigations": ["SAFE-M-3", "SAFE-M-4", "SAFE-M-9", "SAFE-M-13"]
+        "mitigations": [
+          "SAFE-M-3",
+          "SAFE-M-4",
+          "SAFE-M-9",
+          "SAFE-M-13"
+        ]
       },
       "additional": {
         "label": "Implement as Resources Allow",

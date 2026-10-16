@@ -140,10 +140,7 @@ export interface TechniquesData {
   framework: TechniquesFramework;
   tactics: Tactic[];
   techniques: Technique[];
-  mitigations: Mitigation[];
   tacticDistribution: Record<string, number>;
-  mitigationStats: Record<string, number>;
-  mitigationCategoryDistribution: Record<string, number>;
 }
 
 export interface MitigationsData {
