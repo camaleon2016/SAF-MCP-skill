@@ -240,14 +240,25 @@ The skill only needs to be installed and built on **one** machine. Once running 
 | **Config discovery** (`discover_and_analyze_config`) | Skill host only | **Partially** — `url` entries work remotely; `command` entries require the server code on the skill host |
 | **Stdio discovery** (`discover_and_analyze_stdio`) | Skill host only | **No** — spawns the target as a child process, so the server code must be local |
 
-**Example remote setup:** Install the skill on machine A, start the REST server with `HOST=0.0.0.0`, then from machine B:
+**Example remote setup:** Install the skill on machine A and start the REST server with API keys (the server refuses to listen beyond loopback without them, see [Security Model](#security-model)):
+
+```bash
+# On machine A
+HOST=0.0.0.0 SAFE_MCP_REQUIRE_API_KEY=true SAFE_MCP_API_KEYS="$(openssl rand -hex 24)" \
+  SAFE_MCP_ALLOW_PRIVATE_URLS=true npm run start:rest
+```
+
+Then from machine B:
 
 ```bash
 # Analyze a remote MCP server on machine C from machine B, via the skill on machine A
 curl -X POST http://machine-a:3002/v1/discover/http \
   -H "Content-Type: application/json" \
+  -H "X-Api-Key: <key from machine A>" \
   -d '{"url": "http://machine-c:3001/v1/mcp"}'
 ```
+
+> Stdio and config `command` discovery are **off** on the REST and HTTP servers. Use HTTP discovery remotely, or see [Security Model](#security-model) to enable command discovery deliberately.
 
 > **Important:** All `npm` commands must be run from the project root directory (where `package.json` is located).
 >
@@ -311,18 +322,20 @@ Configure with environment variables:
 
 **Linux / macOS / WSL / Git Bash:**
 ```bash
-HOST=0.0.0.0 PORT=8080 npm run start:http
+HOST=0.0.0.0 PORT=8080 SAFE_MCP_REQUIRE_API_KEY=true SAFE_MCP_API_KEYS="$(openssl rand -hex 24)" npm run start:http
 ```
 
 **Windows PowerShell:**
 ```powershell
-$env:HOST="0.0.0.0"; $env:PORT="8080"; npm run start:http
+$env:HOST="0.0.0.0"; $env:PORT="8080"; $env:SAFE_MCP_REQUIRE_API_KEY="true"; $env:SAFE_MCP_API_KEYS="<at least 16 random characters>"; npm run start:http
 ```
 
 **Windows CMD:**
 ```cmd
-set HOST=0.0.0.0 && set PORT=8080 && npm run start:http
+set HOST=0.0.0.0&& set PORT=8080&& set SAFE_MCP_REQUIRE_API_KEY=true&& set SAFE_MCP_API_KEYS=<at least 16 random characters>&& npm run start:http
 ```
+
+> Binding to anything other than loopback without API keys stops the server at startup. Set `SAFE_MCP_ALLOW_INSECURE_BIND=true` only if something else (a VPN, a reverse proxy with auth) already protects the port.
 
 ### Option 3 — OpenAPI REST Server
 
@@ -479,12 +492,38 @@ copy .env.example .env
 
 ```bash
 SAFE_MCP_REQUIRE_API_KEY=true
-SAFE_MCP_API_KEYS=my-secret-key-1,my-secret-key-2
+SAFE_MCP_API_KEYS=key-one-at-least-16-chars,key-two-at-least-16-chars
 SAFE_MCP_REQUIRE_IP_ALLOWLIST=true
-SAFE_MCP_IP_ALLOWLIST=127.0.0.1,::1,10.0.0.0/8
+SAFE_MCP_IP_ALLOWLIST=127.0.0.1,::1,10.0.0.0/8      # single addresses and CIDR ranges
+SAFE_MCP_TRUST_PROXY=false                           # true only behind a proxy you run
 ```
 
-Clients pass the key via `X-Api-Key` header.
+Clients pass the key via the `X-Api-Key` header or `Authorization: Bearer <key>`. Requiring keys or an allowlist with an empty list stops the server at startup instead of silently allowing everyone. `X-Forwarded-For` is ignored unless `SAFE_MCP_TRUST_PROXY=true`; when trusted, the rightmost entry (the one your proxy added) is used.
+
+### Security Model
+
+The skill can start processes and make outbound requests, so its own surface is locked down by default.
+
+| Setting | Default | What it controls |
+|---|---|---|
+| `SAFE_MCP_ALLOW_COMMAND_DISCOVERY` | on for stdio, **off** for REST and MCP HTTP | Stdio discovery and config entries with a `command` start a child process on the host. Turning this on for a network server also requires API keys, and gives every key holder code execution on the host. |
+| `SAFE_MCP_ALLOW_INSECURE_BIND` | `false` | Allows a non loopback `HOST` without API keys. |
+| `SAFE_MCP_CORS_ORIGINS` | none | Browser origins allowed to call the API. Requests carrying any other `Origin` are refused. |
+| `SAFE_MCP_ALLOWED_HOSTS` | loopback names when bound to loopback | Accepted `Host` header values. Blocks DNS rebinding. |
+| `SAFE_MCP_ALLOW_PRIVATE_URLS` | allowed on a loopback bind, blocked when exposed | Whether URL discovery may reach private and loopback ranges. Cloud metadata and link local addresses are always blocked. |
+
+POST requests must be `Content-Type: application/json`. Discovery refusals return `403` with `"error": "Blocked by policy"` and the reason.
+
+**Why command discovery is off on network servers:** a request like `{"command": "sh", "args": ["-c", "..."]}` would run on the host. A browser tab can also reach a server on `127.0.0.1`, so "it only listens locally" is not enough on its own. Over stdio (Claude Desktop, VS Code), the person who launched the skill is the operator, so it stays on; the discovery tools carry `destructiveHint` annotations so MCP clients ask before calling them.
+
+**To use command discovery from the REST server** (the demos below do this), start it with:
+
+```bash
+export SAFE_MCP_API_KEYS="$(openssl rand -hex 24)"
+SAFE_MCP_ALLOW_COMMAND_DISCOVERY=true SAFE_MCP_REQUIRE_API_KEY=true npm run start:rest
+```
+
+and send `-H "X-Api-Key: $SAFE_MCP_API_KEYS"` with each request.
 
 ### Logging
 
@@ -893,7 +932,16 @@ Each finding includes the same structure as step 3 — technique ID, severity, d
 
 ### Auto-Discovery (no JSON needed)
 
-> **Prerequisite:** Complete steps 1-2 above (start the REST server and verify it's running) before using these endpoints.
+> **Prerequisite:** Stdio and config discovery start processes, so they are off on the REST server by default. For these demos, restart the REST server with command discovery and an API key, as shown in [Security Model](#security-model):
+>
+> ```bash
+> export SAFE_MCP_API_KEYS="$(openssl rand -hex 24)"
+> SAFE_MCP_ALLOW_COMMAND_DISCOVERY=true SAFE_MCP_REQUIRE_API_KEY=true npm run start:rest
+> ```
+>
+> **PowerShell:** `$env:SAFE_MCP_API_KEYS = -join ((48..57)+(97..102) | Get-Random -Count 32 | % {[char]$_}); $env:SAFE_MCP_ALLOW_COMMAND_DISCOVERY="true"; $env:SAFE_MCP_REQUIRE_API_KEY="true"; npm run start:rest`
+>
+> The examples below send that key. HTTP discovery needs neither setting.
 
 Instead of manually writing JSON descriptions, you can point the skill at a running MCP server and it will automatically connect, enumerate all tools, and run the security analysis. Three modes are available:
 
@@ -910,6 +958,7 @@ For this demo, we'll point the skill at **itself** — it's a valid MCP server, 
 ```bash
 curl -X POST http://127.0.0.1:3002/v1/discover/stdio \
   -H "Content-Type: application/json" \
+  -H "X-Api-Key: $SAFE_MCP_API_KEYS" \
   -d '{
     "command": "node",
     "args": ["dist/index.js"],
@@ -926,11 +975,11 @@ curl -X POST http://127.0.0.1:3002/v1/discover/stdio \
 ```powershell
 $cwd = (Get-Location).Path -replace '\\', '\\'
 $body = "{`"command`":`"node`",`"args`":[`"dist/index.js`"],`"cwd`":`"$cwd`"}"
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/stdio -ContentType "application/json" -Body $body | ConvertTo-Json -Depth 10
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/stdio -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAFE_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
 ```
 **CMD:**
 ```cmd
-curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: application/json" -d "{\"command\":\"node\",\"args\":[\"dist/index.js\"],\"cwd\":\"%cd%\"}"
+curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: application/json" -H "X-Api-Key: %SAFE_MCP_API_KEYS%" -d "{\"command\":\"node\",\"args\":[\"dist/index.js\"],\"cwd\":\"%cd%\"}"
 ```
 
 </details>
@@ -1017,6 +1066,7 @@ Paste the contents of your `claude_desktop_config.json` or VS Code MCP settings 
 ```bash
 curl -X POST http://127.0.0.1:3002/v1/discover/config \
   -H "Content-Type: application/json" \
+  -H "X-Api-Key: $SAFE_MCP_API_KEYS" \
   -d '{
     "configJson": "{\"mcpServers\":{\"data-server\":{\"command\":\"node\",\"args\":[\"dist/index.js\"]},\"code-server\":{\"url\":\"http://localhost:4000/v1/mcp\"}}}"
   }'
@@ -1029,11 +1079,11 @@ curl -X POST http://127.0.0.1:3002/v1/discover/config \
 ```powershell
 $config = Get-Content "$env:APPDATA\Claude\claude_desktop_config.json" -Raw
 $body = @{ configJson = $config } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/config -ContentType "application/json" -Body $body | ConvertTo-Json -Depth 10
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/config -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAFE_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
 ```
 **CMD:**
 ```cmd
-curl.exe -X POST http://127.0.0.1:3002/v1/discover/config -H "Content-Type: application/json" -d "{\"configJson\":\"{\\\"mcpServers\\\":{\\\"data-server\\\":{\\\"command\\\":\\\"node\\\",\\\"args\\\":[\\\"dist/index.js\\\"]},\\\"code-server\\\":{\\\"url\\\":\\\"http://localhost:4000/v1/mcp\\\"}}}\"}"
+curl.exe -X POST http://127.0.0.1:3002/v1/discover/config -H "Content-Type: application/json" -H "X-Api-Key: %SAFE_MCP_API_KEYS%" -d "{\"configJson\":\"{\\\"mcpServers\\\":{\\\"data-server\\\":{\\\"command\\\":\\\"node\\\",\\\"args\\\":[\\\"dist/index.js\\\"]},\\\"code-server\\\":{\\\"url\\\":\\\"http://localhost:4000/v1/mcp\\\"}}}\"}"
 ```
 
 </details>

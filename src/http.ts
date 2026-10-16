@@ -5,10 +5,19 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { createServer as createMcpServer } from "./server.js";
 import { info, warn, error as logError, audit } from "./governance/logger.js";
 import { checkAccess, getClientIp } from "./governance/access.js";
+import { setNetworkMode, enforceStartupPolicy, checkBrowserSafety } from "./governance/policy.js";
 
 const PORT = parseInt(process.env["PORT"] ?? "3001", 10);
 const HOST = process.env["HOST"] ?? "127.0.0.1";
 const API_VERSION = "v1";
+
+setNetworkMode(HOST);
+try {
+  enforceStartupPolicy(HOST);
+} catch (err) {
+  console.error(`Refusing to start: ${err instanceof Error ? err.message : String(err)}`);
+  process.exit(1);
+}
 
 const transports = new Map<string, StreamableHTTPServerTransport>();
 
@@ -20,6 +29,13 @@ function json(res: import("node:http").ServerResponse, status: number, body: unk
 const httpServer = createServer(async (req, res) => {
   const clientIp = getClientIp(req);
   const start = performance.now();
+
+  // ── Browser and DNS rebinding protection ────────────────────────
+  const browser = checkBrowserSafety(req);
+  if (!browser.allowed) {
+    json(res, browser.reason?.startsWith("Content-Type") ? 415 : 403, { error: browser.reason });
+    return;
+  }
 
   // ── Health (no auth required) ───────────────────────────────────
   if (req.method === "GET" && (req.url === "/health" || req.url === `/${API_VERSION}/health`)) {

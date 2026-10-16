@@ -1,35 +1,32 @@
 import type { IncomingMessage } from "node:http";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { logAccessDenied, logAccessGranted } from "./logger.js";
-
-// ── Configuration (env-driven) ──────────────────────────────────────
-
-function loadList(envVar: string): Set<string> {
-  const raw = process.env[envVar];
-  if (!raw) return new Set();
-  return new Set(
-    raw.split(",").map((s) => s.trim()).filter(Boolean),
-  );
-}
-
-const API_KEYS = loadList("SAFE_MCP_API_KEYS");
-const IP_ALLOWLIST = loadList("SAFE_MCP_IP_ALLOWLIST");
-const REQUIRE_API_KEY = process.env["SAFE_MCP_REQUIRE_API_KEY"] === "true";
-const REQUIRE_IP_ALLOWLIST = process.env["SAFE_MCP_REQUIRE_IP_ALLOWLIST"] === "true";
+import { buildBlockList, blockListHas, envList, normalizeIp } from "./policy.js";
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
+/**
+ * The client address used for access decisions.
+ *
+ * X-Forwarded-For is attacker controlled unless a proxy you run sets it,
+ * so it is ignored unless SAFE_MCP_TRUST_PROXY=true. When trusted, the
+ * rightmost entry is used: that is the one your proxy appended.
+ */
 export function getClientIp(req: IncomingMessage): string {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (typeof forwarded === "string") {
-    return forwarded.split(",")[0]?.trim() ?? "unknown";
+  if (process.env["SAFE_MCP_TRUST_PROXY"] === "true") {
+    const forwarded = req.headers["x-forwarded-for"];
+    if (typeof forwarded === "string" && forwarded.trim()) {
+      const parts = forwarded.split(",").map((s) => s.trim()).filter(Boolean);
+      const last = parts[parts.length - 1];
+      if (last) return normalizeIp(last);
+    }
   }
-  return req.socket.remoteAddress ?? "unknown";
+  return normalizeIp(req.socket.remoteAddress ?? "unknown");
 }
 
 function safeCompare(a: string, b: string): boolean {
-  const bufA = Buffer.from(createHmac("sha256", "key").update(a).digest());
-  const bufB = Buffer.from(createHmac("sha256", "key").update(b).digest());
+  const bufA = createHash("sha256").update(a).digest();
+  const bufB = createHash("sha256").update(b).digest();
   return timingSafeEqual(bufA, bufB);
 }
 
@@ -40,33 +37,35 @@ export interface AccessResult {
   reason?: string | undefined;
 }
 
+/**
+ * Configuration is read on every call and validated at startup by
+ * enforceStartupPolicy(), so "required but empty" can never fail open.
+ */
 export function checkAccess(req: IncomingMessage): AccessResult {
   const clientIp = getClientIp(req);
 
-  // IP allowlist check
-  if (REQUIRE_IP_ALLOWLIST && IP_ALLOWLIST.size > 0) {
-    if (!IP_ALLOWLIST.has(clientIp)) {
-      logAccessDenied("ip_not_allowlisted", clientIp, { allowlistSize: IP_ALLOWLIST.size });
+  if (process.env["SAFE_MCP_REQUIRE_IP_ALLOWLIST"] === "true") {
+    const entries = envList("SAFE_MCP_IP_ALLOWLIST");
+    const allow = buildBlockList(entries, "SAFE_MCP_IP_ALLOWLIST");
+    if (entries.length === 0 || !blockListHas(allow, clientIp)) {
+      logAccessDenied("ip_not_allowlisted", clientIp, { allowlistSize: entries.length });
       return { allowed: false, reason: "IP address not in allowlist" };
     }
   }
 
-  // API key check
-  if (REQUIRE_API_KEY && API_KEYS.size > 0) {
-    const provided = req.headers["x-api-key"] ?? req.headers["authorization"]?.replace(/^Bearer\s+/i, "");
+  if (process.env["SAFE_MCP_REQUIRE_API_KEY"] === "true") {
+    const keys = envList("SAFE_MCP_API_KEYS");
+    const provided =
+      req.headers["x-api-key"] ?? req.headers["authorization"]?.replace(/^Bearer\s+/i, "");
     if (typeof provided !== "string" || !provided) {
       logAccessDenied("missing_api_key", clientIp);
       return { allowed: false, reason: "API key required" };
     }
-
+    // Compare against every key (no early exit) to keep timing flat.
     let valid = false;
-    for (const key of API_KEYS) {
-      if (safeCompare(provided, key)) {
-        valid = true;
-        break;
-      }
+    for (const key of keys) {
+      if (safeCompare(provided, key)) valid = true;
     }
-
     if (!valid) {
       logAccessDenied("invalid_api_key", clientIp);
       return { allowed: false, reason: "Invalid API key" };

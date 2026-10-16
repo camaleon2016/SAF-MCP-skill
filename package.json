@@ -16,15 +16,16 @@
     "dev": "npx tsx src/index.ts",
     "dev:http": "npx tsx src/http.ts",
     "dev:rest": "npx tsx src/openapi/serve.ts",
-    "test": "npx tsx src/tests/redteam.ts",
+    "test": "npx tsx src/tests/redteam.ts && npx tsx src/tests/governance.ts",
     "typecheck": "tsc --noEmit",
-    "ci": "npm run typecheck && npm run build && npm test"
+    "ci": "npm run typecheck && npm run build && npm test",
+    "test:governance": "npx tsx src/tests/governance.ts"
   },
   "keywords": [],
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/sdk": "^1.31.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.2",
     "zod": "^4.3.6"
