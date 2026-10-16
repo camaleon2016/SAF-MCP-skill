@@ -2,11 +2,12 @@
   "framework": {
     "name": "SAFE-MCP",
     "repository": "https://github.com/safe-agentic-framework/safe-mcp",
-    "totalMitigations": 61,
-    "highEffectiveness": 32,
-    "mediumHighEffectiveness": 19,
-    "mediumEffectiveness": 10,
-    "lowEffectiveness": 0
+    "totalMitigations": 51,
+    "highEffectiveness": 27,
+    "mediumHighEffectiveness": 15,
+    "mediumEffectiveness": 9,
+    "lowEffectiveness": 0,
+    "withdrawnMitigations": 10
   },
   "categories": [
     "Architectural Defense",
@@ -30,15 +31,12 @@
     "AI-Based Defense": 3,
     "Input Validation": 7,
     "Supply Chain Security": 3,
-    "UI Security": 3,
+    "UI Security": 2,
     "Isolation and Containment": 2,
-    "Detective Control": 15,
-    "Preventive Control": 13,
-    "Architectural Control": 4,
-    "Risk Management": 1,
-    "Data Security": 3,
-    "Human Factors": 1,
-    "Supply Chain Control": 1
+    "Detective Control": 13,
+    "Preventive Control": 12,
+    "Architectural Control": 2,
+    "Data Security": 2
   },
   "mitigations": [
     {
@@ -83,7 +81,8 @@
       ],
       "references": [
         "Defeating Prompt Injections by Design - Google Research (2025) - https://arxiv.org/abs/2503.18813"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-2",
@@ -141,7 +140,8 @@
         "NIST SP 800-204D: Software Supply Chain Security in DevSecOps",
         "in-toto: Framework for Supply Chain Integrity",
         "JSON Web Signature (JWS) - RFC 7515"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-3",
@@ -186,7 +186,8 @@
         "LLM01:2025 Prompt Injection - OWASP",
         "NIST AI Risk Management Framework",
         "Attention Tracker: Detecting Prompt Injection Attacks in LLMs (2024)"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-4",
@@ -247,7 +248,8 @@
         "Unicode Security Considerations (Unicode.org) - https://www.unicode.org/reports/tr36/",
         "Invisible Prompt Injection Research - https://www.promptfoo.dev/blog/invisible-unicode-threats/",
         "OWASP Input Validation Cheat Sheet"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-5",
@@ -275,7 +277,8 @@
       ],
       "references": [
         "OWASP Input Validation Cheat Sheet"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-6",
@@ -312,7 +315,8 @@
       "references": [
         "The Update Framework (TUF) - https://theupdateframework.io/",
         "SLSA Supply Chain Security Framework - https://slsa.dev/"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-7",
@@ -333,7 +337,8 @@
       "relatedMitigations": [
         "SAFE-M-4",
         "SAFE-M-8"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-8",
@@ -353,7 +358,8 @@
       ],
       "references": [
         "Promptfoo Research on invisible Unicode threats"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-9",
@@ -395,7 +401,8 @@
         "NSA/CISA Kubernetes Hardening Guidance",
         "CIS Docker Benchmark v1.6.0",
         "MITRE D3FEND - Execution Isolation"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-10",
@@ -417,7 +424,8 @@
       "relatedMitigations": [
         "SAFE-M-11",
         "SAFE-M-12"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-11",
@@ -459,7 +467,8 @@
         "MITRE CAR - Cyber Analytics Repository",
         "Large Language Models for Forecasting and Anomaly Detection (2024)",
         "MITRE - Finding Cyber Threats with ATT&CK-Based Analytics"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-12",
@@ -555,7 +564,8 @@
       "relatedMitigations": [
         "SAFE-M-10",
         "SAFE-M-11"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-13",
@@ -591,7 +601,8 @@
       "references": [
         "RFC 9207 - OAuth 2.0 Authorization Server Issuer Identification",
         "OAuth 2.0 Security Best Current Practice - IETF Draft"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-14",
@@ -635,7 +646,8 @@
       ],
       "relatedMitigations": [
         "SAFE-M-13"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-15",
@@ -656,7 +668,8 @@
       "relatedMitigations": [
         "SAFE-M-13",
         "SAFE-M-14"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-16",
@@ -711,7 +724,8 @@
       "relatedMitigations": [
         "SAFE-M-13",
         "SAFE-M-17"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-17",
@@ -735,7 +749,8 @@
       "relatedMitigations": [
         "SAFE-M-13",
         "SAFE-M-14"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-18",
@@ -761,7 +776,8 @@
       "relatedMitigations": [
         "SAFE-M-19",
         "SAFE-M-20"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-19",
@@ -785,7 +801,8 @@
       "relatedMitigations": [
         "SAFE-M-18",
         "SAFE-M-20"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-20",
@@ -833,7 +850,8 @@
       "relatedMitigations": [
         "SAFE-M-18",
         "SAFE-M-19"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-21",
@@ -848,6 +866,7 @@
         "SAFE-T1102",
         "SAFE-T1103",
         "SAFE-T1110",
+        "SAFE-T1112",
         "SAFE-T1402",
         "SAFE-T1404",
         "SAFE-T1701",
@@ -862,7 +881,8 @@
       "relatedMitigations": [
         "SAFE-M-1",
         "SAFE-M-22"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-22",
@@ -876,6 +896,7 @@
         "SAFE-T1102",
         "SAFE-T1103",
         "SAFE-T1110",
+        "SAFE-T1112",
         "SAFE-T2106",
         "SAFE-T1404",
         "SAFE-T1701",
@@ -892,7 +913,8 @@
       "relatedMitigations": [
         "SAFE-M-21",
         "SAFE-M-23"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-23",
@@ -910,7 +932,8 @@
       "relatedMitigations": [
         "SAFE-M-21",
         "SAFE-M-22"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-24",
@@ -932,7 +955,8 @@
       "relatedMitigations": [
         "SAFE-M-6",
         "SAFE-M-2"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-25",
@@ -945,7 +969,9 @@
       "mitigates": [],
       "relatedMitigations": [
         "SAFE-M-26"
-      ]
+      ],
+      "lifecycleStatus": "withdrawn",
+      "withdrawnNote": "Listed in the upstream SAF-MCP mitigation index but never published as a mitigation page, and later removed from the index. Kept so older reports still resolve; never recommended in findings."
     },
     {
       "id": "SAFE-M-26",
@@ -959,7 +985,9 @@
       "relatedMitigations": [
         "SAFE-M-33",
         "SAFE-M-24"
-      ]
+      ],
+      "lifecycleStatus": "withdrawn",
+      "withdrawnNote": "Listed in the upstream SAF-MCP mitigation index but never published as a mitigation page, and later removed from the index. Kept so older reports still resolve; never recommended in findings."
     },
     {
       "id": "SAFE-M-27",
@@ -972,7 +1000,9 @@
       "mitigates": [],
       "relatedMitigations": [
         "SAFE-M-15"
-      ]
+      ],
+      "lifecycleStatus": "withdrawn",
+      "withdrawnNote": "Listed in the upstream SAF-MCP mitigation index but never published as a mitigation page, and later removed from the index. Kept so older reports still resolve; never recommended in findings."
     },
     {
       "id": "SAFE-M-28",
@@ -985,7 +1015,9 @@
       "mitigates": [],
       "relatedMitigations": [
         "SAFE-M-29"
-      ]
+      ],
+      "lifecycleStatus": "withdrawn",
+      "withdrawnNote": "Listed in the upstream SAF-MCP mitigation index but never published as a mitigation page, and later removed from the index. Kept so older reports still resolve; never recommended in findings."
     },
     {
       "id": "SAFE-M-29",
@@ -1010,6 +1042,7 @@
         "SAFE-T1109",
         "SAFE-T1110",
         "SAFE-T1111",
+        "SAFE-T1112",
         "SAFE-T1201",
         "SAFE-T1203",
         "SAFE-T1204",
@@ -1069,7 +1102,8 @@
       "relatedMitigations": [
         "SAFE-M-1",
         "SAFE-M-42"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-30",
@@ -1091,7 +1125,8 @@
       "relatedMitigations": [
         "SAFE-M-32",
         "SAFE-M-2"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-31",
@@ -1117,7 +1152,8 @@
       "relatedMitigations": [
         "SAFE-M-13",
         "SAFE-M-16"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-32",
@@ -1138,7 +1174,8 @@
       "relatedMitigations": [
         "SAFE-M-30",
         "SAFE-M-11"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-33",
@@ -1156,7 +1193,8 @@
       "relatedMitigations": [
         "SAFE-M-26",
         "SAFE-M-34"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-34",
@@ -1175,7 +1213,8 @@
       "relatedMitigations": [
         "SAFE-M-33",
         "SAFE-M-2"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-35",
@@ -1193,7 +1232,8 @@
       "relatedMitigations": [
         "SAFE-M-33",
         "SAFE-M-36"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-36",
@@ -1214,7 +1254,8 @@
       "relatedMitigations": [
         "SAFE-M-35",
         "SAFE-M-11"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-37",
@@ -1245,7 +1286,8 @@
       "relatedMitigations": [
         "SAFE-M-38",
         "SAFE-M-4"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-38",
@@ -1266,7 +1308,8 @@
       "relatedMitigations": [
         "SAFE-M-37",
         "SAFE-M-5"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-39",
@@ -1280,7 +1323,9 @@
       "relatedMitigations": [
         "SAFE-M-1",
         "SAFE-M-21"
-      ]
+      ],
+      "lifecycleStatus": "withdrawn",
+      "withdrawnNote": "Listed in the upstream SAF-MCP mitigation index but never published as a mitigation page, and later removed from the index. Kept so older reports still resolve; never recommended in findings."
     },
     {
       "id": "SAFE-M-40",
@@ -1295,7 +1340,9 @@
         "SAFE-M-7",
         "SAFE-M-8",
         "SAFE-M-15"
-      ]
+      ],
+      "lifecycleStatus": "withdrawn",
+      "withdrawnNote": "Listed in the upstream SAF-MCP mitigation index but never published as a mitigation page, and later removed from the index. Kept so older reports still resolve; never recommended in findings."
     },
     {
       "id": "SAFE-M-41",
@@ -1310,7 +1357,9 @@
         "SAFE-M-6",
         "SAFE-M-2",
         "SAFE-M-45"
-      ]
+      ],
+      "lifecycleStatus": "withdrawn",
+      "withdrawnNote": "Listed in the upstream SAF-MCP mitigation index but never published as a mitigation page, and later removed from the index. Kept so older reports still resolve; never recommended in findings."
     },
     {
       "id": "SAFE-M-42",
@@ -1324,7 +1373,9 @@
       "relatedMitigations": [
         "SAFE-M-1",
         "SAFE-M-29"
-      ]
+      ],
+      "lifecycleStatus": "withdrawn",
+      "withdrawnNote": "Listed in the upstream SAF-MCP mitigation index but never published as a mitigation page, and later removed from the index. Kept so older reports still resolve; never recommended in findings."
     },
     {
       "id": "SAFE-M-43",
@@ -1338,7 +1389,9 @@
       "relatedMitigations": [
         "SAFE-M-4",
         "SAFE-M-10"
-      ]
+      ],
+      "lifecycleStatus": "withdrawn",
+      "withdrawnNote": "Listed in the upstream SAF-MCP mitigation index but never published as a mitigation page, and later removed from the index. Kept so older reports still resolve; never recommended in findings."
     },
     {
       "id": "SAFE-M-44",
@@ -1352,7 +1405,9 @@
       "relatedMitigations": [
         "SAFE-M-11",
         "SAFE-M-12"
-      ]
+      ],
+      "lifecycleStatus": "withdrawn",
+      "withdrawnNote": "Listed in the upstream SAF-MCP mitigation index but never published as a mitigation page, and later removed from the index. Kept so older reports still resolve; never recommended in findings."
     },
     {
       "id": "SAFE-M-45",
@@ -1388,7 +1443,8 @@
       "relatedMitigations": [
         "SAFE-M-2",
         "SAFE-M-6"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-46",
@@ -1404,7 +1460,8 @@
       "relatedMitigations": [
         "SAFE-M-47",
         "SAFE-M-48"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-47",
@@ -1420,7 +1477,8 @@
       "relatedMitigations": [
         "SAFE-M-46",
         "SAFE-M-48"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-48",
@@ -1436,7 +1494,8 @@
       "relatedMitigations": [
         "SAFE-M-46",
         "SAFE-M-47"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-49",
@@ -1455,7 +1514,8 @@
       "relatedMitigations": [
         "SAFE-M-50",
         "SAFE-M-52"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-50",
@@ -1473,7 +1533,8 @@
       "relatedMitigations": [
         "SAFE-M-1",
         "SAFE-M-49"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-51",
@@ -1494,7 +1555,8 @@
       "relatedMitigations": [
         "SAFE-M-3",
         "SAFE-M-44"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-52",
@@ -1517,7 +1579,8 @@
         "SAFE-M-4",
         "SAFE-M-5",
         "SAFE-M-49"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-53",
@@ -1536,7 +1599,8 @@
       "relatedMitigations": [
         "SAFE-M-26",
         "SAFE-M-54"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-54",
@@ -1556,7 +1620,8 @@
       "relatedMitigations": [
         "SAFE-M-51",
         "SAFE-M-53"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-63",
@@ -1572,7 +1637,8 @@
         "SAFE-T1503",
         "SAFE-T1505"
       ],
-      "relatedMitigations": []
+      "relatedMitigations": [],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-69",
@@ -1591,6 +1657,7 @@
         "SAFE-T1105",
         "SAFE-T1110",
         "SAFE-T1111",
+        "SAFE-T1112",
         "SAFE-T1201",
         "SAFE-T1204",
         "SAFE-T1205",
@@ -1637,7 +1704,8 @@
       ],
       "references": [
         "https://github.com/safe-agentic-framework/safe-mcp/tree/d3d40297c478d2680d315399b6aaf317e5aa15b8/mitigations/SAF-M-69"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-70",
@@ -1699,7 +1767,8 @@
       ],
       "references": [
         "https://github.com/safe-agentic-framework/safe-mcp/tree/d3d40297c478d2680d315399b6aaf317e5aa15b8/mitigations/SAF-M-70"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-71",
@@ -1724,7 +1793,8 @@
       ],
       "references": [
         "https://github.com/safe-agentic-framework/safe-mcp/tree/d3d40297c478d2680d315399b6aaf317e5aa15b8/mitigations/SAF-M-71"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-72",
@@ -1759,7 +1829,8 @@
       ],
       "references": [
         "https://github.com/safe-agentic-framework/safe-mcp/tree/d3d40297c478d2680d315399b6aaf317e5aa15b8/mitigations/SAF-M-72"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-73",
@@ -1771,6 +1842,7 @@
       "description": "Sampling Budget and Iteration Caps enforces hard, client-side limits on how much nested model work an MCP server can trigger through sampling/createMessage during a single user-intent flow or session.",
       "mitigates": [
         "SAFE-T1106",
+        "SAFE-T1112",
         "SAFE-T1403",
         "SAFE-T2102"
       ],
@@ -1783,7 +1855,8 @@
       ],
       "references": [
         "https://github.com/safe-agentic-framework/safe-mcp/tree/d3d40297c478d2680d315399b6aaf317e5aa15b8/mitigations/SAF-M-73"
-      ]
+      ],
+      "lifecycleStatus": "active"
     },
     {
       "id": "SAFE-M-74",
@@ -1848,7 +1921,8 @@
       ],
       "references": [
         "https://github.com/safe-agentic-framework/safe-mcp/tree/d3d40297c478d2680d315399b6aaf317e5aa15b8/mitigations/SAF-M-74"
-      ]
+      ],
+      "lifecycleStatus": "active"
     }
   ],
   "implementationGuidance": {

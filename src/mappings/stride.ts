@@ -26,6 +26,8 @@ export const STRIDE_MAP: Record<string, StrideCategory[]> = {
   "SAFE-T1103": ["S"],
   // Over-Privileged Tools — elevation of privilege
   "SAFE-T1104": ["E"],
+  // Agentic Confused Deputy — upstream replacement for SAFE-T1104; same mapping
+  "SAFE-T1302": ["E"],
   // Path Traversal — information disclosure, elevation of privilege
   "SAFE-T1105": ["I", "E"],
   // Autonomous Loop Exploit — denial of service, tampering

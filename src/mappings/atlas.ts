@@ -50,6 +50,10 @@ const ATLAS_MAP: Record<string, AtlasRef[]> = {
   "SAFE-T1104": [
     ref("AML.T0053", "AI Agent Tool Invocation"),
   ],
+  // Agentic Confused Deputy — upstream replacement for SAFE-T1104; same mapping
+  "SAFE-T1302": [
+    ref("AML.T0053", "AI Agent Tool Invocation"),
+  ],
   // Path Traversal
   "SAFE-T1105": [
     ref("AML.T0086", "Exfiltration via AI Agent Tool"),

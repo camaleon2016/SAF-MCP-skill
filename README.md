@@ -2,7 +2,7 @@
 
 **Describe a tool, server, or agent setup — or point it at a running MCP server to auto-discover everything — and the skill tells you what's dangerous and how to fix it.**
 
-A security analysis engine built on the [SAFE-MCP framework](https://github.com/safe-agentic-framework/safe-mcp) that evaluates MCP tool definitions, server configurations, and agent architectures against 85 known attack techniques across 14 MITRE ATT&CK-aligned tactics.
+A security analysis engine built on the [SAFE-MCP framework](https://github.com/safe-agentic-framework/safe-mcp) that evaluates MCP tool definitions, server configurations, and agent architectures against the 78 active attack techniques (86 cataloged) across 14 MITRE ATT&CK-aligned tactics.
 
 The skill is callable from any agent framework — MCP (stdio or HTTP), OpenAI function calling, LangChain, Azure OpenAI, or Semantic Kernel.
 
@@ -542,8 +542,8 @@ Logs are written in structured JSONL format. Audit events (tool calls, access de
 safe-mcp-skill/
 ├── src/
 │   ├── data/
-│   │   ├── techniques.json          # 85 SAFE-MCP techniques, 14 tactics
-│   │   └── mitigations.json         # 61 mitigations, links generated from upstream
+│   │   ├── techniques.json          # 86 techniques (78 active, 8 deprecated), 14 tactics
+│   │   └── mitigations.json         # 51 active mitigations (plus 10 withdrawn IDs)
 │   ├── engine/
 │   │   ├── analyze.ts               # Lookups, search, threat profiling
 │   │   └── rules.ts                 # 32-rule analysis engine
@@ -571,15 +571,15 @@ safe-mcp-skill/
 │   ├── openai.ts                    # OpenAI function definitions
 │   └── index.ts                     # Stdio entry point + re-exports
 ├── scripts/
-│   ├── sync-mitigation-links.ts     # Regenerates catalog links from upstream SAF-MCP
+│   ├── sync-catalog.ts              # Syncs src/data from upstream SAF-MCP
 │   └── upstream.json                # Pinned upstream commit
 ├── plugins/
 │   └── csharp/
 │       └── SafeMcpSkill/            # C# Semantic Kernel plugin
 ├── docs/
 │   ├── github-mcp-demo.md          # GitHub MCP Server scanning demo
-│   ├── mitigation-link-report.md   # Generated: catalog links vs upstream
-│   └── mitigation-link-changes.md  # Generated: what the last sync changed
+│   ├── catalog-sync-report.md      # Generated: catalog vs upstream
+│   └── catalog-sync-changes.md     # Generated: what the last sync changed
 ├── .github/workflows/ci.yml         # CI pipeline (Node 20 + 22)
 ├── .env.example
 ├── package.json
@@ -588,16 +588,28 @@ safe-mcp-skill/
 
 ## Catalog Data
 
-`src/data/techniques.json` and `src/data/mitigations.json` hold the SAFE-MCP catalog the engine reads. Technique to mitigation links are **generated, not hand edited**: `scripts/sync-mitigation-links.ts` reads a pinned commit of the upstream [SAF-MCP](https://github.com/safe-agentic-framework/safe-mcp) repository (recorded in `scripts/upstream.json`) and takes the union of two upstream sources, the canonical registry (`research/framework-model.yml`) and each mitigation page's "Mitigates" section. Links are written to both sides, so `technique.mitigations` and `mitigation.mitigates` always agree.
+`src/data/techniques.json` and `src/data/mitigations.json` hold the catalog the engine reads. They are **synced from upstream, not hand edited**: `scripts/sync-catalog.ts` reads a pinned commit of [SAF-MCP](https://github.com/safe-agentic-framework/safe-mcp) (recorded in `scripts/upstream.json`) and brings over:
+
+| What | How |
+|---|---|
+| Technique set and names | Upstream names win; previous names are kept in `aliases`, so searching for them still works |
+| Lifecycle | Deprecated techniques keep resolving and carry `replacedBy`; rules must target the replacement |
+| Mitigations | Added when upstream links to them; IDs upstream never published are marked `withdrawn` (they resolve for older reports but are never recommended) |
+| Technique to mitigation links | Union of the upstream registry (`research/framework-model.yml`) and each mitigation page's "Mitigates" section, written to both sides |
+| Severity | **Not synced.** Differences are listed in the report so a change in risk ratings is always a deliberate decision |
 
 ```bash
 git clone https://github.com/safe-agentic-framework/safe-mcp.git ../safe-mcp
 git -C ../safe-mcp checkout "$(node -p "require('./scripts/upstream.json').commit")"
-npm run sync:mitigations -- --upstream ../safe-mcp            # regenerate
-npm run sync:mitigations -- --upstream ../safe-mcp --check    # verify (CI runs this)
+npm run sync:catalog -- --upstream ../safe-mcp            # regenerate
+npm run sync:catalog -- --upstream ../safe-mcp --check    # verify (CI runs this)
 ```
 
-`docs/mitigation-link-report.md` describes the current data against upstream; `docs/mitigation-link-changes.md` records what the last sync changed, including any local links it dropped. To add or correct a link, propose it upstream, then bump the pinned commit and rerun the sync.
+`docs/catalog-sync-report.md` describes the data against upstream (deprecations, severity differences, withdrawn IDs). `docs/catalog-sync-changes.md` records what the last sync changed. To change catalog content, propose it upstream, then bump the pinned commit and rerun the sync.
+
+### IDs: SAFE- and SAF-
+
+Upstream renamed the framework from SAFE-MCP to SAF-MCP, so IDs now appear as `SAF-T1001` and `SAF-M-1`. Every lookup accepts both forms in any case (`SAF-T1001`, `safe-t1001`), and results use the `SAFE-` form for compatibility with existing integrations.
 
 ## MCP Tools
 
@@ -796,7 +808,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
     {
       "ruleId": "RULE-001",
       "severity": "Critical",
-      "technique": { "id": "SAFE-T1001", "name": "Tool Poisoning Attack (TPA)" },
+      "technique": { "id": "SAFE-T1001", "name": "Tool Poisoning Attack" },
       "evidence": "Suspicious patterns in tool descriptions — execute_code: ignore\\s+(previous|above|all)\\s+instructions, ...",
       "mitigations": [
         { "id": "SAFE-M-1", "name": "Control/Data Flow Separation", "effectiveness": "High (Provable Security)" },
@@ -1309,7 +1321,7 @@ curl.exe http://127.0.0.1:3002/v1/threat-profile
 
 #### 12. Get Framework Statistics
 
-Returns totals (85 techniques, 14 tactics, 61 mitigations), tactic distribution, and defense-in-depth guidance:
+Returns totals (86 techniques with 78 active, 14 tactics, 51 active mitigations), tactic distribution, and defense-in-depth guidance:
 
 ```bash
 curl http://127.0.0.1:3002/v1/framework/stats

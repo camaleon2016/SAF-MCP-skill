@@ -61,6 +61,14 @@ export interface Technique {
   relatedTechniques?: string[];
   realWorldIncidents?: string[];
   cves?: string[];
+  /** Other names this technique has had or goes by (upstream renames, aliases). */
+  aliases?: string[];
+  /** Upstream lifecycle: deprecated techniques stay resolvable but rules must not target them. */
+  lifecycleStatus?: "active" | "deprecated";
+  replacedBy?: string[];
+  deprecationReason?: string;
+  /** Upstream SAF profiles this technique belongs to (core, mcp, code-agent, ...). */
+  profiles?: string[];
 }
 
 // ── Mitigations ─────────────────────────────────────────────────────
@@ -97,6 +105,9 @@ export interface Mitigation {
   bestPractices?: BestPractices;
   charactersFiltered?: CharactersFiltered;
   sanitizationModes?: string[];
+  /** "withdrawn": listed upstream once but never published; resolvable, never recommended. */
+  lifecycleStatus?: "active" | "withdrawn";
+  withdrawnNote?: string;
 }
 
 // ── Top-level Data Structures ───────────────────────────────────────
@@ -109,12 +120,15 @@ export interface TechniquesFramework {
   totalTactics: number;
   totalTechniques: number;
   totalMitigations: number;
+  activeTechniques?: number;
+  deprecatedTechniques?: number;
 }
 
 export interface MitigationsFramework {
   name: string;
   repository: string;
   totalMitigations: number;
+  withdrawnMitigations?: number;
   highEffectiveness: number;
   mediumHighEffectiveness: number;
   mediumEffectiveness: number;
