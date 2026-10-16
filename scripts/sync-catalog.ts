@@ -3,8 +3,9 @@
  *
  * What it syncs:
  *   - Techniques: the technique set, upstream names (old names kept as aliases),
- *     lifecycle status, replacements for deprecated techniques, profiles.
- *     Severity is NOT synced; differences are reported for a deliberate decision.
+ *     lifecycle status, replacements for deprecated techniques, profiles, and
+ *     severity: upstream's, unless scripts/severity-overrides.json records a
+ *     deliberate departure with a rationale.
  *   - Mitigations: entries upstream links to, and lifecycle status
  *     (mitigations upstream never published are marked "withdrawn").
  *   - Technique <-> mitigation links, written symmetrically.
@@ -97,6 +98,7 @@ function firstSentence(paragraph: string): string {
 interface Technique {
   id: string; name: string; tactic: string; tacticName: string; severity: string; description: string;
   mitigations: string[]; aliases?: string[]; lifecycleStatus?: string; replacedBy?: string[];
+  severitySource?: string; upstreamSeverity?: string; severityRationale?: string;
   deprecationReason?: string; profiles?: string[]; [k: string]: unknown;
 }
 interface Mitigation {
@@ -142,11 +144,25 @@ const techPage = (localId: string): string | undefined => {
   return existsSync(p) ? readText(p) : undefined;
 };
 
+// Severity overrides: deliberate, documented departures from upstream.
+interface SeverityOverride { severity: string; rationale: string }
+const overridesFile = JSON.parse(readText(join(ROOT, "scripts", "severity-overrides.json"))) as {
+  overrides?: Record<string, SeverityOverride>;
+};
+const overrides = overridesFile.overrides ?? {};
+const knownIds = new Set(registry.techniques.map((t) => toLocal(t.technique_id)));
+for (const [id, o] of Object.entries(overrides)) {
+  if (!knownIds.has(id)) throw new Error(`severity-overrides.json: ${id} is not an upstream technique`);
+  if (!SEVERITIES.includes(o.severity)) throw new Error(`severity-overrides.json: ${id} has invalid severity "${o.severity}" (use ${SEVERITIES.join(", ")})`);
+  if (!o.rationale || o.rationale.trim().length < 20) throw new Error(`severity-overrides.json: ${id} needs a rationale (at least a sentence)`);
+}
+
 const techById = new Map(techData.techniques.map((t) => [t.id, t]));
 const tacticName = (id: string): string => techData.tactics.find((t) => t.id === id)?.name ?? id;
 const addedTechniques: string[] = [];
 const renamed: Array<[string, string, string]> = [];
-const severityDiffs: Array<[string, string, string]> = [];
+const severityChanges: Array<[string, string, string]> = [];
+const noUpstreamSeverity: string[] = [];
 
 for (const up of registry.techniques) {
   const id = toLocal(up.technique_id);
@@ -181,10 +197,32 @@ for (const up of registry.techniques) {
       t.aliases = [...new Set([...(t.aliases ?? []), t.name])];
       t.name = up.name;
     }
-    const sev = pageSeverity(md);
-    if (sev && sev !== t.severity) severityDiffs.push([id, t.severity, sev]);
   }
-  severityDiffs.sort((a, b) => a[0].localeCompare(b[0]));
+
+  // Severity: override, else upstream, else keep the local value.
+  const upSev = pageSeverity(md);
+  const ov = overrides[id];
+  const previous = t.severity;
+  if (ov) {
+    if (upSev && ov.severity === upSev) {
+      throw new Error(`severity-overrides.json: ${id} override equals upstream (${upSev}); remove it`);
+    }
+    t.severity = ov.severity;
+    t.severitySource = "override";
+    t.severityRationale = ov.rationale.trim();
+    if (upSev) t.upstreamSeverity = upSev; else delete t.upstreamSeverity;
+  } else if (upSev) {
+    t.severity = upSev;
+    t.severitySource = "upstream";
+    delete t.upstreamSeverity;
+    delete t.severityRationale;
+  } else {
+    t.severitySource = "local";
+    delete t.upstreamSeverity;
+    delete t.severityRationale;
+    noUpstreamSeverity.push(id);
+  }
+  if (previous !== t.severity && !addedTechniques.includes(id)) severityChanges.push([id, previous, t.severity]);
   const aliases = [...new Set([...(t.aliases ?? []), ...(up.aliases ?? [])])].filter((a) => a !== t!.name);
   if (aliases.length) t.aliases = aliases; else delete t.aliases;
   t.lifecycleStatus = up.lifecycle_status;
@@ -344,6 +382,9 @@ const list = (ids: string[]): string => (ids.length ? ids.map((m) => `- ${m}${na
 
 // Stable: describes the data against upstream. Checked in CI.
 const deprecated = techData.techniques.filter((t) => t.lifecycleStatus === "deprecated");
+const overrideRows = techData.techniques
+  .filter((t) => t.severitySource === "override")
+  .map((t) => `| ${t.id} | ${t.name} | ${t.upstreamSeverity ?? "none"} | ${t.severity} | ${t.severityRationale ?? ""} |`);
 const techName = (id: string): string => techById.get(id)?.name ?? "";
 const report = `# Catalog Sync Report
 
@@ -368,13 +409,21 @@ Kept so lookups and older reports resolve. Rules must target the replacement ins
 |---|---|---|
 ${deprecated.map((t) => `| ${t.id} | ${t.name} | ${(t.replacedBy ?? []).map((r) => `${r} ${techName(r)}`).join("; ")} |`).join("\n")}
 
-## Severity differences (not applied)
+## Severity
 
-Upstream technique pages state a severity that differs from \`src/data\` for these techniques. Severity drives every risk rating the engine reports, so it is not synced automatically.
+Severities come from upstream technique pages, except for the overrides below (from \`scripts/severity-overrides.json\`).
 
-| Technique | Name | Local | Upstream |
-|---|---|---|---|
-${severityDiffs.length ? severityDiffs.map(([id, a, b]) => `| ${id} | ${techName(id)} | ${a} | ${b} |`).join("\n") : "| none | | | |"}
+### Overrides
+
+| Technique | Name | Upstream | Used here | Rationale |
+|---|---|---|---|---|
+${overrideRows.length ? overrideRows.join("\n") : "| none | | | | |"}
+
+### No upstream severity
+
+These pages state no severity, so the existing local value is kept.
+
+${list(noUpstreamSeverity)}
 
 ## Withdrawn mitigations
 
@@ -401,6 +450,10 @@ This file records what the most recent sync changed. It is rewritten only when a
 ## Techniques added
 
 ${list(addedTechniques)}
+
+## Severity changes
+
+${severityChanges.length ? severityChanges.sort((a, b) => a[0].localeCompare(b[0])).map(([id, a, b]) => `- ${id} ${techName(id)}: ${a} → ${b}`).join("\n") : "None."}
 
 ## Techniques renamed upstream
 
@@ -449,7 +502,7 @@ if (check) {
   writeFileSync(techniquesPath, techniquesAfter);
   writeFileSync(mitigationsPath, mitigationsAfter);
   writeFileSync(REPORT, report);
-  if (gained > 0 || dropped.length > 0 || added.length > 0 || addedTechniques.length > 0 || renamed.length > 0) {
+  if (gained > 0 || dropped.length > 0 || added.length > 0 || addedTechniques.length > 0 || renamed.length > 0 || severityChanges.length > 0) {
     writeFileSync(CHANGES, changes);
   }
   console.log(

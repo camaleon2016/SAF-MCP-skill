@@ -465,7 +465,7 @@ const result = analyzeTool({
   description: "Execute Python code on the server",
 });
 
-console.log(result.summary.overallRisk);  // "critical"
+console.log(result.summary.overallRisk);  // "Critical"
 console.log(result.findings);             // [{ruleId, severity, technique, ...}]
 ```
 
@@ -572,6 +572,7 @@ safe-mcp-skill/
 │   └── index.ts                     # Stdio entry point + re-exports
 ├── scripts/
 │   ├── sync-catalog.ts              # Syncs src/data from upstream SAF-MCP
+│   ├── severity-overrides.json      # Deliberate departures from upstream severity
 │   └── upstream.json                # Pinned upstream commit
 ├── plugins/
 │   └── csharp/
@@ -596,7 +597,7 @@ safe-mcp-skill/
 | Lifecycle | Deprecated techniques keep resolving and carry `replacedBy`; rules must target the replacement |
 | Mitigations | Added when upstream links to them; IDs upstream never published are marked `withdrawn` (they resolve for older reports but are never recommended) |
 | Technique to mitigation links | Union of the upstream registry (`research/framework-model.yml`) and each mitigation page's "Mitigates" section, written to both sides |
-| Severity | **Not synced.** Differences are listed in the report so a change in risk ratings is always a deliberate decision |
+| Severity | Upstream's, unless `scripts/severity-overrides.json` records a deliberate departure with a rationale. Overrides appear in the report and on the technique (`severitySource`, `upstreamSeverity`, `severityRationale`) |
 
 ```bash
 git clone https://github.com/safe-agentic-framework/safe-mcp.git ../safe-mcp
@@ -605,7 +606,20 @@ npm run sync:catalog -- --upstream ../safe-mcp            # regenerate
 npm run sync:catalog -- --upstream ../safe-mcp --check    # verify (CI runs this)
 ```
 
-`docs/catalog-sync-report.md` describes the data against upstream (deprecations, severity differences, withdrawn IDs). `docs/catalog-sync-changes.md` records what the last sync changed. To change catalog content, propose it upstream, then bump the pinned commit and rerun the sync.
+`docs/catalog-sync-report.md` describes the data against upstream (deprecations, severity overrides, withdrawn IDs). `docs/catalog-sync-changes.md` records what the last sync changed. To change catalog content, propose it upstream, then bump the pinned commit and rerun the sync.
+
+### Severity overrides
+
+To rate a technique differently from upstream, add it to `scripts/severity-overrides.json` with a rationale, then rerun the sync:
+
+```json
+"SAFE-T1001": {
+  "severity": "Critical",
+  "rationale": "Why this project rates it differently from upstream."
+}
+```
+
+The sync rejects overrides for unknown techniques, invalid severities, missing rationales, or values equal to upstream (remove those instead). Delete an entry to return to upstream's rating.
 
 ### IDs: SAFE- and SAF-
 
@@ -802,7 +816,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
   "summary": {
     "overallRisk": "Critical",
     "totalFindings": 3,
-    "bySeverity": { "Critical": 2, "Medium": 1 }
+    "bySeverity": { "Critical": 2, "High": 1 }
   },
   "findings": [
     {
@@ -841,7 +855,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
     },
     {
       "ruleId": "RULE-027",
-      "severity": "Medium",
+      "severity": "High",
       "technique": { "id": "SAFE-T1603", "name": "System Prompt Disclosure" },
       "evidence": "Tools referencing system prompts/instructions — prompt disclosure risk: execute_code",
       "mitigations": [
@@ -1044,7 +1058,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: appli
     "findings": [
       {
         "ruleId": "RULE-002",
-        "severity": "Critical",
+        "severity": "High",
         "description": "1 server(s) without authentication: safe-mcp-skill"
       },
       {
@@ -1142,7 +1156,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/discover/config -H "Content-Type: appl
     ]
   },
   "analysis": {
-    "summary": { "overallRisk": "critical", "totalFindings": 12 },
+    "summary": { "overallRisk": "Critical", "totalFindings": 12 },
     "findings": [ ... ]
   }
 }

@@ -69,6 +69,14 @@ export interface Technique {
   deprecationReason?: string;
   /** Upstream SAF profiles this technique belongs to (core, mcp, code-agent, ...). */
   profiles?: string[];
+  /**
+   * Where severity comes from: "upstream" (SAF-MCP technique page), "override"
+   * (scripts/severity-overrides.json, with severityRationale), or "local"
+   * (upstream states none).
+   */
+  severitySource?: "upstream" | "override" | "local";
+  upstreamSeverity?: Severity;
+  severityRationale?: string;
 }
 
 // ── Mitigations ─────────────────────────────────────────────────────

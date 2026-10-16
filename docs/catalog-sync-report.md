@@ -28,39 +28,22 @@ Kept so lookups and older reports resolve. Rules must target the replacement ins
 | SAFE-T1702 | Shared-Memory Poisoning | SAFE-T1204 Context Memory Implant |
 | SAFE-T1912 | Stego Response Exfil | SAFE-T1902 Response-Borne Covert Channel |
 
-## Severity differences (not applied)
+## Severity
 
-Upstream technique pages state a severity that differs from `src/data` for these techniques. Severity drives every risk rating the engine reports, so it is not synced automatically.
+Severities come from upstream technique pages, except for the overrides below (from `scripts/severity-overrides.json`).
 
-| Technique | Name | Local | Upstream |
-|---|---|---|---|
-| SAFE-T1001 | Tool Poisoning Attack | Critical | High |
-| SAFE-T1002 | Supply Chain Compromise | Critical | High |
-| SAFE-T1003 | Malicious MCP-Server Distribution | Critical | High |
-| SAFE-T1004 | Server Impersonation / Name-Collision | High | Medium |
-| SAFE-T1007 | OAuth Authorization Phishing | Critical | High |
-| SAFE-T1009 | Authorization Server Mix-up | Critical | High |
-| SAFE-T1102 | Prompt Injection (Multiple Vectors) | Critical | High |
-| SAFE-T1106 | Autonomous Loop Exploit | Medium | High |
-| SAFE-T1109 | Debugging Tool Exploitation | Critical | High |
-| SAFE-T1111 | AI Agent CLI Weaponization | High | Critical |
-| SAFE-T1203 | Backdoored Server Binary | Critical | High |
-| SAFE-T1305 | Host OS Priv-Esc (RCE) | Critical | High |
-| SAFE-T1306 | Rogue Authorization Server | Critical | High |
-| SAFE-T1401 | Line Jumping | Medium | High |
-| SAFE-T1405 | Tool Obfuscation/Renaming | Medium | High |
-| SAFE-T1406 | Metadata Manipulation | Medium | High |
-| SAFE-T1501 | Full-Schema Poisoning (FSP) | Critical | High |
-| SAFE-T1603 | System Prompt Disclosure | Medium | High |
-| SAFE-T1707 | CSRF Token Relay | High | Medium |
-| SAFE-T1803 | Database Dump | Critical | High |
-| SAFE-T1902 | Response-Borne Covert Channel | Medium | High |
-| SAFE-T1904 | Chat-Based Backchannel | Medium | High |
-| SAFE-T1912 | Stego Response Exfil | Medium | High |
-| SAFE-T2101 | Data Destruction | Critical | High |
-| SAFE-T2103 | Code Sabotage | Critical | High |
-| SAFE-T2104 | Fraudulent Transactions | Critical | High |
-| SAFE-T2107 | AI Model Poisoning via MCP Tool Training Data Contamination | Critical | High |
+### Overrides
+
+| Technique | Name | Upstream | Used here | Rationale |
+|---|---|---|---|---|
+| SAFE-T1001 | Tool Poisoning Attack | High | Critical | Tool description poisoning is the primary attack this skill detects (RULE-001). It needs no user action beyond connecting a server, and the payload reaches the model on every tool listing. Kept at the Critical rating this project used before adopting upstream severities. |
+
+### No upstream severity
+
+These pages state no severity, so the existing local value is kept.
+
+- SAFE-T1506
+- SAFE-T3001
 
 ## Withdrawn mitigations
 
