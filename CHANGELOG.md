@@ -8,6 +8,7 @@ Version 2.0.0 fixes serious issues in the skill's own security and brings its ca
 
 ### Security
 
+- - See [GHSA-jf24-ghv2-73gg](https://github.com/camaleon2016/SAFE-MCP-skill/security/advisories/GHSA-jf24-ghv2-73gg) for the command execution issue fixed in this release.
 - **Remote command execution through discovery (fixed).** In 1.x, `POST /v1/discover/stdio` and `/v1/discover/config` ran any command the caller sent, with authentication off by default. Command discovery is now off on the REST and MCP HTTP servers; enabling it requires API keys.
 - **Browser driven attacks on a local server (fixed).** In 1.x, the REST server allowed any origin, accepted `text/plain` POST bodies, and did not check the `Host` header, so a web page could reach a server bound to `127.0.0.1`, including through DNS rebinding. Foreign origins and hosts are now refused, and POST bodies must be `application/json`.
 - **IP allowlist bypass (fixed).** `X-Forwarded-For` was trusted from any client, CIDR entries never matched, and "required but empty" settings failed open. The header is now ignored unless `SAFE_MCP_TRUST_PROXY=true`, CIDR ranges work, and empty required settings stop startup.
