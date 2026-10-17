@@ -110,7 +110,7 @@
       "name": "Tool Poisoning Attack",
       "tactic": "ATK-TA0001",
       "tacticName": "Initial Access",
-      "severity": "Critical",
+      "severity": "High",
       "description": "Attackers embed malicious instructions within MCP tool descriptions that are invisible to users but processed by LLMs. This technique exploits the difference between the displayed tool description and the description processed by the AI model.",
       "attackVectors": {
         "primary": "Malicious tool description injection through compromised MCP servers",
@@ -202,9 +202,7 @@
         "core",
         "mcp"
       ],
-      "severitySource": "override",
-      "severityRationale": "Tool description poisoning is the primary attack this skill detects (RULE-001). It needs no user action beyond connecting a server, and the payload reaches the model on every tool listing. Kept at the Critical rating this project used before adopting upstream severities.",
-      "upstreamSeverity": "High"
+      "severitySource": "upstream"
     },
     {
       "id": "SAFE-T1002",

@@ -631,11 +631,15 @@ npm run sync:catalog -- --upstream ../safe-mcp --check    # verify (CI runs this
 To rate a technique differently from upstream, add it to `scripts/severity-overrides.json` with a rationale, then rerun the sync:
 
 ```json
-"SAFE-T1001": {
-  "severity": "Critical",
-  "rationale": "Why this project rates it differently from upstream."
+"overrides": {
+  "<technique id, for example SAFE-T2104>": {
+    "severity": "Critical",
+    "rationale": "Why this project rates it differently from upstream."
+  }
 }
 ```
+
+The file currently has no overrides, so every severity follows upstream.
 
 The sync rejects overrides for unknown techniques, invalid severities, missing rationales, or values equal to upstream (remove those instead). Delete an entry to return to upstream's rating.
 
@@ -827,19 +831,19 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
 
 </details>
 
-**What comes back:** The engine returns **Critical** risk with 3 findings. Here's a trimmed view of the response (each finding lists every linked mitigation, strongest first; the first three are shown, and the full mappings are cut for space):
+**What comes back:** The engine returns **Critical** risk with 3 findings (the overall rating is the most severe finding, here command injection). Here's a trimmed view of the response (each finding lists every linked mitigation, strongest first; the first three are shown, and the full mappings are cut for space):
 
 ```json
 {
   "summary": {
     "overallRisk": "Critical",
     "totalFindings": 3,
-    "bySeverity": { "Critical": 2, "High": 1 }
+    "bySeverity": { "High": 2, "Critical": 1 }
   },
   "findings": [
     {
       "ruleId": "RULE-001",
-      "severity": "Critical",
+      "severity": "High",
       "technique": { "id": "SAFE-T1001", "name": "Tool Poisoning Attack" },
       "evidence": "Suspicious patterns in tool descriptions — execute_code: ignore\\s+(previous|above|all)\\s+instructions, ...",
       "mitigations": [
