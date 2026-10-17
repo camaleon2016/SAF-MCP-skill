@@ -1,0 +1,1486 @@
+diff --git a/README.md b/README.md
+index 4272fd1..8d7778a 100644
+--- a/README.md
++++ b/README.md
+@@ -465,7 +465,7 @@ const result = analyzeTool({
+   description: "Execute Python code on the server",
+ });
+ 
+-console.log(result.summary.overallRisk);  // "critical"
++console.log(result.summary.overallRisk);  // "Critical"
+ console.log(result.findings);             // [{ruleId, severity, technique, ...}]
+ ```
+ 
+@@ -572,6 +572,7 @@ safe-mcp-skill/
+ │   └── index.ts                     # Stdio entry point + re-exports
+ ├── scripts/
+ │   ├── sync-catalog.ts              # Syncs src/data from upstream SAF-MCP
++│   ├── severity-overrides.json      # Deliberate departures from upstream severity
+ │   └── upstream.json                # Pinned upstream commit
+ ├── plugins/
+ │   └── csharp/
+@@ -596,7 +597,7 @@ safe-mcp-skill/
+ | Lifecycle | Deprecated techniques keep resolving and carry `replacedBy`; rules must target the replacement |
+ | Mitigations | Added when upstream links to them; IDs upstream never published are marked `withdrawn` (they resolve for older reports but are never recommended) |
+ | Technique to mitigation links | Union of the upstream registry (`research/framework-model.yml`) and each mitigation page's "Mitigates" section, written to both sides |
+-| Severity | **Not synced.** Differences are listed in the report so a change in risk ratings is always a deliberate decision |
++| Severity | Upstream's, unless `scripts/severity-overrides.json` records a deliberate departure with a rationale. Overrides appear in the report and on the technique (`severitySource`, `upstreamSeverity`, `severityRationale`) |
+ 
+ ```bash
+ git clone https://github.com/safe-agentic-framework/safe-mcp.git ../safe-mcp
+@@ -605,7 +606,20 @@ npm run sync:catalog -- --upstream ../safe-mcp            # regenerate
+ npm run sync:catalog -- --upstream ../safe-mcp --check    # verify (CI runs this)
+ ```
+ 
+-`docs/catalog-sync-report.md` describes the data against upstream (deprecations, severity differences, withdrawn IDs). `docs/catalog-sync-changes.md` records what the last sync changed. To change catalog content, propose it upstream, then bump the pinned commit and rerun the sync.
++`docs/catalog-sync-report.md` describes the data against upstream (deprecations, severity overrides, withdrawn IDs). `docs/catalog-sync-changes.md` records what the last sync changed. To change catalog content, propose it upstream, then bump the pinned commit and rerun the sync.
++
++### Severity overrides
++
++To rate a technique differently from upstream, add it to `scripts/severity-overrides.json` with a rationale, then rerun the sync:
++
++```json
++"SAFE-T1001": {
++  "severity": "Critical",
++  "rationale": "Why this project rates it differently from upstream."
++}
++```
++
++The sync rejects overrides for unknown techniques, invalid severities, missing rationales, or values equal to upstream (remove those instead). Delete an entry to return to upstream's rating.
+ 
+ ### IDs: SAFE- and SAF-
+ 
+@@ -802,7 +816,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
+   "summary": {
+     "overallRisk": "Critical",
+     "totalFindings": 3,
+-    "bySeverity": { "Critical": 2, "Medium": 1 }
++    "bySeverity": { "Critical": 2, "High": 1 }
+   },
+   "findings": [
+     {
+@@ -841,7 +855,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
+     },
+     {
+       "ruleId": "RULE-027",
+-      "severity": "Medium",
++      "severity": "High",
+       "technique": { "id": "SAFE-T1603", "name": "System Prompt Disclosure" },
+       "evidence": "Tools referencing system prompts/instructions — prompt disclosure risk: execute_code",
+       "mitigations": [
+@@ -1044,7 +1058,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: appli
+     "findings": [
+       {
+         "ruleId": "RULE-002",
+-        "severity": "Critical",
++        "severity": "High",
+         "description": "1 server(s) without authentication: safe-mcp-skill"
+       },
+       {
+@@ -1142,7 +1156,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/discover/config -H "Content-Type: appl
+     ]
+   },
+   "analysis": {
+-    "summary": { "overallRisk": "critical", "totalFindings": 12 },
++    "summary": { "overallRisk": "Critical", "totalFindings": 12 },
+     "findings": [ ... ]
+   }
+ }
+diff --git a/docs/catalog-sync-changes.md b/docs/catalog-sync-changes.md
+index 1848456..29e45f7 100644
+--- a/docs/catalog-sync-changes.md
++++ b/docs/catalog-sync-changes.md
+@@ -6,23 +6,48 @@ This file records what the most recent sync changed. It is rewritten only when a
+ 
+ ## Techniques added
+ 
+-- SAFE-T1112
++None.
++
++## Severity changes
++
++- SAFE-T1002 Supply Chain Compromise: Critical → High
++- SAFE-T1003 Malicious MCP-Server Distribution: Critical → High
++- SAFE-T1004 Server Impersonation / Name-Collision: High → Medium
++- SAFE-T1007 OAuth Authorization Phishing: Critical → High
++- SAFE-T1009 Authorization Server Mix-up: Critical → High
++- SAFE-T1102 Prompt Injection (Multiple Vectors): Critical → High
++- SAFE-T1106 Autonomous Loop Exploit: Medium → High
++- SAFE-T1109 Debugging Tool Exploitation: Critical → High
++- SAFE-T1111 AI Agent CLI Weaponization: High → Critical
++- SAFE-T1203 Backdoored Server Binary: Critical → High
++- SAFE-T1305 Host OS Priv-Esc (RCE): Critical → High
++- SAFE-T1306 Rogue Authorization Server: Critical → High
++- SAFE-T1401 Line Jumping: Medium → High
++- SAFE-T1405 Tool Obfuscation/Renaming: Medium → High
++- SAFE-T1406 Metadata Manipulation: Medium → High
++- SAFE-T1501 Full-Schema Poisoning (FSP): Critical → High
++- SAFE-T1603 System Prompt Disclosure: Medium → High
++- SAFE-T1707 CSRF Token Relay: High → Medium
++- SAFE-T1803 Database Dump: Critical → High
++- SAFE-T1902 Response-Borne Covert Channel: Medium → High
++- SAFE-T1904 Chat-Based Backchannel: Medium → High
++- SAFE-T1912 Stego Response Exfil: Medium → High
++- SAFE-T2101 Data Destruction: Critical → High
++- SAFE-T2103 Code Sabotage: Critical → High
++- SAFE-T2104 Fraudulent Transactions: Critical → High
++- SAFE-T2107 AI Model Poisoning via MCP Tool Training Data Contamination: Critical → High
+ 
+ ## Techniques renamed upstream
+ 
+ Old names are kept in `aliases`, so searches for them still match.
+ 
+-- SAFE-T1001: Tool Poisoning Attack (TPA) → Tool Poisoning Attack
+-- SAFE-T1008: Tool Shadowing Attack → Cross-Server Tool Shadowing
+-- SAFE-T1201: MCP Rug Pull Attack → Post-Approval Tool Mutation
+-- SAFE-T1302: High-Privilege Tool Abuse → Agentic Confused Deputy
+-- SAFE-T1902: Covert Channel in Responses → Response-Borne Covert Channel
++None.
+ 
+ ## Links
+ 
+-- Links before: 741
++- Links before: 746
+ - Links after: 746
+-- Links added: 5
++- Links added: 0
+ - Links dropped: 0
+ 
+ ## Mitigations added from upstream
+diff --git a/docs/catalog-sync-report.md b/docs/catalog-sync-report.md
+index 780e3ad..ba1528e 100644
+--- a/docs/catalog-sync-report.md
++++ b/docs/catalog-sync-report.md
+@@ -28,39 +28,22 @@ Kept so lookups and older reports resolve. Rules must target the replacement ins
+ | SAFE-T1702 | Shared-Memory Poisoning | SAFE-T1204 Context Memory Implant |
+ | SAFE-T1912 | Stego Response Exfil | SAFE-T1902 Response-Borne Covert Channel |
+ 
+-## Severity differences (not applied)
+-
+-Upstream technique pages state a severity that differs from `src/data` for these techniques. Severity drives every risk rating the engine reports, so it is not synced automatically.
+-
+-| Technique | Name | Local | Upstream |
+-|---|---|---|---|
+-| SAFE-T1001 | Tool Poisoning Attack | Critical | High |
+-| SAFE-T1002 | Supply Chain Compromise | Critical | High |
+-| SAFE-T1003 | Malicious MCP-Server Distribution | Critical | High |
+-| SAFE-T1004 | Server Impersonation / Name-Collision | High | Medium |
+-| SAFE-T1007 | OAuth Authorization Phishing | Critical | High |
+-| SAFE-T1009 | Authorization Server Mix-up | Critical | High |
+-| SAFE-T1102 | Prompt Injection (Multiple Vectors) | Critical | High |
+-| SAFE-T1106 | Autonomous Loop Exploit | Medium | High |
+-| SAFE-T1109 | Debugging Tool Exploitation | Critical | High |
+-| SAFE-T1111 | AI Agent CLI Weaponization | High | Critical |
+-| SAFE-T1203 | Backdoored Server Binary | Critical | High |
+-| SAFE-T1305 | Host OS Priv-Esc (RCE) | Critical | High |
+-| SAFE-T1306 | Rogue Authorization Server | Critical | High |
+-| SAFE-T1401 | Line Jumping | Medium | High |
+-| SAFE-T1405 | Tool Obfuscation/Renaming | Medium | High |
+-| SAFE-T1406 | Metadata Manipulation | Medium | High |
+-| SAFE-T1501 | Full-Schema Poisoning (FSP) | Critical | High |
+-| SAFE-T1603 | System Prompt Disclosure | Medium | High |
+-| SAFE-T1707 | CSRF Token Relay | High | Medium |
+-| SAFE-T1803 | Database Dump | Critical | High |
+-| SAFE-T1902 | Response-Borne Covert Channel | Medium | High |
+-| SAFE-T1904 | Chat-Based Backchannel | Medium | High |
+-| SAFE-T1912 | Stego Response Exfil | Medium | High |
+-| SAFE-T2101 | Data Destruction | Critical | High |
+-| SAFE-T2103 | Code Sabotage | Critical | High |
+-| SAFE-T2104 | Fraudulent Transactions | Critical | High |
+-| SAFE-T2107 | AI Model Poisoning via MCP Tool Training Data Contamination | Critical | High |
++## Severity
++
++Severities come from upstream technique pages, except for the overrides below (from `scripts/severity-overrides.json`).
++
++### Overrides
++
++| Technique | Name | Upstream | Used here | Rationale |
++|---|---|---|---|---|
++| SAFE-T1001 | Tool Poisoning Attack | High | Critical | Tool description poisoning is the primary attack this skill detects (RULE-001). It needs no user action beyond connecting a server, and the payload reaches the model on every tool listing. Kept at the Critical rating this project used before adopting upstream severities. |
++
++### No upstream severity
++
++These pages state no severity, so the existing local value is kept.
++
++- SAFE-T1506
++- SAFE-T3001
+ 
+ ## Withdrawn mitigations
+ 
+diff --git a/scripts/severity-overrides.json b/scripts/severity-overrides.json
+new file mode 100644
+index 0000000..c5b7031
+--- /dev/null
++++ b/scripts/severity-overrides.json
+@@ -0,0 +1,9 @@
++{
++  "$comment": "Deliberate departures from upstream SAF-MCP severities. Each entry needs a rationale; it is shown in docs/catalog-sync-report.md and on the technique. An override equal to upstream is rejected as redundant. Remove an entry to return to the upstream severity.",
++  "overrides": {
++    "SAFE-T1001": {
++      "severity": "Critical",
++      "rationale": "Tool description poisoning is the primary attack this skill detects (RULE-001). It needs no user action beyond connecting a server, and the payload reaches the model on every tool listing. Kept at the Critical rating this project used before adopting upstream severities."
++    }
++  }
++}
+diff --git a/scripts/sync-catalog.ts b/scripts/sync-catalog.ts
+index 619b40b..3c196d1 100644
+--- a/scripts/sync-catalog.ts
++++ b/scripts/sync-catalog.ts
+@@ -3,8 +3,9 @@
+  *
+  * What it syncs:
+  *   - Techniques: the technique set, upstream names (old names kept as aliases),
+- *     lifecycle status, replacements for deprecated techniques, profiles.
+- *     Severity is NOT synced; differences are reported for a deliberate decision.
++ *     lifecycle status, replacements for deprecated techniques, profiles, and
++ *     severity: upstream's, unless scripts/severity-overrides.json records a
++ *     deliberate departure with a rationale.
+  *   - Mitigations: entries upstream links to, and lifecycle status
+  *     (mitigations upstream never published are marked "withdrawn").
+  *   - Technique <-> mitigation links, written symmetrically.
+@@ -97,6 +98,7 @@ function firstSentence(paragraph: string): string {
+ interface Technique {
+   id: string; name: string; tactic: string; tacticName: string; severity: string; description: string;
+   mitigations: string[]; aliases?: string[]; lifecycleStatus?: string; replacedBy?: string[];
++  severitySource?: string; upstreamSeverity?: string; severityRationale?: string;
+   deprecationReason?: string; profiles?: string[]; [k: string]: unknown;
+ }
+ interface Mitigation {
+@@ -142,11 +144,25 @@ const techPage = (localId: string): string | undefined => {
+   return existsSync(p) ? readText(p) : undefined;
+ };
+ 
++// Severity overrides: deliberate, documented departures from upstream.
++interface SeverityOverride { severity: string; rationale: string }
++const overridesFile = JSON.parse(readText(join(ROOT, "scripts", "severity-overrides.json"))) as {
++  overrides?: Record<string, SeverityOverride>;
++};
++const overrides = overridesFile.overrides ?? {};
++const knownIds = new Set(registry.techniques.map((t) => toLocal(t.technique_id)));
++for (const [id, o] of Object.entries(overrides)) {
++  if (!knownIds.has(id)) throw new Error(`severity-overrides.json: ${id} is not an upstream technique`);
++  if (!SEVERITIES.includes(o.severity)) throw new Error(`severity-overrides.json: ${id} has invalid severity "${o.severity}" (use ${SEVERITIES.join(", ")})`);
++  if (!o.rationale || o.rationale.trim().length < 20) throw new Error(`severity-overrides.json: ${id} needs a rationale (at least a sentence)`);
++}
++
+ const techById = new Map(techData.techniques.map((t) => [t.id, t]));
+ const tacticName = (id: string): string => techData.tactics.find((t) => t.id === id)?.name ?? id;
+ const addedTechniques: string[] = [];
+ const renamed: Array<[string, string, string]> = [];
+-const severityDiffs: Array<[string, string, string]> = [];
++const severityChanges: Array<[string, string, string]> = [];
++const noUpstreamSeverity: string[] = [];
+ 
+ for (const up of registry.techniques) {
+   const id = toLocal(up.technique_id);
+@@ -181,10 +197,32 @@ for (const up of registry.techniques) {
+       t.aliases = [...new Set([...(t.aliases ?? []), t.name])];
+       t.name = up.name;
+     }
+-    const sev = pageSeverity(md);
+-    if (sev && sev !== t.severity) severityDiffs.push([id, t.severity, sev]);
+   }
+-  severityDiffs.sort((a, b) => a[0].localeCompare(b[0]));
++
++  // Severity: override, else upstream, else keep the local value.
++  const upSev = pageSeverity(md);
++  const ov = overrides[id];
++  const previous = t.severity;
++  if (ov) {
++    if (upSev && ov.severity === upSev) {
++      throw new Error(`severity-overrides.json: ${id} override equals upstream (${upSev}); remove it`);
++    }
++    t.severity = ov.severity;
++    t.severitySource = "override";
++    t.severityRationale = ov.rationale.trim();
++    if (upSev) t.upstreamSeverity = upSev; else delete t.upstreamSeverity;
++  } else if (upSev) {
++    t.severity = upSev;
++    t.severitySource = "upstream";
++    delete t.upstreamSeverity;
++    delete t.severityRationale;
++  } else {
++    t.severitySource = "local";
++    delete t.upstreamSeverity;
++    delete t.severityRationale;
++    noUpstreamSeverity.push(id);
++  }
++  if (previous !== t.severity && !addedTechniques.includes(id)) severityChanges.push([id, previous, t.severity]);
+   const aliases = [...new Set([...(t.aliases ?? []), ...(up.aliases ?? [])])].filter((a) => a !== t!.name);
+   if (aliases.length) t.aliases = aliases; else delete t.aliases;
+   t.lifecycleStatus = up.lifecycle_status;
+@@ -344,6 +382,9 @@ const list = (ids: string[]): string => (ids.length ? ids.map((m) => `- ${m}${na
+ 
+ // Stable: describes the data against upstream. Checked in CI.
+ const deprecated = techData.techniques.filter((t) => t.lifecycleStatus === "deprecated");
++const overrideRows = techData.techniques
++  .filter((t) => t.severitySource === "override")
++  .map((t) => `| ${t.id} | ${t.name} | ${t.upstreamSeverity ?? "none"} | ${t.severity} | ${t.severityRationale ?? ""} |`);
+ const techName = (id: string): string => techById.get(id)?.name ?? "";
+ const report = `# Catalog Sync Report
+ 
+@@ -368,13 +409,21 @@ Kept so lookups and older reports resolve. Rules must target the replacement ins
+ |---|---|---|
+ ${deprecated.map((t) => `| ${t.id} | ${t.name} | ${(t.replacedBy ?? []).map((r) => `${r} ${techName(r)}`).join("; ")} |`).join("\n")}
+ 
+-## Severity differences (not applied)
++## Severity
+ 
+-Upstream technique pages state a severity that differs from \`src/data\` for these techniques. Severity drives every risk rating the engine reports, so it is not synced automatically.
++Severities come from upstream technique pages, except for the overrides below (from \`scripts/severity-overrides.json\`).
+ 
+-| Technique | Name | Local | Upstream |
+-|---|---|---|---|
+-${severityDiffs.length ? severityDiffs.map(([id, a, b]) => `| ${id} | ${techName(id)} | ${a} | ${b} |`).join("\n") : "| none | | | |"}
++### Overrides
++
++| Technique | Name | Upstream | Used here | Rationale |
++|---|---|---|---|---|
++${overrideRows.length ? overrideRows.join("\n") : "| none | | | | |"}
++
++### No upstream severity
++
++These pages state no severity, so the existing local value is kept.
++
++${list(noUpstreamSeverity)}
+ 
+ ## Withdrawn mitigations
+ 
+@@ -402,6 +451,10 @@ This file records what the most recent sync changed. It is rewritten only when a
+ 
+ ${list(addedTechniques)}
+ 
++## Severity changes
++
++${severityChanges.length ? severityChanges.sort((a, b) => a[0].localeCompare(b[0])).map(([id, a, b]) => `- ${id} ${techName(id)}: ${a} → ${b}`).join("\n") : "None."}
++
+ ## Techniques renamed upstream
+ 
+ Old names are kept in \`aliases\`, so searches for them still match.
+@@ -449,7 +502,7 @@ if (check) {
+   writeFileSync(techniquesPath, techniquesAfter);
+   writeFileSync(mitigationsPath, mitigationsAfter);
+   writeFileSync(REPORT, report);
+-  if (gained > 0 || dropped.length > 0 || added.length > 0 || addedTechniques.length > 0 || renamed.length > 0) {
++  if (gained > 0 || dropped.length > 0 || added.length > 0 || addedTechniques.length > 0 || renamed.length > 0 || severityChanges.length > 0) {
+     writeFileSync(CHANGES, changes);
+   }
+   console.log(
+diff --git a/src/data/techniques.json b/src/data/techniques.json
+index ebab668..a3fcb9c 100644
+--- a/src/data/techniques.json
++++ b/src/data/techniques.json
+@@ -88,7 +88,7 @@
+       "name": "AI Model Poisoning via MCP Tool Training Data Contamination",
+       "tactic": "ATK-TA0042",
+       "tacticName": "Resource Development",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Attackers contaminate training data used to develop AI models for MCP tools, implanting backdoors that activate during specific conditions",
+       "mitigations": [
+         "SAFE-M-12",
+@@ -102,7 +102,8 @@
+       "profiles": [
+         "mcp",
+         "model-lifecycle"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1001",
+@@ -200,14 +201,17 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "override",
++      "severityRationale": "Tool description poisoning is the primary attack this skill detects (RULE-001). It needs no user action beyond connecting a server, and the payload reaches the model on every tool listing. Kept at the Critical rating this project used before adopting upstream severities.",
++      "upstreamSeverity": "High"
+     },
+     {
+       "id": "SAFE-T1002",
+       "name": "Supply Chain Compromise",
+       "tactic": "ATK-TA0001",
+       "tacticName": "Initial Access",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Distribution of backdoored MCP server packages through unofficial repositories or compromised legitimate sources. Attackers infiltrate the software distribution pipeline to inject malicious code into MCP servers before they reach end users.",
+       "attackVectors": {
+         "primary": "Compromised package repositories distributing backdoored MCP servers",
+@@ -248,14 +252,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1003",
+       "name": "Malicious MCP-Server Distribution",
+       "tactic": "ATK-TA0001",
+       "tacticName": "Initial Access",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Adversary ships a trojanized server package or Docker image that users install, gaining foothold when the host registers its tools. This technique differs from supply chain compromise in that attackers create entirely new malicious packages.",
+       "attackVectors": {
+         "primary": "Direct distribution of malicious MCP servers disguised as legitimate tools",
+@@ -296,14 +301,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1004",
+       "name": "Server Impersonation / Name-Collision",
+       "tactic": "ATK-TA0001",
+       "tacticName": "Initial Access",
+-      "severity": "High",
++      "severity": "Medium",
+       "description": "Attacker registers a server with the same name/URL as a trusted one, or hijacks discovery, so the client connects to them instead. Exploits weaknesses in naming and discovery systems (DNS, mDNS, local MCP server registries).",
+       "attackVectors": {
+         "primary": "Malicious server registration with a trusted server's name or identifier",
+@@ -345,7 +351,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1005",
+@@ -391,7 +398,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1006",
+@@ -435,14 +443,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1007",
+       "name": "OAuth Authorization Phishing",
+       "tactic": "ATK-TA0001",
+       "tacticName": "Initial Access",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Malicious MCP servers exploit OAuth flows to steal access tokens from legitimate services by tricking users during authorization. The malicious server captures OAuth tokens, granting attackers access to user accounts on third-party services.",
+       "attackVectors": {
+         "primary": "Malicious MCP server configuration through user deception",
+@@ -482,7 +491,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1008",
+@@ -536,14 +546,15 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1009",
+       "name": "Authorization Server Mix-up",
+       "tactic": "ATK-TA0001",
+       "tacticName": "Initial Access",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Client follows redirect to look-alike AS domain (e.g., accounts-google.com vs accounts.google.com), causing authorization codes or tokens to be leaked to attacker-controlled server.",
+       "attackVectors": {
+         "primary": "Typosquatted or homograph domains mimicking legitimate Authorization Servers",
+@@ -591,7 +602,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1101",
+@@ -642,14 +654,15 @@
+       "profiles": [
+         "mcp",
+         "code-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1102",
+       "name": "Prompt Injection (Multiple Vectors)",
+       "tactic": "ATK-TA0002",
+       "tacticName": "Execution",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Malicious instructions injected through various vectors to manipulate AI behavior via MCP",
+       "mitigations": [
+         "SAFE-M-1",
+@@ -687,7 +700,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1103",
+@@ -715,7 +729,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1104",
+@@ -744,7 +759,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1105",
+@@ -768,14 +784,15 @@
+       "profiles": [
+         "mcp",
+         "code-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1106",
+       "name": "Autonomous Loop Exploit",
+       "tactic": "ATK-TA0002",
+       "tacticName": "Execution",
+-      "severity": "Medium",
++      "severity": "High",
+       "description": "Craft prompts that push an agent into infinite self-invoke loop to exhaust CPU or hit rate limits (DoS)",
+       "mitigations": [
+         "SAFE-M-11",
+@@ -792,14 +809,15 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1109",
+       "name": "Debugging Tool Exploitation",
+       "tactic": "ATK-TA0002",
+       "tacticName": "Execution",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Browser-based remote code execution via vulnerable MCP Inspector (CVE-2025-49596)",
+       "mitigations": [
+         "SAFE-M-6",
+@@ -825,7 +843,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1110",
+@@ -855,14 +874,15 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1111",
+       "name": "AI Agent CLI Weaponization",
+       "tactic": "ATK-TA0002",
+       "tacticName": "Execution",
+-      "severity": "High",
++      "severity": "Critical",
+       "description": "Malicious exploitation of AI coding assistant CLI tools with dangerous flags for reconnaissance and data exfiltration",
+       "mitigations": [
+         "SAFE-M-9",
+@@ -879,7 +899,8 @@
+       "profiles": [
+         "core",
+         "code-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1112",
+@@ -902,7 +923,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1201",
+@@ -935,7 +957,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1202",
+@@ -962,14 +985,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1203",
+       "name": "Backdoored Server Binary",
+       "tactic": "ATK-TA0003",
+       "tacticName": "Persistence",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Inserts cron job or reverse shell on install; persists even if MCP service is uninstalled",
+       "mitigations": [
+         "SAFE-M-9",
+@@ -989,7 +1013,8 @@
+       "profiles": [
+         "mcp",
+         "code-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1204",
+@@ -1018,7 +1043,8 @@
+         "core",
+         "mcp",
+         "rag-memory"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1205",
+@@ -1048,7 +1074,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1206",
+@@ -1074,7 +1101,8 @@
+       "profiles": [
+         "mcp",
+         "code-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1207",
+@@ -1099,7 +1127,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T2106",
+@@ -1127,7 +1156,8 @@
+         "core",
+         "mcp",
+         "rag-memory"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1301",
+@@ -1161,7 +1191,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1302",
+@@ -1189,7 +1220,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1303",
+@@ -1216,7 +1248,8 @@
+       "profiles": [
+         "mcp",
+         "code-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1304",
+@@ -1241,14 +1274,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1305",
+       "name": "Host OS Priv-Esc (RCE)",
+       "tactic": "ATK-TA0004",
+       "tacticName": "Privilege Escalation",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Achieve root via misconfigured service running as root, then alter host",
+       "mitigations": [
+         "SAFE-M-9",
+@@ -1267,14 +1301,15 @@
+       "profiles": [
+         "mcp",
+         "code-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1306",
+       "name": "Rogue Authorization Server",
+       "tactic": "ATK-TA0004",
+       "tacticName": "Privilege Escalation",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Malicious MCP server redirects OAuth flows to attacker-controlled AS that ignores audience restrictions and Proof of Possession (PoP), minting overly-permissive super-tokens with expanded scopes",
+       "mitigations": [
+         "SAFE-M-12",
+@@ -1298,7 +1333,8 @@
+       "deprecationReason": "The frozen contracts define the same multi-authorization-server issuer-misbinding mechanism and immediate cross-issuer authorization-code or token disclosure. A rogue server is a prerequisite and actor role, not a separate technique.",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1307",
+@@ -1325,7 +1361,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1308",
+@@ -1352,7 +1389,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1309",
+@@ -1385,14 +1423,15 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1401",
+       "name": "Line Jumping",
+       "tactic": "ATK-TA0005",
+       "tacticName": "Defense Evasion",
+-      "severity": "Medium",
++      "severity": "High",
+       "description": "Bypassing security checkpoints through context injection before tool invocation",
+       "mitigations": [
+         "SAFE-M-1",
+@@ -1420,7 +1459,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1402",
+@@ -1456,7 +1496,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1403",
+@@ -1484,7 +1525,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1404",
+@@ -1511,14 +1553,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1405",
+       "name": "Tool Obfuscation/Renaming",
+       "tactic": "ATK-TA0005",
+       "tacticName": "Defense Evasion",
+-      "severity": "Medium",
++      "severity": "High",
+       "description": "Malicious tool named Utils-Helper to blend in among 30 legit tools",
+       "mitigations": [
+         "SAFE-M-2",
+@@ -1538,14 +1581,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1406",
+       "name": "Metadata Manipulation",
+       "tactic": "ATK-TA0005",
+       "tacticName": "Defense Evasion",
+-      "severity": "Medium",
++      "severity": "High",
+       "description": "Strip safety flags or lower risk scores in tool manifest before host logs it",
+       "mitigations": [
+         "SAFE-M-2",
+@@ -1566,7 +1610,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1407",
+@@ -1593,7 +1638,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1408",
+@@ -1620,14 +1666,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1501",
+       "name": "Full-Schema Poisoning (FSP)",
+       "tactic": "ATK-TA0006",
+       "tacticName": "Credential Access",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Exploitation of entire MCP tool schema beyond descriptions for credential theft",
+       "mitigations": [
+         "SAFE-M-2",
+@@ -1642,7 +1689,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1502",
+@@ -1666,7 +1714,8 @@
+       "profiles": [
+         "mcp",
+         "code-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1503",
+@@ -1691,7 +1740,8 @@
+       "profiles": [
+         "mcp",
+         "code-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1504",
+@@ -1713,7 +1763,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1505",
+@@ -1740,7 +1791,8 @@
+         "core",
+         "mcp",
+         "rag-memory"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1506",
+@@ -1766,7 +1818,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "local"
+     },
+     {
+       "id": "SAFE-T1507",
+@@ -1792,7 +1845,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1601",
+@@ -1816,7 +1870,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1602",
+@@ -1838,14 +1893,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1603",
+       "name": "System Prompt Disclosure",
+       "tactic": "ATK-TA0007",
+       "tacticName": "Discovery",
+-      "severity": "Medium",
++      "severity": "High",
+       "description": "Adversaries attempt to extract internal system prompts and security policies governing AI agent behavior through multi-turn conversational attacks exploiting LLM sycophancy",
+       "mitigations": [
+         "SAFE-M-1",
+@@ -1862,7 +1918,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1604",
+@@ -1882,7 +1939,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1605",
+@@ -1904,7 +1962,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1606",
+@@ -1927,7 +1986,8 @@
+       "profiles": [
+         "mcp",
+         "code-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1701",
+@@ -1954,7 +2014,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1702",
+@@ -1985,7 +2046,8 @@
+         "core",
+         "mcp",
+         "rag-memory"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1703",
+@@ -2011,7 +2073,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1704",
+@@ -2040,7 +2103,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1705",
+@@ -2067,7 +2131,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1706",
+@@ -2089,14 +2154,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1707",
+       "name": "CSRF Token Relay",
+       "tactic": "ATK-TA0008",
+       "tacticName": "Lateral Movement",
+-      "severity": "High",
++      "severity": "Medium",
+       "description": "Leaked OAuth token is passed via Cross-Site Request Forgery to access different resources on the same Resource Server (e.g., pivoting between GCP projects under same Google AS)",
+       "mitigations": [
+         "SAFE-M-12",
+@@ -2111,7 +2177,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1801",
+@@ -2135,7 +2202,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1802",
+@@ -2159,14 +2227,15 @@
+       "profiles": [
+         "mcp",
+         "code-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1803",
+       "name": "Database Dump",
+       "tactic": "ATK-TA0009",
+       "tacticName": "Collection",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Use SQL tool to SELECT * from prod DB",
+       "mitigations": [
+         "SAFE-M-12",
+@@ -2181,7 +2250,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1804",
+@@ -2206,7 +2276,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1805",
+@@ -2233,7 +2304,8 @@
+         "core",
+         "mcp",
+         "rag-memory"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1901",
+@@ -2259,14 +2331,15 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1902",
+       "name": "Response-Borne Covert Channel",
+       "tactic": "ATK-TA0011",
+       "tacticName": "Command and Control",
+-      "severity": "Medium",
++      "severity": "High",
+       "description": "Encode data in whitespace or markdown links returned to chat",
+       "mitigations": [
+         "SAFE-M-4",
+@@ -2286,7 +2359,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1903",
+@@ -2312,14 +2386,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1904",
+       "name": "Chat-Based Backchannel",
+       "tactic": "ATK-TA0011",
+       "tacticName": "Command and Control",
+-      "severity": "Medium",
++      "severity": "High",
+       "description": "LLM embeds base64 blobs in normal answers that another bot decodes",
+       "mitigations": [
+         "SAFE-M-11",
+@@ -2336,7 +2411,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1910",
+@@ -2361,7 +2437,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1911",
+@@ -2386,14 +2463,15 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1912",
+       "name": "Stego Response Exfil",
+       "tactic": "ATK-TA0010",
+       "tacticName": "Exfiltration",
+-      "severity": "Medium",
++      "severity": "High",
+       "description": "Hide data in code blocks shown to user then copied elsewhere",
+       "mitigations": [
+         "SAFE-M-4",
+@@ -2417,7 +2495,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1913",
+@@ -2442,7 +2521,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1914",
+@@ -2471,7 +2551,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T1915",
+@@ -2496,14 +2577,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "financial-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T2101",
+       "name": "Data Destruction",
+       "tactic": "ATK-TA0040",
+       "tacticName": "Impact",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "delete_file or drop_table commands wipe assets",
+       "mitigations": [
+         "SAFE-M-12",
+@@ -2518,7 +2600,8 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T2102",
+@@ -2541,14 +2624,15 @@
+       "lifecycleStatus": "active",
+       "profiles": [
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T2103",
+       "name": "Code Sabotage",
+       "tactic": "ATK-TA0040",
+       "tacticName": "Impact",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Agent commits malicious PR into repo",
+       "mitigations": [
+         "SAFE-M-9",
+@@ -2566,14 +2650,15 @@
+         "core",
+         "mcp",
+         "code-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T2104",
+       "name": "Fraudulent Transactions",
+       "tactic": "ATK-TA0040",
+       "tacticName": "Impact",
+-      "severity": "Critical",
++      "severity": "High",
+       "description": "Payment-tool instructed to move funds",
+       "mitigations": [
+         "SAFE-M-12",
+@@ -2590,7 +2675,8 @@
+         "core",
+         "mcp",
+         "financial-agent"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T2105",
+@@ -2615,7 +2701,8 @@
+       "profiles": [
+         "core",
+         "mcp"
+-      ]
++      ],
++      "severitySource": "upstream"
+     },
+     {
+       "id": "SAFE-T3001",
+@@ -2641,7 +2728,8 @@
+         "core",
+         "mcp",
+         "rag-memory"
+-      ]
++      ],
++      "severitySource": "local"
+     }
+   ],
+   "tacticDistribution": {
+diff --git a/src/tests/catalog.ts b/src/tests/catalog.ts
+index be8aa58..816a221 100644
+--- a/src/tests/catalog.ts
++++ b/src/tests/catalog.ts
+@@ -178,5 +178,19 @@ test("CAT-013: techniques renamed upstream are still found by their old names",
+   );
+ });
+ 
++test("CAT-014: every severity traces to upstream or a documented override", () => {
++  assertEmpty(
++    techniques.filter((t) => !["upstream", "override", "local"].includes(t.severitySource ?? "")).map((t) => t.id),
++    "techniques without a severity source",
++  );
++  assertEmpty(
++    techniques
++      .filter((t) => t.severitySource === "override")
++      .filter((t) => !t.severityRationale || t.severityRationale.length < 20 || t.upstreamSeverity === t.severity)
++      .map((t) => t.id),
++    "overrides without a rationale, or equal to upstream",
++  );
++});
++
+ console.log(`\n  Total: ${passed + failed} | Passed: ${passed} | Failed: ${failed}\n`);
+ process.exit(failed > 0 ? 1 : 0);
+diff --git a/src/types.ts b/src/types.ts
+index 28e1453..4a12048 100644
+--- a/src/types.ts
++++ b/src/types.ts
+@@ -69,6 +69,14 @@ export interface Technique {
+   deprecationReason?: string;
+   /** Upstream SAF profiles this technique belongs to (core, mcp, code-agent, ...). */
+   profiles?: string[];
++  /**
++   * Where severity comes from: "upstream" (SAF-MCP technique page), "override"
++   * (scripts/severity-overrides.json, with severityRationale), or "local"
++   * (upstream states none).
++   */
++  severitySource?: "upstream" | "override" | "local";
++  upstreamSeverity?: Severity;
++  severityRationale?: string;
+ }
+ 
+ // ── Mitigations ─────────────────────────────────────────────────────

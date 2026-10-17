@@ -178,5 +178,19 @@ test("CAT-013: techniques renamed upstream are still found by their old names", 
   );
 });
 
+test("CAT-014: every severity traces to upstream or a documented override", () => {
+  assertEmpty(
+    techniques.filter((t) => !["upstream", "override", "local"].includes(t.severitySource ?? "")).map((t) => t.id),
+    "techniques without a severity source",
+  );
+  assertEmpty(
+    techniques
+      .filter((t) => t.severitySource === "override")
+      .filter((t) => !t.severityRationale || t.severityRationale.length < 20 || t.upstreamSeverity === t.severity)
+      .map((t) => t.id),
+    "overrides without a rationale, or equal to upstream",
+  );
+});
+
 console.log(`\n  Total: ${passed + failed} | Passed: ${passed} | Failed: ${failed}\n`);
 process.exit(failed > 0 ? 1 : 0);
