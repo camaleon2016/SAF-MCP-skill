@@ -17,13 +17,13 @@ The [OWASP Top 10 for LLM Applications](https://genai.owasp.org/llm-top-10/) ide
 | **LLM09** | Misinformation | LLM generating false or misleading information presented as fact |
 | **LLM10** | Unbounded Consumption | Resource exhaustion through uncontrolled LLM usage (tokens, API calls, compute) |
 
-## How SAFE-MCP Maps to OWASP LLM Top 10
+## How SAF-MCP Maps to OWASP LLM Top 10
 
-Every finding from the SAFE-MCP analysis engine includes OWASP LLM references in its `mappings.owaspLlm` field. This connects each MCP-specific finding to the broader LLM risk category it falls under.
+Every finding from the SAF-MCP analysis engine includes OWASP LLM references in its `mappings.owaspLlm` field. This connects each MCP-specific finding to the broader LLM risk category it falls under.
 
 **Example mapping:**
 
-| SAFE-MCP Rule | OWASP LLM |
+| SAF-MCP Rule | OWASP LLM |
 |---|---|
 | RULE-001 Tool Poisoning | LLM01 Prompt Injection, LLM04 Data Poisoning |
 | RULE-002 Unauthenticated Server | LLM03 Supply Chain |

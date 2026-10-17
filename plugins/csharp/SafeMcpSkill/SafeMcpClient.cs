@@ -5,7 +5,7 @@ using SafeMcpSkill.Models;
 namespace SafeMcpSkill;
 
 /// <summary>
-/// HTTP client for the SAFE-MCP REST API.
+/// HTTP client for the SAF-MCP REST API.
 /// Used internally by the Semantic Kernel plugin.
 /// </summary>
 public sealed class SafeMcpClient : IDisposable

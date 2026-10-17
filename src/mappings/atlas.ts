@@ -1,5 +1,5 @@
 // ── MITRE ATLAS Mapping ─────────────────────────────────────────────
-// Maps each SAFE-MCP technique to relevant MITRE ATLAS v5.5 techniques.
+// Maps each SAF-MCP technique to relevant MITRE ATLAS v5.5 techniques.
 // Only the ~30 ATLAS techniques relevant to MCP/agent security are included.
 
 import type { AtlasRef } from "./types.js";

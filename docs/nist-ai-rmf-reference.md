@@ -11,9 +11,9 @@ The [NIST AI RMF](https://www.nist.gov/artificial-intelligence/risk-management-f
 | **MEASURE** | Assess, analyze, and monitor AI risks | *How bad are the risks and are controls working?* |
 | **MANAGE** | Prioritize, respond to, and mitigate AI risks | *What do we do about it?* |
 
-## Subcategories Used in SAFE-MCP Mappings
+## Subcategories Used in SAF-MCP Mappings
 
-Each SAFE-MCP finding maps to one or more NIST AI RMF subcategories via the `mappings.nistAiRmf` field:
+Each SAF-MCP finding maps to one or more NIST AI RMF subcategories via the `mappings.nistAiRmf` field:
 
 | Subcategory | Function | What It Covers |
 |---|---|---|
@@ -30,11 +30,11 @@ Each SAFE-MCP finding maps to one or more NIST AI RMF subcategories via the `map
 | MANAGE-3.2 | MANAGE | Third-party risk treatment and monitoring |
 | MANAGE-4.1 | MANAGE | Post-deployment incident response and recovery |
 
-## How SAFE-MCP Maps to NIST AI RMF
+## How SAF-MCP Maps to NIST AI RMF
 
 **Example mapping:**
 
-| SAFE-MCP Rule | NIST AI RMF Subcategories |
+| SAF-MCP Rule | NIST AI RMF Subcategories |
 |---|---|
 | RULE-001 Tool Poisoning | GOVERN-1.2, MEASURE-2.6, MANAGE-2.4 |
 | RULE-002 Unauthenticated Server | GOVERN-1.5, MAP-3.4, MANAGE-3.2 |

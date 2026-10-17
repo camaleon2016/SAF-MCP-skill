@@ -22,7 +22,7 @@ function normalizeTechniqueId(id: string): string {
   return id.trim().toUpperCase().replace(/^SAF-(?=T)/, "SAFE-");
 }
 
-/** Get all framework mappings for a single SAFE-MCP technique. */
+/** Get all framework mappings for a single SAF-MCP technique. */
 export function getMappings(rawTechniqueId: string): FrameworkMappings {
   const techniqueId = normalizeTechniqueId(rawTechniqueId);
   return {

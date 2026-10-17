@@ -42,7 +42,7 @@ const httpServer = createServer(async (req, res) => {
   if (req.method === "GET" && (req.url === "/health" || req.url === `/${API_VERSION}/health`)) {
     json(res, 200, {
       status: "ok",
-      name: "safe-mcp-skill",
+      name: "saf-mcp-skill",
       version: VERSION,
       apiVersion: API_VERSION,
     });
@@ -52,10 +52,10 @@ const httpServer = createServer(async (req, res) => {
   // ── Version info (no auth required) ─────────────────────────────
   if (req.method === "GET" && req.url === "/version") {
     json(res, 200, {
-      name: "safe-mcp-skill",
+      name: "saf-mcp-skill",
       version: VERSION,
       apiVersion: API_VERSION,
-      framework: "SAFE-MCP",
+      framework: "SAF-MCP",
     });
     return;
   }
@@ -130,6 +130,6 @@ const httpServer = createServer(async (req, res) => {
 
 httpServer.listen(PORT, HOST, () => {
   info("server_started", { detail: { host: HOST, port: PORT, apiVersion: API_VERSION } });
-  console.error(`SAFE-MCP Skill ${API_VERSION} listening on http://${HOST}:${PORT}/${API_VERSION}/mcp`);
+  console.error(`SAF-MCP Skill ${API_VERSION} listening on http://${HOST}:${PORT}/${API_VERSION}/mcp`);
   console.error(`Health: http://${HOST}:${PORT}/health | Version: http://${HOST}:${PORT}/version`);
 });

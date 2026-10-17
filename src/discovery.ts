@@ -104,7 +104,7 @@ export async function discoverAndAnalyzeStdio(
   input: StdioDiscoveryInput,
 ): Promise<DiscoveryResult> {
   assertCommandDiscoveryAllowed();
-  const client = new Client({ name: "safe-mcp-discovery", version: VERSION });
+  const client = new Client({ name: "saf-mcp-discovery", version: VERSION });
   const stdioParams: Record<string, unknown> = { command: input.command, stderr: "pipe" };
   if (input.args) stdioParams.args = input.args;
   if (input.env) stdioParams.env = input.env;
@@ -140,7 +140,7 @@ export async function discoverAndAnalyzeHttp(
   input: HttpDiscoveryInput,
 ): Promise<DiscoveryResult> {
   const url = await assertUrlAllowed(input.url);
-  const client = new Client({ name: "safe-mcp-discovery", version: VERSION });
+  const client = new Client({ name: "saf-mcp-discovery", version: VERSION });
 
   const opts = input.headers
     ? { requestInit: { headers: input.headers } }
@@ -155,7 +155,7 @@ export async function discoverAndAnalyzeHttp(
     discovered = await discoverViaClient(client, transport);
     discovered.transport = "http";
   } catch {
-    const sseClient = new Client({ name: "safe-mcp-discovery", version: VERSION });
+    const sseClient = new Client({ name: "saf-mcp-discovery", version: VERSION });
     const sseTransport = opts
       ? new SSEClientTransport(url, opts)
       : new SSEClientTransport(url);
@@ -233,13 +233,13 @@ export async function discoverAndAnalyzeConfig(
       if (entry.url) {
         // HTTP/SSE server
         const url = await assertUrlAllowed(entry.url);
-        const client = new Client({ name: "safe-mcp-discovery", version: VERSION });
+        const client = new Client({ name: "saf-mcp-discovery", version: VERSION });
         try {
           const transport = new StreamableHTTPClientTransport(url);
           discovered = await discoverViaClient(client, transport);
           discovered.transport = "http";
         } catch {
-          const sseClient = new Client({ name: "safe-mcp-discovery", version: VERSION });
+          const sseClient = new Client({ name: "saf-mcp-discovery", version: VERSION });
           const sseTransport = new SSEClientTransport(url);
           discovered = await discoverViaClient(sseClient, sseTransport);
           discovered.transport = "sse";
@@ -254,7 +254,7 @@ export async function discoverAndAnalyzeConfig(
       } else if (entry.command) {
         // Stdio server: spawns a process, so it obeys the command discovery policy
         assertCommandDiscoveryAllowed();
-        const client = new Client({ name: "safe-mcp-discovery", version: VERSION });
+        const client = new Client({ name: "saf-mcp-discovery", version: VERSION });
         const stdParams: Record<string, unknown> = { command: entry.command, stderr: "pipe" };
         if (entry.args) stdParams.args = entry.args;
         if (entry.env) stdParams.env = entry.env;

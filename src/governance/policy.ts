@@ -24,14 +24,52 @@ export class PolicyError extends Error {
 
 // ── Env helpers ─────────────────────────────────────────────────────
 
+const PREFIX = "SAF_MCP_";
+/** Settings used the SAFE_MCP_ prefix before the rename to saf-mcp-skill. */
+const LEGACY_PREFIX = "SAFE_MCP_";
+const warned = new Set<string>();
+
+function warnOnce(key: string, message: string): void {
+  if (warned.has(key)) return;
+  warned.add(key);
+  process.stderr.write(`saf-mcp-skill: ${message}\n`);
+}
+
+/**
+ * Read a setting by name without its prefix: setting("REQUIRE_API_KEY") reads
+ * SAF_MCP_REQUIRE_API_KEY, and falls back to the older SAFE_MCP_REQUIRE_API_KEY
+ * with a one time deprecation warning. When both are set, the new name wins.
+ */
+export function setting(name: string): string | undefined {
+  const current = process.env[PREFIX + name];
+  const legacy = process.env[LEGACY_PREFIX + name];
+  const has = (v: string | undefined): v is string => v !== undefined && v !== "";
+  if (has(current)) {
+    if (has(legacy) && legacy !== current) {
+      warnOnce(`both:${name}`, `${LEGACY_PREFIX}${name} is ignored because ${PREFIX}${name} is set.`);
+    }
+    return current;
+  }
+  if (has(legacy)) {
+    warnOnce(`legacy:${name}`, `${LEGACY_PREFIX}${name} is deprecated; rename it to ${PREFIX}${name}.`);
+    return legacy;
+  }
+  return undefined;
+}
+
+/** Test helper: forget which deprecation warnings were shown. */
+export function resetSettingWarnings(): void {
+  warned.clear();
+}
+
 function envFlag(name: string): boolean | undefined {
-  const v = process.env[name];
-  if (v === undefined || v === "") return undefined;
+  const v = setting(name);
+  if (v === undefined) return undefined;
   return v.toLowerCase() === "true";
 }
 
 export function envList(name: string): string[] {
-  return (process.env[name] ?? "")
+  return (setting(name) ?? "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
@@ -116,36 +154,36 @@ export function blockListHas(list: BlockList, ip: string): boolean {
  * operator probably did not intend. Called before listen().
  */
 export function enforceStartupPolicy(host: string): void {
-  const requireKey = envFlag("SAFE_MCP_REQUIRE_API_KEY") === true;
-  const keys = envList("SAFE_MCP_API_KEYS");
-  const requireIp = envFlag("SAFE_MCP_REQUIRE_IP_ALLOWLIST") === true;
-  const ips = envList("SAFE_MCP_IP_ALLOWLIST");
+  const requireKey = envFlag("REQUIRE_API_KEY") === true;
+  const keys = envList("API_KEYS");
+  const requireIp = envFlag("REQUIRE_IP_ALLOWLIST") === true;
+  const ips = envList("IP_ALLOWLIST");
 
   if (requireKey && keys.length === 0) {
     throw new PolicyError(
-      "SAFE_MCP_REQUIRE_API_KEY=true but SAFE_MCP_API_KEYS is empty. Refusing to start with authentication silently disabled.",
+      "SAF_MCP_REQUIRE_API_KEY=true but SAF_MCP_API_KEYS is empty. Refusing to start with authentication silently disabled.",
     );
   }
   if (requireKey && keys.some((k) => k.length < 16)) {
-    throw new PolicyError("Every entry in SAFE_MCP_API_KEYS must be at least 16 characters.");
+    throw new PolicyError("Every entry in SAF_MCP_API_KEYS must be at least 16 characters.");
   }
   if (requireIp && ips.length === 0) {
     throw new PolicyError(
-      "SAFE_MCP_REQUIRE_IP_ALLOWLIST=true but SAFE_MCP_IP_ALLOWLIST is empty. Refusing to start with the allowlist silently disabled.",
+      "SAF_MCP_REQUIRE_IP_ALLOWLIST=true but SAF_MCP_IP_ALLOWLIST is empty. Refusing to start with the allowlist silently disabled.",
     );
   }
-  if (ips.length > 0) buildBlockList(ips, "SAFE_MCP_IP_ALLOWLIST"); // validates entries
+  if (ips.length > 0) buildBlockList(ips, "SAF_MCP_IP_ALLOWLIST"); // validates entries
 
-  if (!isLoopbackHost(host) && !requireKey && envFlag("SAFE_MCP_ALLOW_INSECURE_BIND") !== true) {
+  if (!isLoopbackHost(host) && !requireKey && envFlag("ALLOW_INSECURE_BIND") !== true) {
     throw new PolicyError(
       `HOST=${host} is reachable from other machines but API keys are not required. ` +
-        "Set SAFE_MCP_REQUIRE_API_KEY=true and SAFE_MCP_API_KEYS, or set SAFE_MCP_ALLOW_INSECURE_BIND=true if you accept the risk.",
+        "Set SAF_MCP_REQUIRE_API_KEY=true and SAF_MCP_API_KEYS, or set SAF_MCP_ALLOW_INSECURE_BIND=true if you accept the risk.",
     );
   }
   if (commandDiscoveryAllowed() && networkMode && !requireKey) {
     throw new PolicyError(
-      "SAFE_MCP_ALLOW_COMMAND_DISCOVERY=true on a network transport lets any caller run commands on this host. " +
-        "It also requires SAFE_MCP_REQUIRE_API_KEY=true.",
+      "SAF_MCP_ALLOW_COMMAND_DISCOVERY=true on a network transport lets any caller run commands on this host. " +
+        "It also requires SAF_MCP_REQUIRE_API_KEY=true.",
     );
   }
 }
@@ -167,7 +205,7 @@ function hostWithoutPort(hostHeader: string): string {
  */
 export function checkBrowserSafety(req: IncomingMessage): { allowed: boolean; reason?: string } {
   // Host header
-  const allowedHosts = envList("SAFE_MCP_ALLOWED_HOSTS").map((h) => h.toLowerCase());
+  const allowedHosts = envList("ALLOWED_HOSTS").map((h) => h.toLowerCase());
   const hostHeader = (req.headers.host ?? "").toLowerCase();
   const host = hostWithoutPort(hostHeader);
   if (allowedHosts.length > 0) {
@@ -181,7 +219,7 @@ export function checkBrowserSafety(req: IncomingMessage): { allowed: boolean; re
   // Origin header (browsers always send it on cross origin requests)
   const origin = req.headers.origin;
   if (typeof origin === "string" && origin !== "null") {
-    const allowedOrigins = envList("SAFE_MCP_CORS_ORIGINS");
+    const allowedOrigins = envList("CORS_ORIGINS");
     if (!allowedOrigins.includes(origin)) {
       return { allowed: false, reason: "Origin not allowed" };
     }
@@ -204,7 +242,7 @@ export function checkBrowserSafety(req: IncomingMessage): { allowed: boolean; re
 export function corsHeaders(req: IncomingMessage): Record<string, string> {
   const origin = req.headers.origin;
   if (typeof origin !== "string") return {};
-  if (!envList("SAFE_MCP_CORS_ORIGINS").includes(origin)) return {};
+  if (!envList("CORS_ORIGINS").includes(origin)) return {};
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Headers": "Content-Type, X-Api-Key, Authorization",
@@ -216,7 +254,7 @@ export function corsHeaders(req: IncomingMessage): Record<string, string> {
 // ── Command discovery ───────────────────────────────────────────────
 
 export function commandDiscoveryAllowed(): boolean {
-  const explicit = envFlag("SAFE_MCP_ALLOW_COMMAND_DISCOVERY");
+  const explicit = envFlag("ALLOW_COMMAND_DISCOVERY");
   if (explicit !== undefined) return explicit;
   return !networkMode;
 }
@@ -230,7 +268,7 @@ export function assertCommandDiscoveryAllowed(): void {
     throw new PolicyError(
       "Command based discovery (stdio, or config entries with a command) is disabled on network transports " +
         "because it runs a process on this host. Use HTTP discovery, run the skill over stdio, " +
-        "or set SAFE_MCP_ALLOW_COMMAND_DISCOVERY=true together with API keys.",
+        "or set SAF_MCP_ALLOW_COMMAND_DISCOVERY=true together with API keys.",
     );
   }
 }
@@ -271,7 +309,7 @@ export async function assertUrlAllowed(rawUrl: string): Promise<URL> {
     : (await lookup(hostname, { all: true })).map((a) => a.address);
 
   const blockPrivate =
-    networkMode && !isLoopbackHost(bindHost) && envFlag("SAFE_MCP_ALLOW_PRIVATE_URLS") !== true;
+    networkMode && !isLoopbackHost(bindHost) && envFlag("ALLOW_PRIVATE_URLS") !== true;
 
   for (const a of addrs) {
     if (blockListHas(ALWAYS_BLOCKED, a)) {
@@ -279,7 +317,7 @@ export async function assertUrlAllowed(rawUrl: string): Promise<URL> {
     }
     if (blockPrivate && blockListHas(PRIVATE_RANGES, a)) {
       throw new PolicyError(
-        `${url.hostname} resolves to private address ${a}. Set SAFE_MCP_ALLOW_PRIVATE_URLS=true to allow internal targets.`,
+        `${url.hostname} resolves to private address ${a}. Set SAF_MCP_ALLOW_PRIVATE_URLS=true to allow internal targets.`,
       );
     }
   }

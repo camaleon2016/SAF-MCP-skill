@@ -31,7 +31,7 @@ export const openAiFunctions = [
     type: "function" as const,
     function: {
       name: "analyze_architecture",
-      description: "Run a full SAFE-MCP security analysis on an agent architecture definition. Returns risk summary, findings (matched techniques), and recommended mitigations.",
+      description: "Run a full SAF-MCP security analysis on an agent architecture definition. Returns risk summary, findings (matched techniques), and recommended mitigations.",
       parameters: {
         type: "object",
         properties: {
@@ -100,7 +100,7 @@ export const openAiFunctions = [
     type: "function" as const,
     function: {
       name: "analyze_tool",
-      description: "Analyze a single MCP tool definition for SAFE-MCP security risks.",
+      description: "Analyze a single MCP tool definition for SAF-MCP security risks.",
       parameters: {
         type: "object",
         properties: {
@@ -149,7 +149,7 @@ export const openAiFunctions = [
     type: "function" as const,
     function: {
       name: "get_technique",
-      description: "Retrieve full details for a SAFE-MCP technique by ID (e.g., SAFE-T1001).",
+      description: "Retrieve full details for a SAF-MCP technique by ID (e.g., SAFE-T1001).",
       parameters: {
         type: "object",
         properties: { id: { type: "string", description: "Technique ID such as SAFE-T1001" } },
@@ -161,7 +161,7 @@ export const openAiFunctions = [
     type: "function" as const,
     function: {
       name: "get_mitigation",
-      description: "Retrieve full details for a SAFE-MCP mitigation by ID (e.g., SAFE-M-1).",
+      description: "Retrieve full details for a SAF-MCP mitigation by ID (e.g., SAFE-M-1).",
       parameters: {
         type: "object",
         properties: { id: { type: "string", description: "Mitigation ID such as SAFE-M-1" } },
@@ -173,7 +173,7 @@ export const openAiFunctions = [
     type: "function" as const,
     function: {
       name: "search_techniques",
-      description: "Search SAFE-MCP techniques by keyword (matches ID, name, description).",
+      description: "Search SAF-MCP techniques by keyword (matches ID, name, description).",
       parameters: {
         type: "object",
         properties: { query: { type: "string", description: "Search keyword" } },
@@ -185,7 +185,7 @@ export const openAiFunctions = [
     type: "function" as const,
     function: {
       name: "search_mitigations",
-      description: "Search SAFE-MCP mitigations by keyword (matches ID, name, description).",
+      description: "Search SAF-MCP mitigations by keyword (matches ID, name, description).",
       parameters: {
         type: "object",
         properties: { query: { type: "string", description: "Search keyword" } },
@@ -221,7 +221,7 @@ export const openAiFunctions = [
     type: "function" as const,
     function: {
       name: "get_threat_profile",
-      description: "Return a high-level SAFE-MCP threat profile: severity distribution, unmitigated techniques, critical techniques, and overall mitigation coverage.",
+      description: "Return a high-level SAF-MCP threat profile: severity distribution, unmitigated techniques, critical techniques, and overall mitigation coverage.",
       parameters: { type: "object", properties: {} },
     },
   },
@@ -229,7 +229,7 @@ export const openAiFunctions = [
     type: "function" as const,
     function: {
       name: "get_unmitigated_techniques",
-      description: "List all SAFE-MCP techniques that currently have no known mitigations.",
+      description: "List all SAF-MCP techniques that currently have no known mitigations.",
       parameters: { type: "object", properties: {} },
     },
   },
@@ -245,7 +245,7 @@ export const openAiFunctions = [
     type: "function" as const,
     function: {
       name: "get_framework_stats",
-      description: "Return SAFE-MCP framework metadata: totals, tactic distribution, mitigation category distribution, and implementation guidance.",
+      description: "Return SAF-MCP framework metadata: totals, tactic distribution, mitigation category distribution, and implementation guidance.",
       parameters: { type: "object", properties: {} },
     },
   },

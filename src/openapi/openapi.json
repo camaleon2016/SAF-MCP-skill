@@ -1,10 +1,10 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SAFE-MCP Security Analysis API",
-    "description": "Analyzes MCP tool/server definitions and agent architectures against the SAFE-MCP threat framework (78 active techniques, 51 active mitigations, 32 detection rules).",
-    "version": "2.1.0",
-    "contact": { "name": "SAFE-MCP Skill" },
+    "title": "SAF-MCP Security Analysis API",
+    "description": "Analyzes MCP tool/server definitions and agent architectures against the SAF-MCP threat framework (78 active techniques, 51 active mitigations, 32 detection rules).",
+    "version": "2.2.0",
+    "contact": { "name": "SAF-MCP Skill" },
     "license": { "name": "ISC" }
   },
   "servers": [
@@ -15,7 +15,7 @@
       "post": {
         "operationId": "analyzeArchitecture",
         "summary": "Analyze agent architecture",
-        "description": "Run a full SAFE-MCP security analysis on an agent architecture. Returns risk summary, matched techniques, and recommended mitigations.",
+        "description": "Run a full SAF-MCP security analysis on an agent architecture. Returns risk summary, matched techniques, and recommended mitigations.",
         "requestBody": {
           "required": true,
           "content": {
@@ -146,7 +146,7 @@
     "/v1/threat-profile": {
       "get": {
         "operationId": "getThreatProfile",
-        "summary": "Get SAFE-MCP threat profile",
+        "summary": "Get SAF-MCP threat profile",
         "responses": {
           "200": { "description": "Threat profile", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ThreatProfile" } } } }
         },
@@ -177,7 +177,7 @@
       "post": {
         "operationId": "discoverAndAnalyzeStdio",
         "summary": "Discover & analyze MCP server (stdio)",
-        "description": "Connect to a local MCP server via stdio, automatically enumerate all its tools, and run a full SAFE-MCP security analysis.",
+        "description": "Connect to a local MCP server via stdio, automatically enumerate all its tools, and run a full SAF-MCP security analysis.",
         "requestBody": {
           "required": true,
           "content": {
@@ -197,7 +197,7 @@
       "post": {
         "operationId": "discoverAndAnalyzeHttp",
         "summary": "Discover & analyze MCP server (HTTP/SSE)",
-        "description": "Connect to a remote MCP server via HTTP or SSE, automatically enumerate all its tools, and run a full SAFE-MCP security analysis.",
+        "description": "Connect to a remote MCP server via HTTP or SSE, automatically enumerate all its tools, and run a full SAF-MCP security analysis.",
         "requestBody": {
           "required": true,
           "content": {

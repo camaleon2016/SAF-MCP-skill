@@ -1,22 +1,22 @@
 # Quick Demo — Scanning the GitHub MCP Server
 
-Point SAFE-MCP at the real [GitHub MCP Server](https://github.com/github/github-mcp-server) and get a full security analysis in one command. No tool definitions to write — the skill auto-discovers everything.
+Point SAF-MCP at the real [GitHub MCP Server](https://github.com/github/github-mcp-server) and get a full security analysis in one command. No tool definitions to write — the skill auto-discovers everything.
 
 ## Prerequisites
 
 | Tool | Why |
 |---|---|
-| Node.js 20+ | Runs SAFE-MCP |
+| Node.js 20+ | Runs SAF-MCP |
 | Docker | Runs the GitHub MCP Server (no Go toolchain needed) |
 | GitHub PAT | The GitHub MCP Server needs a token to start ([create one here](https://github.com/settings/personal-access-tokens/new)) |
 
-> The PAT only needs read-only repo access — it's used by the target server, not by SAFE-MCP itself. SAFE-MCP just connects, lists tools, and analyzes their definitions.
+> The PAT only needs read-only repo access — it's used by the target server, not by SAF-MCP itself. SAF-MCP just connects, lists tools, and analyzes their definitions.
 
 ## Setup (one time)
 
 ```bash
-# 1. Build SAFE-MCP
-cd safe-mcp-skill
+# 1. Build SAF-MCP
+cd saf-mcp-skill
 npm install
 npm run build
 
@@ -32,7 +32,7 @@ export GITHUB_PERSONAL_ACCESS_TOKEN="ghp_your_token_here"
 
 **PowerShell:**
 ```powershell
-cd C:\path\to\safe-mcp-skill
+cd C:\path\to\saf-mcp-skill
 npm install
 npm run build
 
@@ -43,7 +43,7 @@ $env:GITHUB_PERSONAL_ACCESS_TOKEN = "ghp_your_token_here"
 
 **CMD:**
 ```cmd
-cd C:\path\to\safe-mcp-skill
+cd C:\path\to\saf-mcp-skill
 npm install
 npm run build
 
@@ -56,11 +56,11 @@ set GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token_here
 
 ## Run the Demo
 
-### Step 1 — Start the SAFE-MCP REST server
+### Step 1 — Start the SAF-MCP REST server
 
 ```bash
-export SAFE_MCP_API_KEYS="$(openssl rand -hex 24)"
-SAFE_MCP_ALLOW_COMMAND_DISCOVERY=true SAFE_MCP_REQUIRE_API_KEY=true npm run start:rest
+export SAF_MCP_API_KEYS="$(openssl rand -hex 24)"
+SAF_MCP_ALLOW_COMMAND_DISCOVERY=true SAF_MCP_REQUIRE_API_KEY=true npm run start:rest
 ```
 
 > This demo uses stdio discovery, which starts a process (here, a Docker container) on your machine, so it is off on the REST server unless you enable it with an API key. See [Security Model](../README.md#security-model). Keep the key exported in the terminal you send requests from.
@@ -68,7 +68,7 @@ SAFE_MCP_ALLOW_COMMAND_DISCOVERY=true SAFE_MCP_REQUIRE_API_KEY=true npm run star
 You should see:
 
 ```
-SAFE-MCP REST API listening on http://127.0.0.1:3002
+SAF-MCP REST API listening on http://127.0.0.1:3002
 ```
 
 Leave this running and open a **second terminal** for the remaining steps.
@@ -80,7 +80,7 @@ This single command starts the GitHub MCP Server via Docker, connects to it over
 ```bash
 curl -s -X POST http://127.0.0.1:3002/v1/discover/stdio \
   -H "Content-Type: application/json" \
-  -H "X-Api-Key: $SAFE_MCP_API_KEYS" \
+  -H "X-Api-Key: $SAF_MCP_API_KEYS" \
   -d "{
     \"command\": \"docker\",
     \"args\": [\"run\", \"-i\", \"--rm\", \"-e\", \"GITHUB_PERSONAL_ACCESS_TOKEN\", \"ghcr.io/github/github-mcp-server\"],
@@ -101,19 +101,19 @@ $body = @{
   args = @("run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server")
   env = @{ GITHUB_PERSONAL_ACCESS_TOKEN = $pat }
 } | ConvertTo-Json -Depth 3
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/stdio -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAFE_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/stdio -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAF_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
 ```
 
 **CMD:**
 ```cmd
-curl.exe -s -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: application/json" -H "X-Api-Key: %SAFE_MCP_API_KEYS%" -d "{\"command\":\"docker\",\"args\":[\"run\",\"-i\",\"--rm\",\"-e\",\"GITHUB_PERSONAL_ACCESS_TOKEN\",\"ghcr.io/github/github-mcp-server\"],\"env\":{\"GITHUB_PERSONAL_ACCESS_TOKEN\":\"%GITHUB_PERSONAL_ACCESS_TOKEN%\"}}"
+curl.exe -s -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: application/json" -H "X-Api-Key: %SAF_MCP_API_KEYS%" -d "{\"command\":\"docker\",\"args\":[\"run\",\"-i\",\"--rm\",\"-e\",\"GITHUB_PERSONAL_ACCESS_TOKEN\",\"ghcr.io/github/github-mcp-server\"],\"env\":{\"GITHUB_PERSONAL_ACCESS_TOKEN\":\"%GITHUB_PERSONAL_ACCESS_TOKEN%\"}}"
 ```
 
 </details>
 
 **What happens behind the scenes:**
 
-1. SAFE-MCP spawns `docker run -i --rm ... ghcr.io/github/github-mcp-server` as a child process
+1. SAF-MCP spawns `docker run -i --rm ... ghcr.io/github/github-mcp-server` as a child process
 2. It speaks MCP protocol over stdio to the container
 3. It calls `tools/list` to enumerate every tool the server registers
 4. It feeds all discovered tool definitions through the 32-rule security engine
@@ -134,7 +134,7 @@ The response has two sections:
 }
 ```
 
-**`analysis`** — SAFE-MCP's security assessment:
+**`analysis`** — SAF-MCP's security assessment:
 
 ```json
 {
@@ -177,7 +177,7 @@ The GitHub MCP Server supports [toolsets](https://github.com/github/github-mcp-s
 ```bash
 curl -s -X POST http://127.0.0.1:3002/v1/discover/stdio \
   -H "Content-Type: application/json" \
-  -H "X-Api-Key: $SAFE_MCP_API_KEYS" \
+  -H "X-Api-Key: $SAF_MCP_API_KEYS" \
   -d "{
     \"command\": \"docker\",
     \"args\": [\"run\", \"-i\", \"--rm\",
@@ -201,7 +201,7 @@ $body = @{
   args = @("run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "-e", "GITHUB_TOOLSETS=all", "ghcr.io/github/github-mcp-server")
   env = @{ GITHUB_PERSONAL_ACCESS_TOKEN = $pat }
 } | ConvertTo-Json -Depth 3
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/stdio -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAFE_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/stdio -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAF_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
 ```
 
 </details>
@@ -225,7 +225,7 @@ If your audience uses Claude Desktop or VS Code, you can scan an entire MCP conf
 ```bash
 curl -s -X POST http://127.0.0.1:3002/v1/discover/config \
   -H "Content-Type: application/json" \
-  -H "X-Api-Key: $SAFE_MCP_API_KEYS" \
+  -H "X-Api-Key: $SAF_MCP_API_KEYS" \
   -d "{
     \"configJson\": \"{\\\"mcpServers\\\":{\\\"github\\\":{\\\"command\\\":\\\"docker\\\",\\\"args\\\":[\\\"run\\\",\\\"-i\\\",\\\"--rm\\\",\\\"-e\\\",\\\"GITHUB_PERSONAL_ACCESS_TOKEN\\\",\\\"ghcr.io/github/github-mcp-server\\\"],\\\"env\\\":{\\\"GITHUB_PERSONAL_ACCESS_TOKEN\\\":\\\"$GITHUB_PERSONAL_ACCESS_TOKEN\\\"}}}}\"
   }" | python3 -m json.tool
@@ -247,7 +247,7 @@ $config = @{
   }
 } | ConvertTo-Json -Depth 4 -Compress
 $body = @{ configJson = $config } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/config -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAFE_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/config -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAF_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
 ```
 
 </details>

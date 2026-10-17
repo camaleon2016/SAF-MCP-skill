@@ -1,6 +1,6 @@
 {
-  "name": "safe-mcp-skill",
-  "version": "2.1.0",
+  "name": "saf-mcp-skill",
+  "version": "2.2.0",
   "description": "Security analysis for MCP servers, tool definitions, and agent architectures against the SAF-MCP (formerly SAFE-MCP) attack technique catalog, with STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF mappings.",
   "keywords": [
     "mcp",
@@ -18,13 +18,13 @@
   ],
   "author": "Jautau \"Jay\" White (https://github.com/camaleon2016)",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/camaleon2016/SAFE-MCP-skill#readme",
+  "homepage": "https://github.com/camaleon2016/SAF-MCP-skill#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/camaleon2016/SAFE-MCP-skill.git"
+    "url": "git+https://github.com/camaleon2016/SAF-MCP-skill.git"
   },
   "bugs": {
-    "url": "https://github.com/camaleon2016/SAFE-MCP-skill/issues"
+    "url": "https://github.com/camaleon2016/SAF-MCP-skill/issues"
   },
   "type": "module",
   "main": "dist/lib.js",
@@ -38,7 +38,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "safe-mcp-skill": "dist/index.js"
+    "saf-mcp-skill": "dist/index.js"
   },
   "files": [
     "dist",

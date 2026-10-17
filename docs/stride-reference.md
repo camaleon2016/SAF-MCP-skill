@@ -13,13 +13,13 @@ STRIDE is a threat classification model developed by Microsoft for identifying s
 | **D** | Denial of Service | Availability | Denying or degrading service to legitimate users |
 | **E** | Elevation of Privilege | Authorization | Gaining capabilities beyond what was granted |
 
-## How SAFE-MCP Maps to STRIDE
+## How SAF-MCP Maps to STRIDE
 
-Every finding from the SAFE-MCP analysis engine includes STRIDE categories in its `mappings.stride` field. This tells you which *type* of threat each finding represents, independent of the specific attack technique.
+Every finding from the SAF-MCP analysis engine includes STRIDE categories in its `mappings.stride` field. This tells you which *type* of threat each finding represents, independent of the specific attack technique.
 
 **Example mapping:**
 
-| SAFE-MCP Rule | Technique | STRIDE |
+| SAF-MCP Rule | Technique | STRIDE |
 |---|---|---|
 | RULE-001 Tool Poisoning | SAFE-T1001 | T, S |
 | RULE-002 Unauthenticated Server | SAFE-T1002 | S, T |

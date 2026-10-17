@@ -1,6 +1,6 @@
 {
   "framework": {
-    "name": "SAFE-MCP",
+    "name": "SAF-MCP",
     "fullName": "Secure Agentic Framework for Model Context Protocol (SAF-MCP, formerly SAFE-MCP)",
     "repository": "https://github.com/safe-agentic-framework/safe-mcp",
     "website": "https://www.safemcp.org/",

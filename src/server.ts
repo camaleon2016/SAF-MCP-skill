@@ -78,7 +78,7 @@ srv.registerTool(
   {
     title: "Analyze Agent Architecture",
     description:
-      "Run a full SAFE-MCP security analysis on an agent architecture definition. Returns risk summary, findings (matched techniques), and recommended mitigations.",
+      "Run a full SAF-MCP security analysis on an agent architecture definition. Returns risk summary, findings (matched techniques), and recommended mitigations.",
     inputSchema: { architecture: ArchitectureSchema },
   },
   async ({ architecture }) => ({
@@ -91,7 +91,7 @@ srv.registerTool(
   {
     title: "Analyze MCP Tool",
     description:
-      "Analyze a single MCP tool definition for SAFE-MCP security risks.",
+      "Analyze a single MCP tool definition for SAF-MCP security risks.",
     inputSchema: { tool: ToolDefinitionSchema },
   },
   async ({ tool }) => ({
@@ -117,7 +117,7 @@ srv.registerTool(
   {
     title: "Get Technique Details",
     description:
-      "Retrieve full details for a SAFE-MCP technique by ID (e.g., SAFE-T1001).",
+      "Retrieve full details for a SAF-MCP technique by ID (e.g., SAFE-T1001).",
     inputSchema: { id: z.string().describe("Technique ID such as SAFE-T1001") },
   },
   async ({ id }) => {
@@ -134,7 +134,7 @@ srv.registerTool(
   {
     title: "Get Mitigation Details",
     description:
-      "Retrieve full details for a SAFE-MCP mitigation by ID (e.g., SAFE-M-1).",
+      "Retrieve full details for a SAF-MCP mitigation by ID (e.g., SAFE-M-1).",
     inputSchema: { id: z.string().describe("Mitigation ID such as SAFE-M-1") },
   },
   async ({ id }) => {
@@ -151,7 +151,7 @@ srv.registerTool(
   {
     title: "Search Techniques",
     description:
-      "Search SAFE-MCP techniques by keyword (matches ID, name, description).",
+      "Search SAF-MCP techniques by keyword (matches ID, name, description).",
     inputSchema: { query: z.string().describe("Search keyword") },
   },
   async ({ query }) => {
@@ -176,7 +176,7 @@ srv.registerTool(
   {
     title: "Search Mitigations",
     description:
-      "Search SAFE-MCP mitigations by keyword (matches ID, name, description).",
+      "Search SAF-MCP mitigations by keyword (matches ID, name, description).",
     inputSchema: { query: z.string().describe("Search keyword") },
   },
   async ({ query }) => {
@@ -240,7 +240,7 @@ srv.registerTool(
   {
     title: "Get Threat Profile",
     description:
-      "Return a high-level SAFE-MCP threat profile: severity distribution, unmitigated techniques, critical techniques, and overall mitigation coverage.",
+      "Return a high-level SAF-MCP threat profile: severity distribution, unmitigated techniques, critical techniques, and overall mitigation coverage.",
     inputSchema: {},
   },
   async () => {
@@ -254,7 +254,7 @@ srv.registerTool(
   {
     title: "Get Unmitigated Techniques",
     description:
-      "List all SAFE-MCP techniques that currently have no known mitigations.",
+      "List all SAF-MCP techniques that currently have no known mitigations.",
     inputSchema: {},
   },
   async () => {
@@ -310,7 +310,7 @@ srv.registerTool(
   {
     title: "Get Framework Statistics",
     description:
-      "Return SAFE-MCP framework metadata: totals, tactic distribution, mitigation category distribution, and implementation guidance.",
+      "Return SAF-MCP framework metadata: totals, tactic distribution, mitigation category distribution, and implementation guidance.",
     inputSchema: {},
   },
   async () => {
@@ -326,7 +326,7 @@ srv.registerTool(
   {
     title: "Discover & Analyze MCP Server (stdio)",
     description:
-      "Connect to a local MCP server via stdio, automatically enumerate all its tools, and run a full SAFE-MCP security analysis. WARNING: this starts the given command as a child process on the host, so only call it for a server the user has asked to analyze and would be willing to run.",
+      "Connect to a local MCP server via stdio, automatically enumerate all its tools, and run a full SAF-MCP security analysis. WARNING: this starts the given command as a child process on the host, so only call it for a server the user has asked to analyze and would be willing to run.",
     annotations: {
       readOnlyHint: false,
       destructiveHint: true,
@@ -356,7 +356,7 @@ srv.registerTool(
   {
     title: "Discover & Analyze MCP Server (HTTP/SSE)",
     description:
-      "Connect to a remote MCP server via HTTP or SSE, automatically enumerate all its tools, and run a full SAFE-MCP security analysis. Provide the server URL — the skill handles the rest.",
+      "Connect to a remote MCP server via HTTP or SSE, automatically enumerate all its tools, and run a full SAF-MCP security analysis. Provide the server URL — the skill handles the rest.",
     annotations: {
       readOnlyHint: true,
       openWorldHint: true,
@@ -380,7 +380,7 @@ srv.registerTool(
   {
     title: "Discover & Analyze from Config File",
     description:
-      "Parse an MCP client config (Claude Desktop, VS Code, etc.), connect to every server defined in it, enumerate all tools, and run a full architecture-level SAFE-MCP security analysis across all servers.",
+      "Parse an MCP client config (Claude Desktop, VS Code, etc.), connect to every server defined in it, enumerate all tools, and run a full architecture-level SAF-MCP security analysis across all servers.",
     annotations: {
       readOnlyHint: false,
       destructiveHint: true,
@@ -402,9 +402,9 @@ srv.registerTool(
   {
     title: "Get Framework Mappings for a Technique",
     description:
-      "Given a SAFE-MCP technique ID, return its cross-references to STRIDE, MITRE ATLAS, OWASP LLM Top 10 (2025), and NIST AI RMF.",
+      "Given a SAF-MCP technique ID, return its cross-references to STRIDE, MITRE ATLAS, OWASP LLM Top 10 (2025), and NIST AI RMF.",
     inputSchema: {
-      techniqueId: z.string().describe("SAFE-MCP technique ID (e.g. SAFE-T1001)"),
+      techniqueId: z.string().describe("SAF-MCP technique ID (e.g. SAFE-T1001)"),
     },
   },
   async ({ techniqueId }) => ({
@@ -417,9 +417,9 @@ srv.registerTool(
   {
     title: "Get Framework Coverage Summary",
     description:
-      "Given a list of SAFE-MCP technique IDs (from analysis findings), return coverage summaries across STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF.",
+      "Given a list of SAF-MCP technique IDs (from analysis findings), return coverage summaries across STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF.",
     inputSchema: {
-      techniqueIds: z.array(z.string()).describe("Array of SAFE-MCP technique IDs"),
+      techniqueIds: z.array(z.string()).describe("Array of SAF-MCP technique IDs"),
     },
   },
   async ({ techniqueIds }) => ({
@@ -432,7 +432,7 @@ srv.registerTool(
 
 /** Create a fresh McpServer with all tools registered. */
 export function createServer(): McpServer {
-  const srv = new McpServer({ name: "safe-mcp-skill", version: VERSION });
+  const srv = new McpServer({ name: "saf-mcp-skill", version: VERSION });
   registerTools(srv);
   return srv;
 }
