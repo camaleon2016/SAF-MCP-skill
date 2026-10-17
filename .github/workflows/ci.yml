@@ -44,6 +44,23 @@ jobs:
           test -f dist/engine/rules.js
           test -f dist/governance/logger.js
           test -f dist/governance/access.js
+          test -f dist/governance/policy.js
+          test -f dist/lib.js
+          test -f dist/lib.d.ts
+          head -1 dist/index.js | grep -q '^#!/usr/bin/env node'
+
+      - name: Built library imports without starting a server
+        run: |
+          # stdin stays open and idle; a stdio server would keep the process alive
+          sleep 30 | timeout 15 node -e "import('./dist/lib.js').then(m => console.log('safe-mcp-skill', m.VERSION))"
+
+      - name: Package contents
+        run: |
+          npm pack --dry-run 2>&1 | tee pack.txt
+          grep -q 'dist/lib.js' pack.txt
+          if grep -E ' (src|docs|scripts)/|dist/tests/|\.map$' pack.txt; then
+            echo "Unexpected files in the package"; exit 1
+          fi
 
   security-audit:
     runs-on: ubuntu-latest

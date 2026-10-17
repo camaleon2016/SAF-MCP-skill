@@ -1,11 +1,57 @@
 {
   "name": "safe-mcp-skill",
-  "version": "1.0.0",
-  "description": "",
-  "main": "dist/index.js",
+  "version": "2.0.0",
+  "description": "Security analysis for MCP servers, tool definitions, and agent architectures against the SAF-MCP (formerly SAFE-MCP) attack technique catalog, with STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF mappings.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "security",
+    "ai-security",
+    "agent-security",
+    "saf-mcp",
+    "safe-mcp",
+    "threat-modeling",
+    "mitre-atlas",
+    "owasp-llm",
+    "nist-ai-rmf",
+    "stride"
+  ],
+  "author": "Jautau \"Jay\" White (https://github.com/camaleon2016)",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/camaleon2016/SAFE-MCP-skill#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/camaleon2016/SAFE-MCP-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/camaleon2016/SAFE-MCP-skill/issues"
+  },
   "type": "module",
+  "main": "dist/lib.js",
+  "types": "dist/lib.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/lib.d.ts",
+      "import": "./dist/lib.js",
+      "default": "./dist/lib.js"
+    },
+    "./package.json": "./package.json"
+  },
   "bin": {
     "safe-mcp-skill": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "!dist/tests",
+    "!dist/**/*.map",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "SKILL.md"
+  ],
+  "engines": {
+    "node": ">=20"
   },
   "scripts": {
     "build": "tsc && npm run copy-data",
@@ -16,25 +62,23 @@
     "dev": "npx tsx src/index.ts",
     "dev:http": "npx tsx src/http.ts",
     "dev:rest": "npx tsx src/openapi/serve.ts",
-    "test": "npx tsx src/tests/redteam.ts && npx tsx src/tests/catalog.ts && npx tsx src/tests/governance.ts",
+    "test": "npx tsx src/tests/redteam.ts && npx tsx src/tests/catalog.ts && npx tsx src/tests/package.ts && npx tsx src/tests/governance.ts",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.scripts.json",
     "ci": "npm run typecheck && npm run build && npm test",
     "test:governance": "npx tsx src/tests/governance.ts",
     "test:catalog": "npx tsx src/tests/catalog.ts",
-    "sync:catalog": "tsx scripts/sync-catalog.ts"
+    "sync:catalog": "tsx scripts/sync-catalog.ts",
+    "test:package": "npx tsx src/tests/package.ts",
+    "prepare": "npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "Apache-2.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.31.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^6.0.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
     "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
     "yaml": "2.9.1"
   }
 }

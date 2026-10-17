@@ -176,7 +176,7 @@ winget install Microsoft.DotNet.SDK.8
 
 ```bash
 # 1. Clone or copy the project
-git clone <repo-url> safe-mcp-skill
+git clone https://github.com/camaleon2016/SAFE-MCP-skill.git safe-mcp-skill
 cd safe-mcp-skill
 
 # 2. Install dependencies
@@ -469,6 +469,18 @@ console.log(result.summary.overallRisk);  // "Critical"
 console.log(result.findings);             // [{ruleId, severity, technique, ...}]
 ```
 
+Importing the package has no side effects: it starts no server and never touches stdin or stdout. The package root also exports the catalog lookups (`getTechnique`, `searchTechniques`, `getMitigationsForTechnique`, and others) and `VERSION`. In library mode your program is the operator, so `discoverAndAnalyzeStdio` is allowed; it starts the command you pass, so only pass commands you trust.
+
+To use it from another project, install it from GitHub (npm builds it during install):
+
+```bash
+npm install github:camaleon2016/SAFE-MCP-skill
+```
+
+### Option 7 — Agent Skill (SKILL.md)
+
+[`SKILL.md`](SKILL.md) packages guidance for agents that support Agent Skills: when to use the tools, how to choose between describing, discovering, and looking up, when to stop and confirm before discovery starts a process, and how to present findings without overstating them. It works alongside the MCP server (Option 1 or 2), which provides the tools it calls.
+
 ## Configuration
 
 Copy `.env.example` to `.env` to customize:
@@ -563,13 +575,16 @@ safe-mcp-skill/
 │   ├── tests/
 │   │   ├── redteam.ts               # 34 red-team test cases
 │   │   ├── catalog.ts               # Catalog integrity checks
+│   │   ├── package.ts               # Entry points and versions
 │   │   └── governance.ts            # Security model tests
 │   ├── types.ts                     # TypeScript type definitions
 │   ├── discovery.ts                 # Auto-discovery via stdio, HTTP, or config
 │   ├── server.ts                    # MCP server (18 tools)
 │   ├── http.ts                      # MCP HTTP transport
 │   ├── openai.ts                    # OpenAI function definitions
-│   └── index.ts                     # Stdio entry point + re-exports
+│   ├── lib.ts                       # Library entry point (no side effects)
+│   ├── version.ts                   # Package version
+│   └── index.ts                     # The safe-mcp-skill command (MCP stdio server)
 ├── scripts/
 │   ├── sync-catalog.ts              # Syncs src/data from upstream SAF-MCP
 │   ├── severity-overrides.json      # Deliberate departures from upstream severity
@@ -582,6 +597,9 @@ safe-mcp-skill/
 │   ├── catalog-sync-report.md      # Generated: catalog vs upstream
 │   └── catalog-sync-changes.md     # Generated: what the last sync changed
 ├── .github/workflows/ci.yml         # CI pipeline (Node 20 + 22)
+├── SKILL.md                         # Agent Skill instructions
+├── SECURITY.md                      # Vulnerability reporting
+├── CHANGELOG.md
 ├── .env.example
 ├── package.json
 └── tsconfig.json
@@ -1390,7 +1408,7 @@ In a separate terminal:
 npm test
 ```
 
-Runs the 34 attack-pattern test cases, the catalog integrity checks, and the security model tests, printing pass/fail for each.
+Runs the 34 attack-pattern test cases, the catalog integrity checks, the package checks, and the security model tests, printing pass/fail for each.
 
 #### 15. Stop the Server
 
@@ -1428,7 +1446,7 @@ Run from the project root directory:
 
 ```bash
 cd safe-mcp-skill
-npm test                # Red-team, catalog integrity, and governance suites
+npm test                # Red-team, catalog integrity, package, and governance suites
 npm run typecheck       # Type-check without emitting
 npm run ci              # Full pipeline: typecheck → build → test
 ```

@@ -6,6 +6,7 @@ import { createServer as createMcpServer } from "./server.js";
 import { info, warn, error as logError, audit } from "./governance/logger.js";
 import { checkAccess, getClientIp } from "./governance/access.js";
 import { setNetworkMode, enforceStartupPolicy, checkBrowserSafety } from "./governance/policy.js";
+import { VERSION } from "./version.js";
 
 const PORT = parseInt(process.env["PORT"] ?? "3001", 10);
 const HOST = process.env["HOST"] ?? "127.0.0.1";
@@ -42,7 +43,7 @@ const httpServer = createServer(async (req, res) => {
     json(res, 200, {
       status: "ok",
       name: "safe-mcp-skill",
-      version: "1.0.0",
+      version: VERSION,
       apiVersion: API_VERSION,
     });
     return;
@@ -52,7 +53,7 @@ const httpServer = createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/version") {
     json(res, 200, {
       name: "safe-mcp-skill",
-      version: "1.0.0",
+      version: VERSION,
       apiVersion: API_VERSION,
       framework: "SAFE-MCP",
     });

@@ -42,6 +42,7 @@ import type {
   ConfigDiscoveryInput,
 } from "../discovery.js";
 import type { Severity } from "../types.js";
+import { VERSION } from "../version.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = parseInt(process.env["PORT"] ?? "3002", 10);
@@ -106,11 +107,11 @@ const httpServer = createServer(async (req, res) => {
 
   // Health / version (no auth)
   if (req.method === "GET" && (path === "/health" || path === "/v1/health")) {
-    json(res, 200, { status: "ok", name: "safe-mcp-skill", version: "1.0.0", apiVersion: "v1" });
+    json(res, 200, { status: "ok", name: "safe-mcp-skill", version: VERSION, apiVersion: "v1" });
     return;
   }
   if (req.method === "GET" && path === "/version") {
-    json(res, 200, { name: "safe-mcp-skill", version: "1.0.0", apiVersion: "v1", framework: "SAFE-MCP" });
+    json(res, 200, { name: "safe-mcp-skill", version: VERSION, apiVersion: "v1", framework: "SAFE-MCP" });
     return;
   }
   if (req.method === "GET" && path === "/v1/openapi.json") {
