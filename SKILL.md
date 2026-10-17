@@ -46,13 +46,14 @@ Prefer Describe when the user can give you the definitions. It runs nothing.
 
 - `summary.overallRisk` is the highest severity among the findings.
 - Each finding has a `ruleId`, a `technique` (ID and name), the `evidence` that triggered it, `mitigations` sorted strongest first, and `mappings` for the four frameworks.
+- Findings from RULE-001 (tool poisoning) and RULE-025 (schema poisoning) carry a `confidence`. "high" means a clear attack signal such as hidden instruction markup or concealment from the user; "medium" means only weaker signals appeared together. The evidence names each signal and quotes the text that triggered it.
 - Severities come from upstream SAF-MCP. A technique with `severitySource: "override"` is rated differently on purpose; its `severityRationale` says why.
 - A deprecated technique names its `replacedBy` techniques. Withdrawn mitigations resolve by ID but are never recommended.
 
 ## Present it
 
 1. Lead with the overall risk and the number of findings.
-2. Take findings from most to least severe. For each, give the technique ID and name, the evidence in plain words, and the top two or three mitigations.
+2. Take findings from most to least severe. For each, give the technique ID and name, the evidence in plain words, and the top two or three mitigations. For a poisoning finding, say whether its confidence is high or medium.
 3. Add framework mappings when the user is threat modeling or reporting to risk or compliance partners.
 4. Say plainly what the result does not cover. The rules cover a subset of the catalog, and pattern matching can be evaded, so a Low or empty result means no rule fired, not that the target is safe.
 5. Offer a next step: fix and rerun, or walk the catalog for the most severe technique.
