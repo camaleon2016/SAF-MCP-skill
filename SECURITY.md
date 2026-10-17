@@ -4,7 +4,7 @@
 
 Please report vulnerabilities privately through GitHub: open the repository's **Security** tab and choose **Report a vulnerability**. Do not open a public issue for a vulnerability.
 
-Include what you found, how to reproduce it, the version or commit, and the transport involved (stdio, MCP over HTTP, REST, or library). You can expect an acknowledgment within 5 business days and a status update within 14 days. Fixes are released as a new version, followed by a GitHub Security Advisory crediting the reporter unless you prefer otherwise.
+Include what you found, how to reproduce it, the version or commit, and the transport involved (stdio, MCP over HTTP, REST, or library). You can expect an acknowledgment within 5 business days and a status update within 14 business days. Fixes are released as a new version, followed by a GitHub Security Advisory crediting the reporter unless you prefer otherwise.
 
 ## Supported versions
 

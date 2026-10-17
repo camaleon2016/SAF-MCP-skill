@@ -1,9 +1,4 @@
 {
   "$comment": "Deliberate departures from upstream SAF-MCP severities. Each entry needs a rationale; it is shown in docs/catalog-sync-report.md and on the technique. An override equal to upstream is rejected as redundant. Remove an entry to return to the upstream severity.",
-  "overrides": {
-    "SAFE-T1001": {
-      "severity": "Critical",
-      "rationale": "Tool description poisoning is the primary attack this skill detects (RULE-001). It needs no user action beyond connecting a server, and the payload reaches the model on every tool listing. Kept at the Critical rating this project used before adopting upstream severities."
-    }
-  }
+  "overrides": {}
 }

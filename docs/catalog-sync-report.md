@@ -36,7 +36,7 @@ Severities come from upstream technique pages, except for the overrides below (f
 
 | Technique | Name | Upstream | Used here | Rationale |
 |---|---|---|---|---|
-| SAFE-T1001 | Tool Poisoning Attack | High | Critical | Tool description poisoning is the primary attack this skill detects (RULE-001). It needs no user action beyond connecting a server, and the payload reaches the model on every tool listing. Kept at the Critical rating this project used before adopting upstream severities. |
+| none | | | | |
 
 ### No upstream severity
 

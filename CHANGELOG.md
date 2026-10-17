@@ -2,7 +2,7 @@
 
 All notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
-## [2.0.0] - Unreleased
+## [2.0.0] - 2026-10-16
 
 Version 2.0.0 fixes serious issues in the skill's own security and brings its catalog in line with upstream SAF-MCP. Several defaults and outputs change, so read **Breaking changes** before upgrading.
 
@@ -21,7 +21,7 @@ Version 2.0.0 fixes serious issues in the skill's own security and brings its ca
 - The servers refuse to start on a non loopback `HOST` without API keys (`SAFE_MCP_ALLOW_INSECURE_BIND` to override).
 - REST POST requests must send `Content-Type: application/json`; requests with a foreign `Origin` or `Host` are refused.
 - Import the library from the package root (`import { analyzeTool } from "safe-mcp-skill"`). `dist/index.js` is now only the `safe-mcp-skill` command and exports nothing.
-- Severities follow upstream SAF-MCP: 26 techniques changed, 12 of them used by rules. `SAFE-T1001` stays Critical through a documented override.
+- Severities follow upstream SAF-MCP: 27 techniques changed, 13 of them used by rules (for example `SAFE-T1001` Tool Poisoning is now High). Deliberate departures can be recorded in `scripts/severity-overrides.json` with a rationale; none are set in this release.
 - Five techniques use their upstream names (for example `SAFE-T1201` is now Post-Approval Tool Mutation); old names remain searchable as aliases.
 - RULE-018 now reports `SAFE-T1302` (Agentic Confused Deputy), the upstream replacement for deprecated `SAFE-T1104`.
 - `techniques.json` no longer carries a duplicate copy of the mitigations or their statistics. Framework totals count active techniques and mitigations.
