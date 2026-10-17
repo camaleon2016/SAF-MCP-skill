@@ -26,6 +26,7 @@ import {
   discoverAndAnalyzeHttp,
   discoverAndAnalyzeConfig,
 } from "./discovery.js";
+import { VERSION } from "./version.js";
 
 // ── Server ──────────────────────────────────────────────────────────
 
@@ -431,7 +432,7 @@ srv.registerTool(
 
 /** Create a fresh McpServer with all tools registered. */
 export function createServer(): McpServer {
-  const srv = new McpServer({ name: "safe-mcp-skill", version: "1.0.0" });
+  const srv = new McpServer({ name: "safe-mcp-skill", version: VERSION });
   registerTools(srv);
   return srv;
 }
