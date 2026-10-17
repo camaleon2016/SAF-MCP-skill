@@ -41,6 +41,8 @@ const NIST_AI_RMF_MAP: Record<string, NistAiRmfRef[]> = {
   "SAFE-T1103": [gov("GOVERN-1.5"), mea("MEASURE-2.6")],
   // Over-Privileged Tools — least privilege governance
   "SAFE-T1104": [gov("GOVERN-1.4"), man("MANAGE-2.2")],
+  // Agentic Confused Deputy — upstream replacement for SAFE-T1104; same mapping
+  "SAFE-T1302": [gov("GOVERN-1.4"), man("MANAGE-2.2")],
   // Path Traversal — security testing
   "SAFE-T1105": [mea("MEASURE-2.6"), man("MANAGE-2.4")],
   // Autonomous Loop — monitoring + resource management

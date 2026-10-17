@@ -20,8 +20,8 @@
     "typecheck": "tsc --noEmit && tsc -p tsconfig.scripts.json",
     "ci": "npm run typecheck && npm run build && npm test",
     "test:governance": "npx tsx src/tests/governance.ts",
-    "sync:mitigations": "tsx scripts/sync-mitigation-links.ts",
-    "test:catalog": "npx tsx src/tests/catalog.ts"
+    "test:catalog": "npx tsx src/tests/catalog.ts",
+    "sync:catalog": "tsx scripts/sync-catalog.ts"
   },
   "keywords": [],
   "author": "",

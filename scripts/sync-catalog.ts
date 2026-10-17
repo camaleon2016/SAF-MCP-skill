@@ -1,10 +1,17 @@
 /**
- * Regenerate technique <-> mitigation links in src/data from the upstream
- * SAF-MCP catalog, so every link traces to an upstream source.
+ * Sync src/data with a pinned commit of the upstream SAF-MCP catalog.
+ *
+ * What it syncs:
+ *   - Techniques: the technique set, upstream names (old names kept as aliases),
+ *     lifecycle status, replacements for deprecated techniques, profiles.
+ *     Severity is NOT synced; differences are reported for a deliberate decision.
+ *   - Mitigations: entries upstream links to, and lifecycle status
+ *     (mitigations upstream never published are marked "withdrawn").
+ *   - Technique <-> mitigation links, written symmetrically.
  *
  * Usage:
- *   npx tsx scripts/sync-mitigation-links.ts --upstream <path to safe-mcp checkout>
- *   npx tsx scripts/sync-mitigation-links.ts --upstream <path> --check   (CI: fail on drift)
+ *   npx tsx scripts/sync-catalog.ts --upstream <path to safe-mcp checkout>
+ *   npx tsx scripts/sync-catalog.ts --upstream <path> --check   (CI: fail on drift)
  *
  * Link sources (union):
  *   A. research/framework-model.yml   techniques[].mitigations   (canonical registry)
@@ -22,8 +29,8 @@ import { parse as parseYaml } from "yaml";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DATA = join(ROOT, "src", "data");
-const REPORT = join(ROOT, "docs", "mitigation-link-report.md");
-const CHANGES = join(ROOT, "docs", "mitigation-link-changes.md");
+const REPORT = join(ROOT, "docs", "catalog-sync-report.md");
+const CHANGES = join(ROOT, "docs", "catalog-sync-changes.md");
 
 // ── Args ────────────────────────────────────────────────────────────
 
@@ -87,7 +94,11 @@ function firstSentence(paragraph: string): string {
 
 // ── Load ────────────────────────────────────────────────────────────
 
-interface Technique { id: string; mitigations: string[]; [k: string]: unknown }
+interface Technique {
+  id: string; name: string; tactic: string; tacticName: string; severity: string; description: string;
+  mitigations: string[]; aliases?: string[]; lifecycleStatus?: string; replacedBy?: string[];
+  deprecationReason?: string; profiles?: string[]; [k: string]: unknown;
+}
 interface Mitigation {
   id: string; name: string; category: string; effectiveness: string; description: string;
   mitigates: string[]; relatedMitigations: string[]; [k: string]: unknown;
@@ -97,17 +108,99 @@ const techniquesPath = join(DATA, "techniques.json");
 const mitigationsPath = join(DATA, "mitigations.json");
 const techniquesBefore = readText(techniquesPath);
 const mitigationsBefore = readText(mitigationsPath);
-const techData = JSON.parse(techniquesBefore) as Record<string, unknown> & { techniques: Technique[]; framework: Record<string, unknown> };
+const techData = JSON.parse(techniquesBefore) as Record<string, unknown> & {
+  techniques: Technique[]; framework: Record<string, unknown>; tactics: Array<{ id: string; name: string }>;
+  tacticDistribution: Record<string, number>;
+};
 const mitData = JSON.parse(mitigationsBefore) as Record<string, unknown> & {
   mitigations: Mitigation[]; framework: Record<string, unknown>; categories: string[]; categoryDistribution: Record<string, number>;
 };
 
-const localTechIds = new Set(techData.techniques.map((t) => t.id));
 const localMitById = new Map(mitData.mitigations.map((m) => [m.id, m]));
 
+interface UpTechnique {
+  technique_id: string; name: string; lifecycle_status: string; tactics?: string[]; profiles?: string[];
+  aliases?: string[]; replaced_by?: string[]; deprecation?: { reason?: string };
+  attack_mappings?: Array<{ id: string }>; mitigations?: string[];
+}
 const registry = parseYaml(readText(join(upstreamDir, "research", "framework-model.yml"))) as {
-  techniques: Array<{ technique_id: string; mitigations?: string[] }>;
+  techniques: UpTechnique[];
 };
+
+// ── Sync techniques ─────────────────────────────────────────────────
+
+const stripComments = (s: string): string => s.replace(/<!--[\s\S]*?-->/g, "");
+const SEVERITIES = ["Critical", "High", "Medium", "Low"];
+const pageSeverity = (md: string | undefined): string | undefined => {
+  const raw = md ? /^\s*-?\s*\*\*Severity\*\*:\s*([A-Za-z]+)/m.exec(md)?.[1] : undefined;
+  if (!raw) return undefined;
+  const v = raw[0]!.toUpperCase() + raw.slice(1).toLowerCase();
+  return SEVERITIES.includes(v) ? v : undefined;
+};
+const techPage = (localId: string): string | undefined => {
+  const p = join(upstreamDir, "techniques", localId.replace(/^SAFE-/, "SAF-"), "README.md");
+  return existsSync(p) ? readText(p) : undefined;
+};
+
+const techById = new Map(techData.techniques.map((t) => [t.id, t]));
+const tacticName = (id: string): string => techData.tactics.find((t) => t.id === id)?.name ?? id;
+const addedTechniques: string[] = [];
+const renamed: Array<[string, string, string]> = [];
+const severityDiffs: Array<[string, string, string]> = [];
+
+for (const up of registry.techniques) {
+  const id = toLocal(up.technique_id);
+  const md = techPage(id);
+  let t = techById.get(id);
+  if (!t) {
+    const tactic = up.tactics?.[0];
+    const severity = pageSeverity(md);
+    const overview = stripComments(section(md ?? "", "Overview") ?? "").split(/\n\s*\n/).find((p) => p.trim()) ?? "";
+    if (!tactic || !severity || !overview) {
+      throw new Error(`${id}: cannot add, upstream is missing a tactic, severity, or overview`);
+    }
+    t = {
+      id,
+      name: up.name,
+      tactic,
+      tacticName: tacticName(tactic),
+      severity,
+      description: firstSentence(overview),
+      mitigations: [],
+      mitreAttackMapping: (up.attack_mappings ?? []).map((a) => a.id),
+    };
+    // Place it after the last technique of the same tactic, keeping the file's order.
+    let at = -1;
+    techData.techniques.forEach((x, i) => { if (x.tactic === tactic) at = i; });
+    techData.techniques.splice(at === -1 ? techData.techniques.length : at + 1, 0, t);
+    techById.set(id, t);
+    addedTechniques.push(id);
+  } else {
+    if (t.name !== up.name) {
+      renamed.push([id, t.name, up.name]);
+      t.aliases = [...new Set([...(t.aliases ?? []), t.name])];
+      t.name = up.name;
+    }
+    const sev = pageSeverity(md);
+    if (sev && sev !== t.severity) severityDiffs.push([id, t.severity, sev]);
+  }
+  severityDiffs.sort((a, b) => a[0].localeCompare(b[0]));
+  const aliases = [...new Set([...(t.aliases ?? []), ...(up.aliases ?? [])])].filter((a) => a !== t!.name);
+  if (aliases.length) t.aliases = aliases; else delete t.aliases;
+  t.lifecycleStatus = up.lifecycle_status;
+  if (up.lifecycle_status === "deprecated") {
+    t.replacedBy = (up.replaced_by ?? []).map(toLocal);
+    if (up.deprecation?.reason) t.deprecationReason = up.deprecation.reason; else delete t.deprecationReason;
+  } else {
+    delete t.replacedBy;
+    delete t.deprecationReason;
+  }
+  t.profiles = [...(up.profiles ?? [])];
+}
+const upstreamTechIds = new Set(registry.techniques.map((t) => toLocal(t.technique_id)));
+const notUpstream = techData.techniques.filter((t) => !upstreamTechIds.has(t.id)).map((t) => t.id);
+if (notUpstream.length) throw new Error(`Local techniques missing upstream (IDs are permanent upstream, so this needs a look): ${notUpstream.join(", ")}`);
+const localTechIds = new Set(techData.techniques.map((t) => t.id));
 
 const upMitDirs = readdirSync(join(upstreamDir, "mitigations")).filter((d) => /^SAF-M-\d+$/.test(d));
 const upstreamMitIds = new Set(upMitDirs.map(toLocal));
@@ -194,9 +287,23 @@ for (const m of mitData.mitigations) {
 
 // ── Recompute metadata the engine actually serves ───────────────────
 
-const effCount = (e: string): number => mitData.mitigations.filter((m) => m.effectiveness === e).length;
+const WITHDRAWN_NOTE =
+  "Listed in the upstream SAF-MCP mitigation index but never published as a mitigation page, and later removed from the index. " +
+  "Kept so older reports still resolve; never recommended in findings.";
+for (const m of mitData.mitigations) {
+  if (upstreamMitIds.has(m.id)) {
+    m["lifecycleStatus"] = "active";
+    delete m["withdrawnNote"];
+  } else {
+    m["lifecycleStatus"] = "withdrawn";
+    m["withdrawnNote"] = WITHDRAWN_NOTE;
+  }
+}
+const activeMits = mitData.mitigations.filter((m) => m["lifecycleStatus"] === "active");
+const effCount = (e: string): number => activeMits.filter((m) => m.effectiveness === e).length;
 const stats = {
-  totalMitigations: mitData.mitigations.length,
+  totalMitigations: activeMits.length,
+  withdrawnMitigations: mitData.mitigations.length - activeMits.length,
   highEffectiveness: effCount("High") + effCount("High (Provable Security)"),
   mediumHighEffectiveness: effCount("Medium-High"),
   mediumEffectiveness: effCount("Medium"),
@@ -204,8 +311,16 @@ const stats = {
 };
 Object.assign(mitData.framework, stats);
 techData.framework["totalMitigations"] = stats.totalMitigations;
+const activeTechs = techData.techniques.filter((t) => t.lifecycleStatus === "active");
+techData.framework["fullName"] = "Secure Agentic Framework for Model Context Protocol (SAF-MCP, formerly SAFE-MCP)";
+techData.framework["totalTechniques"] = techData.techniques.length;
+techData.framework["activeTechniques"] = activeTechs.length;
+techData.framework["deprecatedTechniques"] = techData.techniques.length - activeTechs.length;
+const tacticDist: Record<string, number> = {};
+for (const tac of techData.tactics) tacticDist[tac.name] = activeTechs.filter((t) => t.tactic === tac.id).length;
+techData.tacticDistribution = tacticDist;
 const catDist: Record<string, number> = {};
-for (const m of mitData.mitigations) catDist[m.category] = (catDist[m.category] ?? 0) + 1;
+for (const m of activeMits) catDist[m.category] = (catDist[m.category] ?? 0) + 1;
 mitData.categoryDistribution = catDist;
 mitData.categories = [...new Set([...mitData.categories, ...Object.keys(catDist)])];
 
@@ -224,11 +339,13 @@ const fromBoth = kept.filter(([t, m]) => links.get(key(t, m))!.size === 2).lengt
 const fromPageOnly = kept.filter(([t, m]) => { const s = links.get(key(t, m))!; return s.size === 1 && s.has("mitigation page"); }).length;
 const nameOf = (id: string): string => localMitById.get(id)?.name ?? "";
 
-const header = `Generated by \`scripts/sync-mitigation-links.ts\` from SAF-MCP commit [\`${pinned.commit.slice(0, 7)}\`](https://github.com/safe-agentic-framework/safe-mcp/tree/${pinned.commit}). Do not edit by hand; rerun the script.`;
+const header = `Generated by \`scripts/sync-catalog.ts\` from SAF-MCP commit [\`${pinned.commit.slice(0, 7)}\`](https://github.com/safe-agentic-framework/safe-mcp/tree/${pinned.commit}). Do not edit by hand; rerun the script.`;
 const list = (ids: string[]): string => (ids.length ? ids.map((m) => `- ${m}${nameOf(m) ? `: ${nameOf(m)}` : ""}`).join("\n") : "None.");
 
 // Stable: describes the data against upstream. Checked in CI.
-const report = `# Mitigation Link Report
+const deprecated = techData.techniques.filter((t) => t.lifecycleStatus === "deprecated");
+const techName = (id: string): string => techById.get(id)?.name ?? "";
+const report = `# Catalog Sync Report
 
 ${header}
 
@@ -236,35 +353,62 @@ ${header}
 
 | | Count |
 |---|---|
+| Techniques | ${techData.techniques.length} (${activeTechs.length} active, ${deprecated.length} deprecated) |
+| Mitigations | ${mitData.mitigations.length} (${activeMits.length} active, ${mitData.mitigations.length - activeMits.length} withdrawn) |
 | Technique to mitigation links | ${after.size} |
 | Techniques with at least one mitigation | ${techData.techniques.filter((t) => t.mitigations.length > 0).length} of ${techData.techniques.length} |
 | Links in both the registry and a mitigation page | ${fromBoth} |
 | Links only on a mitigation page (missing from the upstream registry) | ${fromPageOnly} |
-| Mitigations shipped | ${mitData.mitigations.length} |
 
-## Mitigations shipped locally but removed upstream
+## Deprecated techniques
 
-These have no links until the catalog sync removes or replaces them.
+Kept so lookups and older reports resolve. Rules must target the replacement instead (enforced by \`src/tests/catalog.ts\`).
+
+| Technique | Name | Replaced by |
+|---|---|---|
+${deprecated.map((t) => `| ${t.id} | ${t.name} | ${(t.replacedBy ?? []).map((r) => `${r} ${techName(r)}`).join("; ")} |`).join("\n")}
+
+## Severity differences (not applied)
+
+Upstream technique pages state a severity that differs from \`src/data\` for these techniques. Severity drives every risk rating the engine reports, so it is not synced automatically.
+
+| Technique | Name | Local | Upstream |
+|---|---|---|---|
+${severityDiffs.length ? severityDiffs.map(([id, a, b]) => `| ${id} | ${techName(id)} | ${a} | ${b} |`).join("\n") : "| none | | | |"}
+
+## Withdrawn mitigations
+
+${WITHDRAWN_NOTE}
 
 ${list(removedUpstream)}
 
 ## Upstream techniques not shipped locally
 
-Links to these are skipped until the catalog sync adds them.
-
 ${list(skippedTechniques)}
 
-## Orphaned mitigations
+## Mitigations with no links
 
-${list(orphaned)}
+${list(orphaned.filter((m) => !removedUpstream.includes(m)))}
 `;
 
 // One time: what this particular run changed. For PR review, not checked.
-const changes = `# Mitigation Link Changes
+const changes = `# Catalog Sync Changes
 
 ${header}
 
-This file records what the most recent sync changed. It is rewritten only when a sync changes links.
+This file records what the most recent sync changed. It is rewritten only when a sync changes something.
+
+## Techniques added
+
+${list(addedTechniques)}
+
+## Techniques renamed upstream
+
+Old names are kept in \`aliases\`, so searches for them still match.
+
+${renamed.length ? renamed.map(([id, a, b]) => `- ${id}: ${a} → ${b}`).join("\n") : "None."}
+
+## Links
 
 - Links before: ${before.size}
 - Links after: ${after.size}
@@ -294,20 +438,23 @@ if (check) {
   const drift = [
     techniquesAfter !== techniquesBefore && "src/data/techniques.json",
     mitigationsAfter !== mitigationsBefore && "src/data/mitigations.json",
-    report !== reportBefore && "docs/mitigation-link-report.md",
+    report !== reportBefore && "docs/catalog-sync-report.md",
   ].filter(Boolean);
   if (drift.length) {
-    console.error(`Out of sync with upstream ${pinned.commit.slice(0, 7)}: ${drift.join(", ")}.\nRun: npx tsx scripts/sync-mitigation-links.ts --upstream <path>`);
+    console.error(`Out of sync with upstream ${pinned.commit.slice(0, 7)}: ${drift.join(", ")}.\nRun: npx tsx scripts/sync-catalog.ts --upstream <path>`);
     process.exit(1);
   }
-  console.log(`Mitigation links match upstream ${pinned.commit.slice(0, 7)}.`);
+  console.log(`Catalog matches upstream ${pinned.commit.slice(0, 7)}.`);
 } else {
   writeFileSync(techniquesPath, techniquesAfter);
   writeFileSync(mitigationsPath, mitigationsAfter);
   writeFileSync(REPORT, report);
-  if (gained > 0 || dropped.length > 0 || added.length > 0) writeFileSync(CHANGES, changes);
+  if (gained > 0 || dropped.length > 0 || added.length > 0 || addedTechniques.length > 0 || renamed.length > 0) {
+    writeFileSync(CHANGES, changes);
+  }
   console.log(
-    `Synced from ${pinned.commit.slice(0, 7)}: ${after.size} links (was ${before.size}), ` +
-      `${added.length} mitigations added, ${dropped.length} local links dropped. See docs/mitigation-link-report.md.`,
+    `Synced from ${pinned.commit.slice(0, 7)}: ${techData.techniques.length} techniques (${addedTechniques.length} added, ` +
+      `${renamed.length} renamed), ${after.size} links (was ${before.size}), ${added.length} mitigations added. ` +
+      `See docs/catalog-sync-report.md.`,
   );
 }

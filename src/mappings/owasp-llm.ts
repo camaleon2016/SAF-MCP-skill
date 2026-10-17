@@ -46,6 +46,8 @@ const OWASP_LLM_MAP: Record<string, OwaspLlmRef[]> = {
   "SAFE-T1103": refs("LLM03"),
   // Over-Privileged Tools — excessive agency
   "SAFE-T1104": refs("LLM06"),
+  // Agentic Confused Deputy — upstream replacement for SAFE-T1104; same mapping
+  "SAFE-T1302": refs("LLM06"),
   // Path Traversal — sensitive info disclosure
   "SAFE-T1105": refs("LLM02"),
   // Autonomous Loop Exploit — unbounded consumption

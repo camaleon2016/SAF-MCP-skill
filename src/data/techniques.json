@@ -1,12 +1,14 @@
 {
   "framework": {
     "name": "SAFE-MCP",
-    "fullName": "Security Analysis Framework for Evaluation of Model Context Protocol",
+    "fullName": "Secure Agentic Framework for Model Context Protocol (SAF-MCP, formerly SAFE-MCP)",
     "repository": "https://github.com/safe-agentic-framework/safe-mcp",
     "website": "https://www.safemcp.org/",
     "totalTactics": 14,
-    "totalTechniques": 85,
-    "totalMitigations": 61
+    "totalTechniques": 86,
+    "totalMitigations": 51,
+    "activeTechniques": 78,
+    "deprecatedTechniques": 8
   },
   "tactics": [
     {
@@ -95,11 +97,16 @@
         "SAFE-M-35",
         "SAFE-M-36"
       ],
-      "mitreAttackMapping": []
+      "mitreAttackMapping": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp",
+        "model-lifecycle"
+      ]
     },
     {
       "id": "SAFE-T1001",
-      "name": "Tool Poisoning Attack (TPA)",
+      "name": "Tool Poisoning Attack",
       "tactic": "ATK-TA0001",
       "tacticName": "Initial Access",
       "severity": "Critical",
@@ -185,6 +192,14 @@
         "MCP Inspector RCE CVE-2025-49596 (June 2025)",
         "mcp-remote Command Injection CVE-2025-6514 (July 2025)",
         "Gmail Message Exploit in Claude Desktop (July 2025)"
+      ],
+      "aliases": [
+        "Tool Poisoning Attack (TPA)"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
       ]
     },
     {
@@ -229,6 +244,10 @@
         "SAFE-T1001",
         "SAFE-T1003",
         "SAFE-T1006"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -273,6 +292,10 @@
         "SAFE-T1002",
         "SAFE-T1006",
         "SAFE-T1203"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -318,6 +341,10 @@
         "SAFE-T1407",
         "SAFE-T1005",
         "SAFE-T1704"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -360,6 +387,10 @@
         "CVE-2025-66416",
         "CVE-2025-52882",
         "CVE-2025-54073"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -400,6 +431,10 @@
         "SAFE-T1001",
         "SAFE-T1004",
         "SAFE-T1207"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -443,11 +478,15 @@
         "SAFE-T1004",
         "SAFE-T1006",
         "SAFE-T1202"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
       "id": "SAFE-T1008",
-      "name": "Tool Shadowing Attack",
+      "name": "Cross-Server Tool Shadowing",
       "tactic": "ATK-TA0001",
       "tacticName": "Initial Access",
       "severity": "High",
@@ -489,6 +528,14 @@
         "SAFE-T1001",
         "SAFE-T1301",
         "SAFE-T1102"
+      ],
+      "aliases": [
+        "Tool Shadowing Attack"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
       ]
     },
     {
@@ -540,6 +587,10 @@
         "SAFE-T1202",
         "SAFE-T1506",
         "SAFE-T1507"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -586,6 +637,11 @@
         "SAFE-T1103",
         "SAFE-T1105",
         "SAFE-T1001"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp",
+        "code-agent"
       ]
     },
     {
@@ -626,6 +682,11 @@
       "relatedTechniques": [
         "SAFE-T1001",
         "SAFE-T1101"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
       ]
     },
     {
@@ -650,6 +711,10 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1101"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -670,7 +735,16 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "deprecated",
+      "replacedBy": [
+        "SAFE-T1302"
+      ],
+      "deprecationReason": "The Framework Model v2 taxonomy review found no independently classifiable mechanism beyond the replacement technique or technique chain.",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1105",
@@ -689,6 +763,11 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1101"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp",
+        "code-agent"
       ]
     },
     {
@@ -708,7 +787,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1109",
@@ -731,6 +815,16 @@
       "relatedTechniques": [],
       "cves": [
         "CVE-2025-49596"
+      ],
+      "lifecycleStatus": "deprecated",
+      "replacedBy": [
+        "SAFE-T1005",
+        "SAFE-T1101"
+      ],
+      "deprecationReason": "The Framework Model v2 taxonomy review found no independently classifiable mechanism beyond the replacement technique or technique chain.",
+      "profiles": [
+        "core",
+        "mcp"
       ]
     },
     {
@@ -756,7 +850,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1111",
@@ -775,11 +874,39 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "code-agent"
+      ]
+    },
+    {
+      "id": "SAFE-T1112",
+      "name": "Sampling Request Abuse",
+      "tactic": "ATK-TA0002",
+      "tacticName": "Execution",
+      "severity": "High",
+      "description": "Sampling Request Abuse is the inferred misuse of a supporting Model Context Protocol (MCP) client's model access when a malicious or compromised server causes an attacker-influenced generation outside meaningful request-specific approval or policy enforcement.",
+      "mitigations": [
+        "SAFE-M-21",
+        "SAFE-M-22",
+        "SAFE-M-29",
+        "SAFE-M-69",
+        "SAFE-M-73"
+      ],
+      "mitreAttackMapping": [
+        "T1204"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1201",
-      "name": "MCP Rug Pull Attack",
+      "name": "Post-Approval Tool Mutation",
       "tactic": "ATK-TA0003",
       "tacticName": "Persistence",
       "severity": "High",
@@ -801,6 +928,13 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1001"
+      ],
+      "aliases": [
+        "MCP Rug Pull Attack"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -824,6 +958,10 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1007"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -846,6 +984,11 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1003"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp",
+        "code-agent"
       ]
     },
     {
@@ -869,6 +1012,12 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T2106"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp",
+        "rag-memory"
       ]
     },
     {
@@ -890,7 +1039,16 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "deprecated",
+      "replacedBy": [
+        "SAFE-T1201"
+      ],
+      "deprecationReason": "The Framework Model v2 taxonomy review found no independently classifiable mechanism beyond the replacement technique or technique chain.",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1206",
@@ -911,7 +1069,12 @@
         "SAFE-M-70"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp",
+        "code-agent"
+      ]
     },
     {
       "id": "SAFE-T1207",
@@ -932,6 +1095,10 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1006"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -954,6 +1121,12 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1204"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp",
+        "rag-memory"
       ]
     },
     {
@@ -979,11 +1152,20 @@
       "relatedTechniques": [
         "SAFE-T1008",
         "SAFE-T1004"
+      ],
+      "lifecycleStatus": "deprecated",
+      "replacedBy": [
+        "SAFE-T1008"
+      ],
+      "deprecationReason": "The Framework Model v2 taxonomy review found no independently classifiable mechanism beyond the replacement technique or technique chain.",
+      "profiles": [
+        "core",
+        "mcp"
       ]
     },
     {
       "id": "SAFE-T1302",
-      "name": "High-Privilege Tool Abuse",
+      "name": "Agentic Confused Deputy",
       "tactic": "ATK-TA0004",
       "tacticName": "Privilege Escalation",
       "severity": "High",
@@ -999,7 +1181,15 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "aliases": [
+        "High-Privilege Tool Abuse"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1303",
@@ -1021,7 +1211,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp",
+        "code-agent"
+      ]
     },
     {
       "id": "SAFE-T1304",
@@ -1042,7 +1237,11 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1305",
@@ -1063,7 +1262,12 @@
         "SAFE-M-69"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp",
+        "code-agent"
+      ]
     },
     {
       "id": "SAFE-T1306",
@@ -1086,6 +1290,14 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1009"
+      ],
+      "lifecycleStatus": "deprecated",
+      "replacedBy": [
+        "SAFE-T1009"
+      ],
+      "deprecationReason": "The frozen contracts define the same multi-authorization-server issuer-misbinding mechanism and immediate cross-issuer authorization-code or token disclosure. A rogue server is a prerequisite and actor role, not a separate technique.",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -1109,6 +1321,10 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1009"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -1132,6 +1348,10 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1009"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -1155,7 +1375,17 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "deprecated",
+      "replacedBy": [
+        "SAFE-T1102",
+        "SAFE-T1302"
+      ],
+      "deprecationReason": "The Framework Model v2 taxonomy review found no independently classifiable mechanism beyond the replacement technique or technique chain.",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1401",
@@ -1186,6 +1416,10 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1001"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -1217,6 +1451,11 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1001"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
       ]
     },
     {
@@ -1241,7 +1480,11 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1404",
@@ -1264,7 +1507,11 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1405",
@@ -1287,7 +1534,11 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1406",
@@ -1311,7 +1562,11 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1407",
@@ -1334,6 +1589,10 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1004"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -1357,6 +1616,10 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1009"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -1374,6 +1637,11 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1001"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
       ]
     },
     {
@@ -1393,7 +1661,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp",
+        "code-agent"
+      ]
     },
     {
       "id": "SAFE-T1503",
@@ -1413,7 +1686,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp",
+        "code-agent"
+      ]
     },
     {
       "id": "SAFE-T1504",
@@ -1431,7 +1709,11 @@
         "SAFE-M-72"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1505",
@@ -1452,7 +1734,13 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp",
+        "rag-memory"
+      ]
     },
     {
       "id": "SAFE-T1506",
@@ -1474,6 +1762,10 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1009"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -1496,6 +1788,10 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1009"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -1516,7 +1812,11 @@
         "SAFE-M-45"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1602",
@@ -1534,7 +1834,11 @@
         "SAFE-M-37"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1603",
@@ -1553,7 +1857,12 @@
         "SAFE-M-37"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1604",
@@ -1569,7 +1878,11 @@
         "SAFE-M-29"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1605",
@@ -1587,7 +1900,11 @@
         "SAFE-M-37"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1606",
@@ -1605,7 +1922,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp",
+        "code-agent"
+      ]
     },
     {
       "id": "SAFE-T1701",
@@ -1627,7 +1949,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1702",
@@ -1648,6 +1975,16 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T2106"
+      ],
+      "lifecycleStatus": "deprecated",
+      "replacedBy": [
+        "SAFE-T1204"
+      ],
+      "deprecationReason": "The frozen contracts define the same persistent-memory write, later cross-session retrieval, and behavior-influence mechanism. Shared scope and Lateral Movement are deployment and tactic mappings rather than a separate atomic behavior.",
+      "profiles": [
+        "core",
+        "mcp",
+        "rag-memory"
       ]
     },
     {
@@ -1669,7 +2006,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1704",
@@ -1693,6 +2035,11 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1004"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
       ]
     },
     {
@@ -1715,7 +2062,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1706",
@@ -1733,6 +2085,10 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1009"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -1751,6 +2107,10 @@
       "mitreAttackMapping": [],
       "relatedTechniques": [
         "SAFE-T1009"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
       ]
     },
     {
@@ -1770,7 +2130,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1802",
@@ -1789,7 +2154,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp",
+        "code-agent"
+      ]
     },
     {
       "id": "SAFE-T1803",
@@ -1807,7 +2177,11 @@
         "SAFE-M-72"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1804",
@@ -1827,7 +2201,12 @@
         "SAFE-M-72"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1805",
@@ -1848,7 +2227,13 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp",
+        "rag-memory"
+      ]
     },
     {
       "id": "SAFE-T1901",
@@ -1869,11 +2254,16 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1902",
-      "name": "Covert Channel in Responses",
+      "name": "Response-Borne Covert Channel",
       "tactic": "ATK-TA0011",
       "tacticName": "Command and Control",
       "severity": "Medium",
@@ -1888,7 +2278,15 @@
         "SAFE-M-72"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "aliases": [
+        "Covert Channel in Responses"
+      ],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1903",
@@ -1910,7 +2308,11 @@
         "SAFE-M-70"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1904",
@@ -1929,7 +2331,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1910",
@@ -1949,7 +2356,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1911",
@@ -1969,7 +2381,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1912",
@@ -1991,7 +2408,16 @@
         "SAFE-M-72"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "deprecated",
+      "replacedBy": [
+        "SAFE-T1902"
+      ],
+      "deprecationReason": "The Framework Model v2 taxonomy review found no independently classifiable mechanism beyond the replacement technique or technique chain.",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1913",
@@ -2012,7 +2438,11 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1914",
@@ -2036,7 +2466,12 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T1915",
@@ -2057,7 +2492,11 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "financial-agent"
+      ]
     },
     {
       "id": "SAFE-T2101",
@@ -2075,7 +2514,11 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T2102",
@@ -2094,7 +2537,11 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T2103",
@@ -2113,7 +2560,13 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp",
+        "code-agent"
+      ]
     },
     {
       "id": "SAFE-T2104",
@@ -2131,7 +2584,13 @@
         "SAFE-M-74"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp",
+        "financial-agent"
+      ]
     },
     {
       "id": "SAFE-T2105",
@@ -2151,7 +2610,12 @@
         "SAFE-M-51"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp"
+      ]
     },
     {
       "id": "SAFE-T3001",
@@ -2171,23 +2635,29 @@
         "SAFE-M-51"
       ],
       "mitreAttackMapping": [],
-      "relatedTechniques": []
+      "relatedTechniques": [],
+      "lifecycleStatus": "active",
+      "profiles": [
+        "core",
+        "mcp",
+        "rag-memory"
+      ]
     }
   ],
   "tacticDistribution": {
     "Reconnaissance": 0,
     "Resource Development": 1,
     "Initial Access": 9,
-    "Execution": 9,
-    "Persistence": 8,
-    "Privilege Escalation": 9,
+    "Execution": 8,
+    "Persistence": 7,
+    "Privilege Escalation": 6,
     "Defense Evasion": 8,
     "Credential Access": 7,
     "Discovery": 6,
-    "Lateral Movement": 7,
+    "Lateral Movement": 6,
     "Collection": 5,
     "Command and Control": 4,
-    "Exfiltration": 6,
+    "Exfiltration": 5,
     "Impact": 6
   }
 }

@@ -17,8 +17,14 @@ export type {
 } from "./types.js";
 export { STRIDE_LABELS } from "./types.js";
 
+/** Accept SAF-T and SAFE-T (any case); mappings are keyed by SAFE-T. */
+function normalizeTechniqueId(id: string): string {
+  return id.trim().toUpperCase().replace(/^SAF-(?=T)/, "SAFE-");
+}
+
 /** Get all framework mappings for a single SAFE-MCP technique. */
-export function getMappings(techniqueId: string): FrameworkMappings {
+export function getMappings(rawTechniqueId: string): FrameworkMappings {
+  const techniqueId = normalizeTechniqueId(rawTechniqueId);
   return {
     stride: getStride(techniqueId),
     atlas: getAtlas(techniqueId),
@@ -28,7 +34,8 @@ export function getMappings(techniqueId: string): FrameworkMappings {
 }
 
 /** Compute coverage summaries from a set of findings (technique IDs). */
-export function getCoverage(techniqueIds: string[]): FrameworkCoverage[] {
+export function getCoverage(rawTechniqueIds: string[]): FrameworkCoverage[] {
+  const techniqueIds = rawTechniqueIds.map(normalizeTechniqueId);
   const strideCounts: Record<string, number> = {};
   const owaspCounts: Record<string, number> = {};
   const atlasCounts: Record<string, number> = {};

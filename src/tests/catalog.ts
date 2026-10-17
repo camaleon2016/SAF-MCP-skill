@@ -2,7 +2,18 @@
  * Catalog integrity: the data the engine ships must be internally consistent,
  * and every rule must lead to at least one mitigation.
  */
-import { listTechniques, listMitigations, getMitigationsForTechnique, getFrameworkStats } from "../engine/analyze.js";
+import {
+  listTechniques,
+  listMitigations,
+  getMitigationsForTechnique,
+  getFrameworkStats,
+  getTechnique,
+  getMitigation,
+  searchTechniques,
+  searchMitigations,
+  rankMitigationsByImpact,
+} from "../engine/analyze.js";
+import { getMappings } from "../mappings/index.js";
 import { listRules, analyzeTool } from "../engine/rules.js";
 
 let passed = 0;
@@ -75,11 +86,15 @@ test("CAT-005: every rule maps to a known technique that has mitigations", () =>
 
 test("CAT-006: published counts match the data", () => {
   const stats = getFrameworkStats();
-  const fm = stats.mitigations as { totalMitigations: number };
-  const ft = stats.techniques as { totalTechniques: number; totalMitigations: number };
-  if (fm.totalMitigations !== mitigations.length) throw new Error(`mitigations.json says ${fm.totalMitigations}, data has ${mitigations.length}`);
-  if (ft.totalMitigations !== mitigations.length) throw new Error(`techniques.json says ${ft.totalMitigations}, data has ${mitigations.length}`);
+  const active = mitigations.filter((m) => m.lifecycleStatus !== "withdrawn").length;
+  const fm = stats.mitigations as { totalMitigations: number; withdrawnMitigations?: number };
+  const ft = stats.techniques as { totalTechniques: number; totalMitigations: number; activeTechniques?: number };
+  if (fm.totalMitigations !== active) throw new Error(`mitigations.json says ${fm.totalMitigations} active, data has ${active}`);
+  if (fm.withdrawnMitigations !== mitigations.length - active) throw new Error(`withdrawn count is ${fm.withdrawnMitigations}`);
+  if (ft.totalMitigations !== active) throw new Error(`techniques.json says ${ft.totalMitigations}, data has ${active}`);
   if (ft.totalTechniques !== techniques.length) throw new Error(`techniques.json says ${ft.totalTechniques}, data has ${techniques.length}`);
+  const activeTech = techniques.filter((t) => t.lifecycleStatus !== "deprecated").length;
+  if (ft.activeTechniques !== activeTech) throw new Error(`activeTechniques is ${ft.activeTechniques}, data has ${activeTech}`);
 });
 
 test("CAT-007: findings from the README demo all carry mitigations", () => {
@@ -89,6 +104,78 @@ test("CAT-007: findings from the README demo all carry mitigations", () => {
   });
   if (r.findings.length === 0) throw new Error("expected findings");
   assertEmpty(r.findings.filter((f) => f.mitigations.length === 0).map((f) => f.ruleId), "findings without mitigations");
+});
+
+test("CAT-008: no rule targets a deprecated technique", () => {
+  const byId = new Map(techniques.map((t) => [t.id, t]));
+  assertEmpty(
+    listRules()
+      .filter((r) => byId.get(r.techniqueId)?.lifecycleStatus === "deprecated")
+      .map((r) => `${r.id}:${r.techniqueId} (use ${byId.get(r.techniqueId)?.replacedBy?.join(" or ")})`),
+    "rules on deprecated techniques",
+  );
+});
+
+test("CAT-009: every deprecated technique names active replacements", () => {
+  const byId = new Map(techniques.map((t) => [t.id, t]));
+  assertEmpty(
+    techniques
+      .filter((t) => t.lifecycleStatus === "deprecated")
+      .filter((t) => !t.replacedBy?.length || t.replacedBy.some((r) => byId.get(r)?.lifecycleStatus !== "active"))
+      .map((t) => t.id),
+    "deprecated techniques without active replacements",
+  );
+});
+
+test("CAT-010: every rule's technique has STRIDE, ATLAS, OWASP LLM, and NIST AI RMF mappings", () => {
+  assertEmpty(
+    listRules().flatMap((r) => {
+      const m = getMappings(r.techniqueId);
+      const missing = [
+        m.stride.length === 0 && "STRIDE",
+        m.atlas.length === 0 && "ATLAS",
+        m.owaspLlm.length === 0 && "OWASP",
+        m.nistAiRmf.length === 0 && "NIST",
+      ].filter(Boolean);
+      return missing.length ? [`${r.id}:${r.techniqueId} missing ${missing.join("/")}`] : [];
+    }),
+    "rules whose findings would lack crosswalks",
+  );
+});
+
+test("CAT-011: withdrawn mitigations are resolvable but never recommended", () => {
+  const withdrawn = mitigations.filter((m) => m.lifecycleStatus === "withdrawn");
+  if (withdrawn.length === 0) return;
+  const ids = new Set(withdrawn.map((m) => m.id));
+  assertEmpty(withdrawn.filter((m) => m.mitigates.length > 0).map((m) => m.id), "withdrawn mitigations with links");
+  assertEmpty(withdrawn.filter((m) => !getMitigation(m.id)).map((m) => m.id), "withdrawn mitigations that no longer resolve");
+  assertEmpty(
+    techniques.flatMap((t) => getMitigationsForTechnique(t.id).filter((m) => ids.has(m.id)).map((m) => `${t.id}->${m.id}`)),
+    "withdrawn mitigations offered for techniques",
+  );
+  assertEmpty(withdrawn.filter((m) => searchMitigations(m.name).some((x) => x.id === m.id)).map((m) => m.id), "withdrawn mitigations in search");
+  assertEmpty(rankMitigationsByImpact().filter((r) => ids.has(r.mitigation.id)).map((r) => r.mitigation.id), "withdrawn mitigations in rankings");
+});
+
+test("CAT-012: SAF- and SAFE- IDs both resolve, in any case", () => {
+  const checks: Array<[string, unknown]> = [
+    ["SAF-T1001", getTechnique("SAF-T1001")?.id],
+    ["saf-t1001", getTechnique("saf-t1001")?.id],
+    ["SAF-M-1", getMitigation("SAF-M-1")?.id],
+    ["SAF-T1001 mitigations", getMitigationsForTechnique("SAF-T1001").length > 0 || undefined],
+    ["SAF-T1001 mappings", getMappings("SAF-T1001").owaspLlm.length > 0 || undefined],
+  ];
+  assertEmpty(checks.filter(([, v]) => !v).map(([k]) => k), "IDs that did not resolve");
+});
+
+test("CAT-013: techniques renamed upstream are still found by their old names", () => {
+  assertEmpty(
+    techniques
+      .flatMap((t) => (t.aliases ?? []).map((a) => [t.id, a] as const))
+      .filter(([id, a]) => !searchTechniques(a).some((x) => x.id === id))
+      .map(([id, a]) => `${id} "${a}"`),
+    "aliases search cannot find",
+  );
 });
 
 console.log(`\n  Total: ${passed + failed} | Passed: ${passed} | Failed: ${failed}\n`);

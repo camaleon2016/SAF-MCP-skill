@@ -477,7 +477,8 @@ const rules: Rule[] = [
   // Over-Privileged Tool Abuse
   {
     id: "RULE-018",
-    techniqueId: "SAFE-T1104",
+    // Was SAFE-T1104 (Over-Privileged Tool Abuse), deprecated upstream and replaced by SAFE-T1302.
+    techniqueId: "SAFE-T1302",
     test(input) {
       const tools = allTools(input);
       const overprivileged = tools.filter((t) => {
