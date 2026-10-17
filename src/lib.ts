@@ -1,13 +1,13 @@
 /**
- * Library entry point: `import { analyzeTool } from "safe-mcp-skill"`.
+ * Library entry point: `import { analyzeTool } from "saf-mcp-skill"`.
  *
  * Importing this module has no side effects. The MCP stdio server lives in
- * index.ts (the `safe-mcp-skill` command) and only starts when run directly.
+ * index.ts (the `saf-mcp-skill` command) and only starts when run directly.
  */
 export { VERSION } from "./version.js";
 
 // OpenAI / LangChain / Azure OpenAI function calling:
-//   import { openAiFunctions, dispatch } from "safe-mcp-skill"
+//   import { openAiFunctions, dispatch } from "saf-mcp-skill"
 export { openAiFunctions, dispatch } from "./openai.js";
 
 // Analysis engine

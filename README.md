@@ -1,8 +1,10 @@
-# SAFE-MCP Security Analysis Skill
+# SAF-MCP Security Analysis Skill
 
 **Describe a tool, server, or agent setup — or point it at a running MCP server to auto-discover everything — and the skill tells you what's dangerous and how to fix it.**
 
-A security analysis engine built on the [SAFE-MCP framework](https://github.com/safe-agentic-framework/safe-mcp) that evaluates MCP tool definitions, server configurations, and agent architectures against the 78 active attack techniques (86 cataloged) across 14 MITRE ATT&CK-aligned tactics.
+A security analysis engine built on the [SAF-MCP framework](https://github.com/safe-agentic-framework/safe-mcp) (formerly SAFE-MCP) that evaluates MCP tool definitions, server configurations, and agent architectures against the 78 active attack techniques (86 cataloged) across 14 MITRE ATT&CK-aligned tactics.
+
+> **Renamed in 2.2.0.** This project was SAFE-MCP-skill (`safe-mcp-skill`) and now matches upstream's rename of SAFE-MCP to SAF-MCP. Old GitHub links redirect, settings with the old `SAFE_MCP_` prefix still work (with a deprecation warning), and technique IDs keep the `SAFE-` form in results.
 
 The skill is callable from any agent framework — MCP (stdio or HTTP), OpenAI function calling, LangChain, Azure OpenAI, or Semantic Kernel.
 
@@ -176,8 +178,8 @@ winget install Microsoft.DotNet.SDK.8
 
 ```bash
 # 1. Clone or copy the project
-git clone https://github.com/camaleon2016/SAFE-MCP-skill.git safe-mcp-skill
-cd safe-mcp-skill
+git clone https://github.com/camaleon2016/SAF-MCP-skill.git saf-mcp-skill
+cd saf-mcp-skill
 
 # 2. Install dependencies
 npm install
@@ -214,7 +216,7 @@ npm run start:rest   # OpenAPI REST server (:3002)
 ### From Source (any OS)
 
 ```bash
-cd safe-mcp-skill
+cd saf-mcp-skill
 npm install
 npm run build
 ```
@@ -244,8 +246,8 @@ The skill only needs to be installed and built on **one** machine. Once running 
 
 ```bash
 # On machine A
-HOST=0.0.0.0 SAFE_MCP_REQUIRE_API_KEY=true SAFE_MCP_API_KEYS="$(openssl rand -hex 24)" \
-  SAFE_MCP_ALLOW_PRIVATE_URLS=true npm run start:rest
+HOST=0.0.0.0 SAF_MCP_REQUIRE_API_KEY=true SAF_MCP_API_KEYS="$(openssl rand -hex 24)" \
+  SAF_MCP_ALLOW_PRIVATE_URLS=true npm run start:rest
 ```
 
 Then from machine B:
@@ -263,7 +265,7 @@ curl -X POST http://machine-a:3002/v1/discover/http \
 > **Important:** All `npm` commands must be run from the project root directory (where `package.json` is located).
 >
 > ```bash
-> cd safe-mcp-skill      # or wherever you cloned/copied the project
+> cd saf-mcp-skill      # or wherever you cloned/copied the project
 > ```
 >
 > **Windows PowerShell / CMD:** If `npm` is not recognized, close and reopen your terminal so PATH updates take effect. Or in PowerShell run:
@@ -285,9 +287,9 @@ The server reads JSON-RPC from stdin and writes to stdout.
 ```json
 {
   "mcpServers": {
-    "safe-mcp": {
+    "saf-mcp": {
       "command": "node",
-      "args": ["<path-to>/safe-mcp-skill/dist/index.js"]
+      "args": ["<path-to>/saf-mcp-skill/dist/index.js"]
     }
   }
 }
@@ -298,9 +300,9 @@ The server reads JSON-RPC from stdin and writes to stdout.
 {
   "mcp": {
     "servers": {
-      "safe-mcp": {
+      "saf-mcp": {
         "command": "node",
-        "args": ["<path-to>/safe-mcp-skill/dist/index.js"]
+        "args": ["<path-to>/saf-mcp-skill/dist/index.js"]
       }
     }
   }
@@ -322,20 +324,20 @@ Configure with environment variables:
 
 **Linux / macOS / WSL / Git Bash:**
 ```bash
-HOST=0.0.0.0 PORT=8080 SAFE_MCP_REQUIRE_API_KEY=true SAFE_MCP_API_KEYS="$(openssl rand -hex 24)" npm run start:http
+HOST=0.0.0.0 PORT=8080 SAF_MCP_REQUIRE_API_KEY=true SAF_MCP_API_KEYS="$(openssl rand -hex 24)" npm run start:http
 ```
 
 **Windows PowerShell:**
 ```powershell
-$env:HOST="0.0.0.0"; $env:PORT="8080"; $env:SAFE_MCP_REQUIRE_API_KEY="true"; $env:SAFE_MCP_API_KEYS="<at least 16 random characters>"; npm run start:http
+$env:HOST="0.0.0.0"; $env:PORT="8080"; $env:SAF_MCP_REQUIRE_API_KEY="true"; $env:SAF_MCP_API_KEYS="<at least 16 random characters>"; npm run start:http
 ```
 
 **Windows CMD:**
 ```cmd
-set HOST=0.0.0.0&& set PORT=8080&& set SAFE_MCP_REQUIRE_API_KEY=true&& set SAFE_MCP_API_KEYS=<at least 16 random characters>&& npm run start:http
+set HOST=0.0.0.0&& set PORT=8080&& set SAF_MCP_REQUIRE_API_KEY=true&& set SAF_MCP_API_KEYS=<at least 16 random characters>&& npm run start:http
 ```
 
-> Binding to anything other than loopback without API keys stops the server at startup. Set `SAFE_MCP_ALLOW_INSECURE_BIND=true` only if something else (a VPN, a reverse proxy with auth) already protects the port.
+> Binding to anything other than loopback without API keys stops the server at startup. Set `SAF_MCP_ALLOW_INSECURE_BIND=true` only if something else (a VPN, a reverse proxy with auth) already protects the port.
 
 ### Option 3 — OpenAPI REST Server
 
@@ -415,7 +417,7 @@ You can import the OpenAPI spec (`http://127.0.0.1:3002/v1/openapi.json`) into e
 Import the tool definitions directly in your Node.js application:
 
 ```typescript
-import { openAiFunctions, dispatch } from "safe-mcp-skill";
+import { openAiFunctions, dispatch } from "saf-mcp-skill";
 
 // openAiFunctions is an array of OpenAI Chat Completions tool definitions
 // Pass them to the API:
@@ -458,7 +460,7 @@ See [plugins/csharp/README.md](plugins/csharp/README.md) for full details.
 Use the analysis engine directly without any server:
 
 ```typescript
-import { analyzeArchitecture, analyzeTool, analyzeServer } from "safe-mcp-skill";
+import { analyzeArchitecture, analyzeTool, analyzeServer } from "saf-mcp-skill";
 
 const result = analyzeTool({
   name: "run_code",
@@ -474,7 +476,7 @@ Importing the package has no side effects: it starts no server and never touches
 To use it from another project, install it from GitHub (npm builds it during install):
 
 ```bash
-npm install github:camaleon2016/SAFE-MCP-skill
+npm install github:camaleon2016/SAF-MCP-skill
 ```
 
 ### Option 7 — Agent Skill (SKILL.md)
@@ -503,14 +505,14 @@ copy .env.example .env
 ### Access Control
 
 ```bash
-SAFE_MCP_REQUIRE_API_KEY=true
-SAFE_MCP_API_KEYS=key-one-at-least-16-chars,key-two-at-least-16-chars
-SAFE_MCP_REQUIRE_IP_ALLOWLIST=true
-SAFE_MCP_IP_ALLOWLIST=127.0.0.1,::1,10.0.0.0/8      # single addresses and CIDR ranges
-SAFE_MCP_TRUST_PROXY=false                           # true only behind a proxy you run
+SAF_MCP_REQUIRE_API_KEY=true
+SAF_MCP_API_KEYS=key-one-at-least-16-chars,key-two-at-least-16-chars
+SAF_MCP_REQUIRE_IP_ALLOWLIST=true
+SAF_MCP_IP_ALLOWLIST=127.0.0.1,::1,10.0.0.0/8      # single addresses and CIDR ranges
+SAF_MCP_TRUST_PROXY=false                           # true only behind a proxy you run
 ```
 
-Clients pass the key via the `X-Api-Key` header or `Authorization: Bearer <key>`. Requiring keys or an allowlist with an empty list stops the server at startup instead of silently allowing everyone. `X-Forwarded-For` is ignored unless `SAFE_MCP_TRUST_PROXY=true`; when trusted, the rightmost entry (the one your proxy added) is used.
+Clients pass the key via the `X-Api-Key` header or `Authorization: Bearer <key>`. Requiring keys or an allowlist with an empty list stops the server at startup instead of silently allowing everyone. `X-Forwarded-For` is ignored unless `SAF_MCP_TRUST_PROXY=true`; when trusted, the rightmost entry (the one your proxy added) is used.
 
 ### Security Model
 
@@ -518,11 +520,11 @@ The skill can start processes and make outbound requests, so its own surface is 
 
 | Setting | Default | What it controls |
 |---|---|---|
-| `SAFE_MCP_ALLOW_COMMAND_DISCOVERY` | on for stdio, **off** for REST and MCP HTTP | Stdio discovery and config entries with a `command` start a child process on the host. Turning this on for a network server also requires API keys, and gives every key holder code execution on the host. |
-| `SAFE_MCP_ALLOW_INSECURE_BIND` | `false` | Allows a non loopback `HOST` without API keys. |
-| `SAFE_MCP_CORS_ORIGINS` | none | Browser origins allowed to call the API. Requests carrying any other `Origin` are refused. |
-| `SAFE_MCP_ALLOWED_HOSTS` | loopback names when bound to loopback | Accepted `Host` header values. Blocks DNS rebinding. |
-| `SAFE_MCP_ALLOW_PRIVATE_URLS` | allowed on a loopback bind, blocked when exposed | Whether URL discovery may reach private and loopback ranges. Cloud metadata and link local addresses are always blocked. |
+| `SAF_MCP_ALLOW_COMMAND_DISCOVERY` | on for stdio, **off** for REST and MCP HTTP | Stdio discovery and config entries with a `command` start a child process on the host. Turning this on for a network server also requires API keys, and gives every key holder code execution on the host. |
+| `SAF_MCP_ALLOW_INSECURE_BIND` | `false` | Allows a non loopback `HOST` without API keys. |
+| `SAF_MCP_CORS_ORIGINS` | none | Browser origins allowed to call the API. Requests carrying any other `Origin` are refused. |
+| `SAF_MCP_ALLOWED_HOSTS` | loopback names when bound to loopback | Accepted `Host` header values. Blocks DNS rebinding. |
+| `SAF_MCP_ALLOW_PRIVATE_URLS` | allowed on a loopback bind, blocked when exposed | Whether URL discovery may reach private and loopback ranges. Cloud metadata and link local addresses are always blocked. |
 
 POST requests must be `Content-Type: application/json`. Discovery refusals return `403` with `"error": "Blocked by policy"` and the reason.
 
@@ -531,11 +533,11 @@ POST requests must be `Content-Type: application/json`. Discovery refusals retur
 **To use command discovery from the REST server** (the demos below do this), start it with:
 
 ```bash
-export SAFE_MCP_API_KEYS="$(openssl rand -hex 24)"
-SAFE_MCP_ALLOW_COMMAND_DISCOVERY=true SAFE_MCP_REQUIRE_API_KEY=true npm run start:rest
+export SAF_MCP_API_KEYS="$(openssl rand -hex 24)"
+SAF_MCP_ALLOW_COMMAND_DISCOVERY=true SAF_MCP_REQUIRE_API_KEY=true npm run start:rest
 ```
 
-and send `-H "X-Api-Key: $SAFE_MCP_API_KEYS"` with each request.
+and send `-H "X-Api-Key: $SAF_MCP_API_KEYS"` with each request.
 
 ### Logging
 
@@ -551,7 +553,7 @@ Logs are written in structured JSONL format. Audit events (tool calls, access de
 ## Project Structure
 
 ```
-safe-mcp-skill/
+saf-mcp-skill/
 ├── src/
 │   ├── data/
 │   │   ├── techniques.json          # 86 techniques (78 active, 8 deprecated), 14 tactics
@@ -587,7 +589,7 @@ safe-mcp-skill/
 │   ├── openai.ts                    # OpenAI function definitions
 │   ├── lib.ts                       # Library entry point (no side effects)
 │   ├── version.ts                   # Package version
-│   └── index.ts                     # The safe-mcp-skill command (MCP stdio server)
+│   └── index.ts                     # The saf-mcp-skill command (MCP stdio server)
 ├── scripts/
 │   ├── sync-catalog.ts              # Syncs src/data from upstream SAF-MCP
 │   ├── severity-overrides.json      # Deliberate departures from upstream severity
@@ -673,7 +675,7 @@ The sync rejects overrides for unknown techniques, invalid severities, missing r
 
 ### IDs: SAFE- and SAF-
 
-Upstream renamed the framework from SAFE-MCP to SAF-MCP, so IDs now appear as `SAF-T1001` and `SAF-M-1`. Every lookup accepts both forms in any case (`SAF-T1001`, `safe-t1001`), and results use the `SAFE-` form for compatibility with existing integrations.
+Upstream renamed the framework from SAF-MCP to SAF-MCP, so IDs now appear as `SAF-T1001` and `SAF-M-1`. Every lookup accepts both forms in any case (`SAF-T1001`, `safe-t1001`), and results use the `SAFE-` form for compatibility with existing integrations.
 
 ## MCP Tools
 
@@ -687,7 +689,7 @@ The skill exposes 18 tools over MCP:
 | `discover_and_analyze_stdio` | Connect to a local MCP server (stdio), auto-enumerate tools, and analyze |
 | `discover_and_analyze_http` | Connect to a remote MCP server (HTTP/SSE), auto-enumerate tools, and analyze |
 | `discover_and_analyze_config` | Parse an MCP config file, connect to all servers, and analyze the full architecture |
-| `get_technique` | Look up a SAFE-MCP technique by ID |
+| `get_technique` | Look up a SAF-MCP technique by ID |
 | `get_mitigation` | Look up a mitigation by ID |
 | `search_techniques` | Search techniques by keyword |
 | `search_mitigations` | Search mitigations by keyword |
@@ -767,7 +769,7 @@ This walkthrough sends increasingly complex inputs — a single tool, then a ful
 Navigate to the project root directory (where `package.json` is) and start the REST server:
 
 ```bash
-cd safe-mcp-skill
+cd saf-mcp-skill
 npm run build
 npm run start:rest
 ```
@@ -777,14 +779,14 @@ npm run start:rest
 
 **PowerShell:**
 ```powershell
-cd C:\path\to\safe-mcp-skill
+cd C:\path\to\saf-mcp-skill
 npm run build
 npm run start:rest
 ```
 
 **CMD:**
 ```cmd
-cd C:\path\to\safe-mcp-skill
+cd C:\path\to\saf-mcp-skill
 npm run build
 npm run start:rest
 ```
@@ -799,7 +801,7 @@ npm run start:rest
 You should see:
 
 ```
-SAFE-MCP REST API listening on http://127.0.0.1:3002
+SAF-MCP REST API listening on http://127.0.0.1:3002
 OpenAPI spec: http://127.0.0.1:3002/v1/openapi.json
 Health: http://127.0.0.1:3002/health
 ```
@@ -828,7 +830,7 @@ curl.exe http://127.0.0.1:3002/health
 
 **Expected output:**
 ```json
-{ "status": "ok", "name": "safe-mcp-skill", "version": "1.0.0", "apiVersion": "v1" }
+{ "status": "ok", "name": "saf-mcp-skill", "version": "1.0.0", "apiVersion": "v1" }
 ```
 
 #### 3. Analyze a Dangerous Tool
@@ -914,7 +916,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
 }
 ```
 
-Each finding maps to a specific SAFE-MCP technique ID, tells you *why* it's dangerous, and links to concrete mitigations you can look up (see step 7 below).
+Each finding maps to a specific SAF-MCP technique ID, tells you *why* it's dangerous, and links to concrete mitigations you can look up (see step 7 below).
 
 #### 4. Analyze a Full Agent Architecture
 
@@ -1024,11 +1026,11 @@ Each finding includes the same structure as step 3 — technique ID, severity, d
 > **Prerequisite:** Stdio and config discovery start processes, so they are off on the REST server by default. For these demos, restart the REST server with command discovery and an API key, as shown in [Security Model](#security-model):
 >
 > ```bash
-> export SAFE_MCP_API_KEYS="$(openssl rand -hex 24)"
-> SAFE_MCP_ALLOW_COMMAND_DISCOVERY=true SAFE_MCP_REQUIRE_API_KEY=true npm run start:rest
+> export SAF_MCP_API_KEYS="$(openssl rand -hex 24)"
+> SAF_MCP_ALLOW_COMMAND_DISCOVERY=true SAF_MCP_REQUIRE_API_KEY=true npm run start:rest
 > ```
 >
-> **PowerShell:** `$env:SAFE_MCP_API_KEYS = -join ((48..57)+(97..102) | Get-Random -Count 32 | % {[char]$_}); $env:SAFE_MCP_ALLOW_COMMAND_DISCOVERY="true"; $env:SAFE_MCP_REQUIRE_API_KEY="true"; npm run start:rest`
+> **PowerShell:** `$env:SAF_MCP_API_KEYS = -join ((48..57)+(97..102) | Get-Random -Count 32 | % {[char]$_}); $env:SAF_MCP_ALLOW_COMMAND_DISCOVERY="true"; $env:SAF_MCP_REQUIRE_API_KEY="true"; npm run start:rest`
 >
 > The examples below send that key. HTTP discovery needs neither setting.
 
@@ -1047,7 +1049,7 @@ For this demo, we'll point the skill at **itself** — it's a valid MCP server, 
 ```bash
 curl -X POST http://127.0.0.1:3002/v1/discover/stdio \
   -H "Content-Type: application/json" \
-  -H "X-Api-Key: $SAFE_MCP_API_KEYS" \
+  -H "X-Api-Key: $SAF_MCP_API_KEYS" \
   -d '{
     "command": "node",
     "args": ["dist/index.js"],
@@ -1055,7 +1057,7 @@ curl -X POST http://127.0.0.1:3002/v1/discover/stdio \
   }'
 ```
 
-> **Note:** `$(pwd)` inserts your current directory. If you're already in the `safe-mcp-skill` folder, this points the discovery at the skill's own MCP server. To analyze a different server, replace the `cwd` value with the absolute path to that server's project root.
+> **Note:** `$(pwd)` inserts your current directory. If you're already in the `saf-mcp-skill` folder, this points the discovery at the skill's own MCP server. To analyze a different server, replace the `cwd` value with the absolute path to that server's project root.
 
 <details>
 <summary>Windows alternatives</summary>
@@ -1064,11 +1066,11 @@ curl -X POST http://127.0.0.1:3002/v1/discover/stdio \
 ```powershell
 $cwd = (Get-Location).Path -replace '\\', '\\'
 $body = "{`"command`":`"node`",`"args`":[`"dist/index.js`"],`"cwd`":`"$cwd`"}"
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/stdio -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAFE_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/stdio -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAF_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
 ```
 **CMD:**
 ```cmd
-curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: application/json" -H "X-Api-Key: %SAFE_MCP_API_KEYS%" -d "{\"command\":\"node\",\"args\":[\"dist/index.js\"],\"cwd\":\"%cd%\"}"
+curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: application/json" -H "X-Api-Key: %SAF_MCP_API_KEYS%" -d "{\"command\":\"node\",\"args\":[\"dist/index.js\"],\"cwd\":\"%cd%\"}"
 ```
 
 </details>
@@ -1078,12 +1080,12 @@ curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: appli
 ```json
 {
   "discovered": {
-    "serverName": "safe-mcp-skill",
+    "serverName": "saf-mcp-skill",
     "serverVersion": "1.0.0",
     "toolCount": 18,
     "tools": [
-      { "name": "analyze_tool", "description": "Analyze a single MCP tool definition for SAFE-MCP security risks." },
-      { "name": "discover_and_analyze_stdio", "description": "Connect to a local MCP server via stdio, automatically enumerate all its tools, and run a full SAFE-MCP security analysis." }
+      { "name": "analyze_tool", "description": "Analyze a single MCP tool definition for SAF-MCP security risks." },
+      { "name": "discover_and_analyze_stdio", "description": "Connect to a local MCP server via stdio, automatically enumerate all its tools, and run a full SAF-MCP security analysis." }
     ]
   },
   "analysis": {
@@ -1114,7 +1116,7 @@ For this demo we'll again use the skill itself — start the MCP HTTP transport 
 
 ```bash
 # In a second terminal (keep the REST server running in the first):
-cd safe-mcp-skill
+cd saf-mcp-skill
 npm run start:http        # MCP HTTP on :3001
 ```
 
@@ -1150,7 +1152,7 @@ Paste the contents of your `claude_desktop_config.json` or VS Code MCP settings 
 ```bash
 curl -X POST http://127.0.0.1:3002/v1/discover/config \
   -H "Content-Type: application/json" \
-  -H "X-Api-Key: $SAFE_MCP_API_KEYS" \
+  -H "X-Api-Key: $SAF_MCP_API_KEYS" \
   -d '{
     "configJson": "{\"mcpServers\":{\"data-server\":{\"command\":\"node\",\"args\":[\"dist/index.js\"]},\"code-server\":{\"url\":\"http://localhost:4000/v1/mcp\"}}}"
   }'
@@ -1163,11 +1165,11 @@ curl -X POST http://127.0.0.1:3002/v1/discover/config \
 ```powershell
 $config = Get-Content "$env:APPDATA\Claude\claude_desktop_config.json" -Raw
 $body = @{ configJson = $config } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/config -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAFE_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/config -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAF_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
 ```
 **CMD:**
 ```cmd
-curl.exe -X POST http://127.0.0.1:3002/v1/discover/config -H "Content-Type: application/json" -H "X-Api-Key: %SAFE_MCP_API_KEYS%" -d "{\"configJson\":\"{\\\"mcpServers\\\":{\\\"data-server\\\":{\\\"command\\\":\\\"node\\\",\\\"args\\\":[\\\"dist/index.js\\\"]},\\\"code-server\\\":{\\\"url\\\":\\\"http://localhost:4000/v1/mcp\\\"}}}\"}"
+curl.exe -X POST http://127.0.0.1:3002/v1/discover/config -H "Content-Type: application/json" -H "X-Api-Key: %SAF_MCP_API_KEYS%" -d "{\"configJson\":\"{\\\"mcpServers\\\":{\\\"data-server\\\":{\\\"command\\\":\\\"node\\\",\\\"args\\\":[\\\"dist/index.js\\\"]},\\\"code-server\\\":{\\\"url\\\":\\\"http://localhost:4000/v1/mcp\\\"}}}\"}"
 ```
 
 </details>
@@ -1455,7 +1457,7 @@ for /f "tokens=5" %a in ('netstat -ano ^| findstr :3002') do taskkill /PID %a /F
 Run from the project root directory:
 
 ```bash
-cd safe-mcp-skill
+cd saf-mcp-skill
 npm test                # Red-team, detection, catalog integrity, package, and governance suites
 npm run typecheck       # Type-check without emitting
 npm run ci              # Full pipeline: typecheck → build → test
@@ -1466,7 +1468,7 @@ npm run ci              # Full pipeline: typecheck → build → test
 Run from the project root directory:
 
 ```bash
-cd safe-mcp-skill
+cd saf-mcp-skill
 npm run dev             # Stdio with ts-node (no build needed)
 npm run dev:http        # HTTP transport with ts-node
 npm run dev:rest        # REST API with ts-node

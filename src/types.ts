@@ -1,4 +1,4 @@
-// SAFE-MCP Framework TypeScript Types
+// SAF-MCP Framework TypeScript Types
 
 // ── Severity & Effectiveness ────────────────────────────────────────
 

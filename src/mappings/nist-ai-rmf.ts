@@ -1,5 +1,5 @@
 // ── NIST AI RMF Mapping ─────────────────────────────────────────────
-// Maps each SAFE-MCP technique to relevant NIST AI RMF subcategories.
+// Maps each SAF-MCP technique to relevant NIST AI RMF subcategories.
 //
 // GOVERN — governance, policies, accountability
 // MAP    — context, risk framing, stakeholder analysis

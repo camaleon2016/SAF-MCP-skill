@@ -1,7 +1,7 @@
 import type { IncomingMessage } from "node:http";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { logAccessDenied, logAccessGranted } from "./logger.js";
-import { buildBlockList, blockListHas, envList, normalizeIp } from "./policy.js";
+import { buildBlockList, blockListHas, envList, normalizeIp, setting } from "./policy.js";
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
@@ -9,11 +9,11 @@ import { buildBlockList, blockListHas, envList, normalizeIp } from "./policy.js"
  * The client address used for access decisions.
  *
  * X-Forwarded-For is attacker controlled unless a proxy you run sets it,
- * so it is ignored unless SAFE_MCP_TRUST_PROXY=true. When trusted, the
+ * so it is ignored unless SAF_MCP_TRUST_PROXY=true. When trusted, the
  * rightmost entry is used: that is the one your proxy appended.
  */
 export function getClientIp(req: IncomingMessage): string {
-  if (process.env["SAFE_MCP_TRUST_PROXY"] === "true") {
+  if (setting("TRUST_PROXY") === "true") {
     const forwarded = req.headers["x-forwarded-for"];
     if (typeof forwarded === "string" && forwarded.trim()) {
       const parts = forwarded.split(",").map((s) => s.trim()).filter(Boolean);
@@ -44,17 +44,17 @@ export interface AccessResult {
 export function checkAccess(req: IncomingMessage): AccessResult {
   const clientIp = getClientIp(req);
 
-  if (process.env["SAFE_MCP_REQUIRE_IP_ALLOWLIST"] === "true") {
-    const entries = envList("SAFE_MCP_IP_ALLOWLIST");
-    const allow = buildBlockList(entries, "SAFE_MCP_IP_ALLOWLIST");
+  if (setting("REQUIRE_IP_ALLOWLIST") === "true") {
+    const entries = envList("IP_ALLOWLIST");
+    const allow = buildBlockList(entries, "SAF_MCP_IP_ALLOWLIST");
     if (entries.length === 0 || !blockListHas(allow, clientIp)) {
       logAccessDenied("ip_not_allowlisted", clientIp, { allowlistSize: entries.length });
       return { allowed: false, reason: "IP address not in allowlist" };
     }
   }
 
-  if (process.env["SAFE_MCP_REQUIRE_API_KEY"] === "true") {
-    const keys = envList("SAFE_MCP_API_KEYS");
+  if (setting("REQUIRE_API_KEY") === "true") {
+    const keys = envList("API_KEYS");
     const provided =
       req.headers["x-api-key"] ?? req.headers["authorization"]?.replace(/^Bearer\s+/i, "");
     if (typeof provided !== "string" || !provided) {

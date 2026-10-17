@@ -2,6 +2,25 @@
 
 All notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.2.0] - Unreleased
+
+Renamed to match upstream. SAFE-MCP is now SAF-MCP (Secure Agentic Framework), and this project follows: the repository is SAF-MCP-skill, and the package and command are `saf-mcp-skill`. Nothing breaks for existing users.
+
+### Changed
+
+- The package and command are renamed from `SAF-MCP-skill` to `saf-mcp-skill`, and the MCP server reports itself as `saf-mcp-skill`. The repository is renamed to SAF-MCP-skill; GitHub redirects old links.
+- Settings use the `SAF_MCP_` prefix. The old `SAFE_MCP_` prefix still works and logs a one time deprecation warning. When both are set, `SAF_MCP_` wins.
+- Documentation, tool descriptions, and the catalog's framework name say SAF-MCP.
+- The Agent Skill is now named `saf-mcp-security-analysis`.
+
+### Compatibility
+
+- Technique and mitigation IDs keep the `SAFE-` form in results. Lookups accept both `SAF-` and `SAFE-`.
+- The C# plugin keeps its class and namespace names.
+- MCP client configs that point at `dist/index.js` keep working. Renaming the server's label in your config is optional.
+
+[2.2.0]: https://github.com/camaleon2016/SAF-MCP-skill/compare/v2.1.0...v2.2.0
+
 ## [2.1.0] - 2026-10-16
 
 Detection quality. Tool poisoning and schema poisoning detection is rebuilt, keyword rules stop matching parts of words, and RULE-002 reports the right technique. Findings change for many inputs: fewer false alarms, more real attacks caught.
@@ -32,7 +51,7 @@ Version 2.0.0 fixes serious issues in the skill's own security and brings its ca
 
 ### Security
 
-- - See [GHSA-jf24-ghv2-73gg](https://github.com/camaleon2016/SAFE-MCP-skill/security/advisories/GHSA-jf24-ghv2-73gg) for the command execution issue fixed in this release.
+- - See [GHSA-jf24-ghv2-73gg](https://github.com/camaleon2016/SAF-MCP-skill/security/advisories/GHSA-jf24-ghv2-73gg) for the command execution issue fixed in this release.
 - **Remote command execution through discovery (fixed).** In 1.x, `POST /v1/discover/stdio` and `/v1/discover/config` ran any command the caller sent, with authentication off by default. Command discovery is now off on the REST and MCP HTTP servers; enabling it requires API keys.
 - **Browser driven attacks on a local server (fixed).** In 1.x, the REST server allowed any origin, accepted `text/plain` POST bodies, and did not check the `Host` header, so a web page could reach a server bound to `127.0.0.1`, including through DNS rebinding. Foreign origins and hosts are now refused, and POST bodies must be `application/json`.
 - **IP allowlist bypass (fixed).** `X-Forwarded-For` was trusted from any client, CIDR entries never matched, and "required but empty" settings failed open. The header is now ignored unless `SAFE_MCP_TRUST_PROXY=true`, CIDR ranges work, and empty required settings stop startup.
@@ -45,7 +64,7 @@ Version 2.0.0 fixes serious issues in the skill's own security and brings its ca
 - Command based discovery is off on the REST and MCP HTTP servers by default (`SAFE_MCP_ALLOW_COMMAND_DISCOVERY`).
 - The servers refuse to start on a non loopback `HOST` without API keys (`SAFE_MCP_ALLOW_INSECURE_BIND` to override).
 - REST POST requests must send `Content-Type: application/json`; requests with a foreign `Origin` or `Host` are refused.
-- Import the library from the package root (`import { analyzeTool } from "safe-mcp-skill"`). `dist/index.js` is now only the `safe-mcp-skill` command and exports nothing.
+- Import the library from the package root (`import { analyzeTool } from "SAF-MCP-skill"`). `dist/index.js` is now only the `SAF-MCP-skill` command and exports nothing.
 - Severities follow upstream SAF-MCP: 27 techniques changed, 13 of them used by rules (for example `SAFE-T1001` Tool Poisoning is now High). Deliberate departures can be recorded in `scripts/severity-overrides.json` with a rationale; none are set in this release.
 - Five techniques use their upstream names (for example `SAFE-T1201` is now Post-Approval Tool Mutation); old names remain searchable as aliases.
 - RULE-018 now reports `SAFE-T1302` (Agentic Confused Deputy), the upstream replacement for deprecated `SAFE-T1104`.
@@ -72,6 +91,6 @@ Version 2.0.0 fixes serious issues in the skill's own security and brings its ca
 
 First release: the SAFE-MCP analysis engine with 32 rules, MCP (stdio and HTTP), REST, OpenAI function calling, and C# Semantic Kernel surfaces, auto discovery, and STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF mappings.
 
-[2.1.0]: https://github.com/camaleon2016/SAFE-MCP-skill/compare/v2.0.0...v2.1.0
-[2.0.0]: https://github.com/camaleon2016/SAFE-MCP-skill/compare/v1.0.0...v2.0.0
-[1.0.0]: https://github.com/camaleon2016/SAFE-MCP-skill/releases/tag/v1.0.0
+[2.1.0]: https://github.com/camaleon2016/SAF-MCP-skill/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/camaleon2016/SAF-MCP-skill/compare/v1.0.0...v2.0.0
+[1.0.0]: https://github.com/camaleon2016/SAF-MCP-skill/releases/tag/v1.0.0

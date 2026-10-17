@@ -6,7 +6,7 @@ import {
 import type { AgentArchitecture, ToolDefinition, ServerDefinition } from "../engine/rules.js";
 
 // ── Red-Team Test Corpus ────────────────────────────────────────────
-// Exercises the rules engine against known SAFE-MCP attack patterns.
+// Exercises the rules engine against known SAF-MCP attack patterns.
 // Run: npx tsx src/tests/redteam.ts
 // CI:  npm test
 
@@ -636,7 +636,7 @@ function runTests(): { results: TestResult[]; passed: number; failed: number; to
 
 const { results, passed, failed, total } = runTests();
 
-console.log("\n═══ SAFE-MCP Red-Team Test Results ═══\n");
+console.log("\n═══ SAF-MCP Red-Team Test Results ═══\n");
 
 for (const r of results) {
   const icon = r.passed ? "✓" : "✗";

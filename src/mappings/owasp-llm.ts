@@ -1,5 +1,5 @@
 // ── OWASP LLM Top 10 (2025) Mapping ────────────────────────────────
-// Maps each SAFE-MCP technique to relevant OWASP LLM Top 10 categories.
+// Maps each SAF-MCP technique to relevant OWASP LLM Top 10 categories.
 //
 // LLM01 Prompt Injection              LLM06 Excessive Agency
 // LLM02 Sensitive Information Disc.   LLM07 System Prompt Leakage

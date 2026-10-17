@@ -78,7 +78,7 @@ await test("PKG-004: entry points are wired correctly", () => {
   const problems: string[] = [];
   if (pkg.main !== "dist/lib.js") problems.push(`main is ${pkg.main}`);
   if (pkg.types !== "dist/lib.d.ts") problems.push(`types is ${pkg.types}`);
-  if (pkg.bin["safe-mcp-skill"] !== "dist/index.js") problems.push("bin does not point at dist/index.js");
+  if (pkg.bin["saf-mcp-skill"] !== "dist/index.js") problems.push("bin does not point at dist/index.js");
   if (!readFileSync("src/index.ts", "utf-8").startsWith("#!/usr/bin/env node")) problems.push("src/index.ts lacks a shebang");
   if (/^export /m.test(readFileSync("src/index.ts", "utf-8"))) problems.push("src/index.ts exports API; it must stay command only");
   if (problems.length) throw new Error(problems.join("; "));

@@ -1,6 +1,6 @@
 {
   "framework": {
-    "name": "SAFE-MCP",
+    "name": "SAF-MCP",
     "repository": "https://github.com/safe-agentic-framework/safe-mcp",
     "totalMitigations": 51,
     "highEffectiveness": 27,

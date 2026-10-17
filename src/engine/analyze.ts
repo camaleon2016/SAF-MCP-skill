@@ -54,7 +54,7 @@ for (const t of techniquesData.techniques) {
 // ── IDs ─────────────────────────────────────────────────────────────
 
 /**
- * Upstream renamed SAFE-MCP to SAF-MCP, so IDs now appear as SAF-T1001 and
+ * Upstream renamed SAF-MCP to SAF-MCP, so IDs now appear as SAF-T1001 and
  * SAF-M-1 as well as the original SAFE-T1001 and SAFE-M-1. Accept either
  * (any case) and return the form this catalog stores.
  */

@@ -350,6 +350,8 @@ const stats = {
 Object.assign(mitData.framework, stats);
 techData.framework["totalMitigations"] = stats.totalMitigations;
 const activeTechs = techData.techniques.filter((t) => t.lifecycleStatus === "active");
+techData.framework["name"] = "SAF-MCP";
+mitData.framework["name"] = "SAF-MCP";
 techData.framework["fullName"] = "Secure Agentic Framework for Model Context Protocol (SAF-MCP, formerly SAFE-MCP)";
 techData.framework["totalTechniques"] = techData.techniques.length;
 techData.framework["activeTechniques"] = activeTechs.length;

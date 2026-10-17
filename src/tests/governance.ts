@@ -16,6 +16,7 @@ import {
   checkBrowserSafety,
   assertCommandDiscoveryAllowed,
   assertUrlAllowed,
+  resetSettingWarnings,
 } from "../governance/policy.js";
 import { checkAccess, getClientIp } from "../governance/access.js";
 
@@ -48,16 +49,19 @@ async function throwsPolicy(fn: () => unknown | Promise<unknown>, label: string)
 }
 
 const GOV_VARS = [
-  "HOST", "SAFE_MCP_REQUIRE_API_KEY", "SAFE_MCP_API_KEYS", "SAFE_MCP_REQUIRE_IP_ALLOWLIST",
-  "SAFE_MCP_IP_ALLOWLIST", "SAFE_MCP_TRUST_PROXY", "SAFE_MCP_ALLOW_INSECURE_BIND",
-  "SAFE_MCP_ALLOW_COMMAND_DISCOVERY", "SAFE_MCP_ALLOW_PRIVATE_URLS", "SAFE_MCP_CORS_ORIGINS",
-  "SAFE_MCP_ALLOWED_HOSTS",
+  "HOST", "SAF_MCP_REQUIRE_API_KEY", "SAF_MCP_API_KEYS", "SAF_MCP_REQUIRE_IP_ALLOWLIST",
+  "SAF_MCP_IP_ALLOWLIST", "SAF_MCP_TRUST_PROXY", "SAF_MCP_ALLOW_INSECURE_BIND",
+  "SAF_MCP_ALLOW_COMMAND_DISCOVERY", "SAF_MCP_ALLOW_PRIVATE_URLS", "SAF_MCP_CORS_ORIGINS",
+  "SAF_MCP_ALLOWED_HOSTS",
 ];
+/** The same settings under the pre 2.2.0 prefix, cleared between tests too. */
+const ALL_VARS = [...GOV_VARS, ...GOV_VARS.filter((k) => k.startsWith("SAF_MCP_")).map((k) => k.replace("SAF_MCP_", "SAFE_MCP_"))];
 
 function withEnv(vars: Record<string, string>): void {
-  for (const k of GOV_VARS) delete process.env[k];
+  for (const k of ALL_VARS) delete process.env[k];
   Object.assign(process.env, vars);
   resetPolicyMode();
+  resetSettingWarnings();
 }
 
 function fakeReq(opts: {
@@ -76,33 +80,33 @@ const KEY = "test-key-0123456789abcdef";
 
 console.log("\nGovernance: unit checks\n");
 
-await test("GOV-001: X-Forwarded-For is ignored unless SAFE_MCP_TRUST_PROXY=true", () => {
+await test("GOV-001: X-Forwarded-For is ignored unless SAF_MCP_TRUST_PROXY=true", () => {
   withEnv({});
   const req = fakeReq({ ip: "203.0.113.9", headers: { "x-forwarded-for": "10.0.0.1" } });
   assert(getClientIp(req) === "203.0.113.9", `got ${getClientIp(req)}`);
 });
 
 await test("GOV-002: with a trusted proxy, the rightmost X-Forwarded-For entry is used", () => {
-  withEnv({ SAFE_MCP_TRUST_PROXY: "true" });
+  withEnv({ SAF_MCP_TRUST_PROXY: "true" });
   const req = fakeReq({ headers: { "x-forwarded-for": "10.0.0.1, 198.51.100.7" } });
   assert(getClientIp(req) === "198.51.100.7", `got ${getClientIp(req)}`);
 });
 
 await test("GOV-003: CIDR allowlist entries match addresses inside the range", () => {
-  withEnv({ SAFE_MCP_REQUIRE_IP_ALLOWLIST: "true", SAFE_MCP_IP_ALLOWLIST: "10.0.0.0/8" });
+  withEnv({ SAF_MCP_REQUIRE_IP_ALLOWLIST: "true", SAF_MCP_IP_ALLOWLIST: "10.0.0.0/8" });
   assert(checkAccess(fakeReq({ ip: "10.20.30.40" })).allowed, "10.20.30.40 should be allowed");
   assert(checkAccess(fakeReq({ ip: "::ffff:10.1.2.3" })).allowed, "IPv4 mapped address should be allowed");
   assert(!checkAccess(fakeReq({ ip: "11.0.0.1" })).allowed, "11.0.0.1 should be denied");
 });
 
 await test("GOV-004: a spoofed X-Forwarded-For cannot satisfy the allowlist", () => {
-  withEnv({ SAFE_MCP_REQUIRE_IP_ALLOWLIST: "true", SAFE_MCP_IP_ALLOWLIST: "10.0.0.0/8" });
+  withEnv({ SAF_MCP_REQUIRE_IP_ALLOWLIST: "true", SAF_MCP_IP_ALLOWLIST: "10.0.0.0/8" });
   const req = fakeReq({ ip: "203.0.113.9", headers: { "x-forwarded-for": "10.0.0.1" } });
   assert(!checkAccess(req).allowed, "spoofed header should not grant access");
 });
 
 await test("GOV-005: API key required, missing or wrong key is denied, right key allowed", () => {
-  withEnv({ SAFE_MCP_REQUIRE_API_KEY: "true", SAFE_MCP_API_KEYS: KEY });
+  withEnv({ SAF_MCP_REQUIRE_API_KEY: "true", SAF_MCP_API_KEYS: KEY });
   assert(!checkAccess(fakeReq({})).allowed, "missing key should be denied");
   assert(!checkAccess(fakeReq({ headers: { "x-api-key": "nope" } })).allowed, "wrong key should be denied");
   assert(checkAccess(fakeReq({ headers: { "x-api-key": KEY } })).allowed, "right key should be allowed");
@@ -110,14 +114,14 @@ await test("GOV-005: API key required, missing or wrong key is denied, right key
 });
 
 await test("GOV-006: startup refuses REQUIRE_API_KEY with no keys (no fail open)", async () => {
-  withEnv({ SAFE_MCP_REQUIRE_API_KEY: "true" });
+  withEnv({ SAF_MCP_REQUIRE_API_KEY: "true" });
   await throwsPolicy(() => enforceStartupPolicy("127.0.0.1"), "empty keys");
 });
 
 await test("GOV-007: startup refuses REQUIRE_IP_ALLOWLIST with an empty or invalid list", async () => {
-  withEnv({ SAFE_MCP_REQUIRE_IP_ALLOWLIST: "true" });
+  withEnv({ SAF_MCP_REQUIRE_IP_ALLOWLIST: "true" });
   await throwsPolicy(() => enforceStartupPolicy("127.0.0.1"), "empty allowlist");
-  withEnv({ SAFE_MCP_REQUIRE_IP_ALLOWLIST: "true", SAFE_MCP_IP_ALLOWLIST: "10.0.0.0/99" });
+  withEnv({ SAF_MCP_REQUIRE_IP_ALLOWLIST: "true", SAF_MCP_IP_ALLOWLIST: "10.0.0.0/99" });
   await throwsPolicy(() => enforceStartupPolicy("127.0.0.1"), "bad prefix");
 });
 
@@ -125,10 +129,10 @@ await test("GOV-008: startup refuses a non loopback bind without API keys", asyn
   withEnv({});
   setNetworkMode("0.0.0.0");
   await throwsPolicy(() => enforceStartupPolicy("0.0.0.0"), "open bind");
-  withEnv({ SAFE_MCP_REQUIRE_API_KEY: "true", SAFE_MCP_API_KEYS: KEY });
+  withEnv({ SAF_MCP_REQUIRE_API_KEY: "true", SAF_MCP_API_KEYS: KEY });
   setNetworkMode("0.0.0.0");
   enforceStartupPolicy("0.0.0.0");
-  withEnv({ SAFE_MCP_ALLOW_INSECURE_BIND: "true" });
+  withEnv({ SAF_MCP_ALLOW_INSECURE_BIND: "true" });
   setNetworkMode("0.0.0.0");
   enforceStartupPolicy("0.0.0.0");
 });
@@ -141,10 +145,10 @@ await test("GOV-009: command discovery is allowed over stdio and off on network 
 });
 
 await test("GOV-010: enabling command discovery on a network transport requires API keys", async () => {
-  withEnv({ SAFE_MCP_ALLOW_COMMAND_DISCOVERY: "true" });
+  withEnv({ SAF_MCP_ALLOW_COMMAND_DISCOVERY: "true" });
   setNetworkMode("127.0.0.1");
   await throwsPolicy(() => enforceStartupPolicy("127.0.0.1"), "no keys");
-  withEnv({ SAFE_MCP_ALLOW_COMMAND_DISCOVERY: "true", SAFE_MCP_REQUIRE_API_KEY: "true", SAFE_MCP_API_KEYS: KEY });
+  withEnv({ SAF_MCP_ALLOW_COMMAND_DISCOVERY: "true", SAF_MCP_REQUIRE_API_KEY: "true", SAF_MCP_API_KEYS: KEY });
   setNetworkMode("127.0.0.1");
   enforceStartupPolicy("127.0.0.1");
   assertCommandDiscoveryAllowed();
@@ -162,10 +166,10 @@ await test("GOV-012: private targets allowed on a loopback bind, blocked when ex
   withEnv({});
   setNetworkMode("127.0.0.1");
   await assertUrlAllowed("http://127.0.0.1:3001/v1/mcp");
-  withEnv({ SAFE_MCP_REQUIRE_API_KEY: "true", SAFE_MCP_API_KEYS: KEY });
+  withEnv({ SAF_MCP_REQUIRE_API_KEY: "true", SAF_MCP_API_KEYS: KEY });
   setNetworkMode("0.0.0.0");
   await throwsPolicy(() => assertUrlAllowed("http://10.0.0.5:3001/mcp"), "private when exposed");
-  process.env["SAFE_MCP_ALLOW_PRIVATE_URLS"] = "true";
+  process.env["SAF_MCP_ALLOW_PRIVATE_URLS"] = "true";
   await assertUrlAllowed("http://10.0.0.5:3001/mcp");
 });
 
@@ -176,7 +180,7 @@ await test("GOV-013: cross origin browser requests are refused", () => {
   assert(!checkBrowserSafety(evil).allowed, "foreign origin should be refused");
   const nullOrigin = fakeReq({ method: "POST", headers: { origin: "null", "content-type": "application/json" } });
   assert(!checkBrowserSafety(nullOrigin).allowed, "null origin should be refused");
-  process.env["SAFE_MCP_CORS_ORIGINS"] = "https://tools.example";
+  process.env["SAF_MCP_CORS_ORIGINS"] = "https://tools.example";
   const ok = fakeReq({ method: "POST", headers: { origin: "https://tools.example", "content-type": "application/json" } });
   assert(checkBrowserSafety(ok).allowed, "listed origin should be allowed");
 });
@@ -196,17 +200,32 @@ await test("GOV-015: POST bodies that skip the CORS preflight (text/plain) are r
   assert(!checkBrowserSafety(req).allowed, "text/plain POST should be refused");
 });
 
+await test("GOV-016: settings with the old SAFE_MCP_ prefix still enforce security", async () => {
+  withEnv({ SAFE_MCP_REQUIRE_API_KEY: "true", SAFE_MCP_API_KEYS: KEY });
+  setNetworkMode("0.0.0.0");
+  enforceStartupPolicy("0.0.0.0"); // keys are configured, so an exposed bind is allowed
+  assert(!checkAccess(fakeReq({})).allowed, "missing key should be denied under the old prefix");
+  assert(checkAccess(fakeReq({ headers: { "x-api-key": KEY } })).allowed, "right key should be allowed under the old prefix");
+  withEnv({ SAFE_MCP_REQUIRE_API_KEY: "true" });
+  await throwsPolicy(() => enforceStartupPolicy("127.0.0.1"), "old prefix, empty keys");
+});
+
+await test("GOV-017: when both prefixes are set, SAF_MCP_ wins", () => {
+  withEnv({ SAF_MCP_REQUIRE_API_KEY: "true", SAF_MCP_API_KEYS: KEY, SAFE_MCP_REQUIRE_API_KEY: "false" });
+  assert(!checkAccess(fakeReq({})).allowed, "the new setting (keys required) should win");
+});
+
 // ── End to end against a live REST server ─────────────────────────
 
 console.log("\nGovernance: end to end against the REST server\n");
 
 const PORT = 3902;
 const BASE = `http://127.0.0.1:${PORT}`;
-const MARKER = join(tmpdir(), `safe-mcp-gov-${process.pid}`);
+const MARKER = join(tmpdir(), `saf-mcp-gov-${process.pid}`);
 
 function startServer(env: Record<string, string>): Promise<{ proc: ChildProcess; output: () => string }> {
   const childEnv: Record<string, string> = {};
-  for (const [k, v] of Object.entries(process.env)) if (v !== undefined && !GOV_VARS.includes(k)) childEnv[k] = v;
+  for (const [k, v] of Object.entries(process.env)) if (v !== undefined && !ALL_VARS.includes(k)) childEnv[k] = v;
   Object.assign(childEnv, { PORT: String(PORT), LOG_TO_FILE: "false", LOG_TO_STDERR: "false" }, env);
   const proc = spawn(process.execPath, ["--import", "tsx", "src/openapi/serve.ts"], { env: childEnv });
   let out = "";

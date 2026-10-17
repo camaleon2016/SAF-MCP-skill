@@ -58,7 +58,7 @@ try {
 
 function json(res: import("node:http").ServerResponse, status: number, body: unknown): void {
   const data = JSON.stringify(body, null, 2);
-  // CORS headers, when any, are set per request from SAFE_MCP_CORS_ORIGINS.
+  // CORS headers, when any, are set per request from SAF_MCP_CORS_ORIGINS.
   res.writeHead(status, { "Content-Type": "application/json" });
   res.end(data);
 }
@@ -88,7 +88,7 @@ const httpServer = createServer(async (req, res) => {
   const clientIp = getClientIp(req);
   const start = performance.now();
 
-  // CORS: only origins the operator listed in SAFE_MCP_CORS_ORIGINS
+  // CORS: only origins the operator listed in SAF_MCP_CORS_ORIGINS
   const cors = corsHeaders(req);
   for (const [k, v] of Object.entries(cors)) res.setHeader(k, v);
   if (req.method === "OPTIONS") {
@@ -107,11 +107,11 @@ const httpServer = createServer(async (req, res) => {
 
   // Health / version (no auth)
   if (req.method === "GET" && (path === "/health" || path === "/v1/health")) {
-    json(res, 200, { status: "ok", name: "safe-mcp-skill", version: VERSION, apiVersion: "v1" });
+    json(res, 200, { status: "ok", name: "saf-mcp-skill", version: VERSION, apiVersion: "v1" });
     return;
   }
   if (req.method === "GET" && path === "/version") {
-    json(res, 200, { name: "safe-mcp-skill", version: VERSION, apiVersion: "v1", framework: "SAFE-MCP" });
+    json(res, 200, { name: "saf-mcp-skill", version: VERSION, apiVersion: "v1", framework: "SAF-MCP" });
     return;
   }
   if (req.method === "GET" && path === "/v1/openapi.json") {
@@ -256,7 +256,7 @@ const httpServer = createServer(async (req, res) => {
 
 httpServer.listen(PORT, HOST, () => {
   info("rest_server_started", { detail: { host: HOST, port: PORT } });
-  console.error(`SAFE-MCP REST API listening on http://${HOST}:${PORT}`);
+  console.error(`SAF-MCP REST API listening on http://${HOST}:${PORT}`);
   console.error(`OpenAPI spec: http://${HOST}:${PORT}/v1/openapi.json`);
   console.error(`Health: http://${HOST}:${PORT}/health`);
 });

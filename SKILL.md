@@ -1,13 +1,13 @@
 ---
-name: safe-mcp-security-analysis
-description: Analyzes MCP servers, MCP tool definitions, and AI agent architectures for security exposure using the SAF-MCP (formerly SAFE-MCP) attack technique catalog, and explains each finding with mitigations and STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF mappings. Use when someone wants to vet an MCP server before connecting it, review an agent's tools or wiring, threat model an agentic system, or look up a SAF-MCP or SAFE-MCP technique or mitigation ID.
+name: saf-mcp-security-analysis
+description: Analyzes MCP servers, MCP tool definitions, and AI agent architectures for security exposure using the SAF-MCP (formerly SAFE-MCP) attack technique catalog, and explains each finding with mitigations and STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF mappings. Use when someone wants to vet an MCP server before connecting it, review an agent's tools or wiring, threat model an agentic system, or look up a SAF-MCP or SAF-MCP technique or mitigation ID.
 ---
 
 # SAF-MCP Security Analysis
 
-This skill uses the tools of the `safe-mcp-skill` MCP server. It reads how a tool, server, or agent is wired and reports which SAF-MCP techniques it is exposed to, with evidence, mitigations, and framework mappings.
+This skill uses the tools of the `saf-mcp-skill` MCP server. It reads how a tool, server, or agent is wired and reports which SAF-MCP techniques it is exposed to, with evidence, mitigations, and framework mappings.
 
-If the tools below are not available, tell the user the `safe-mcp-skill` MCP server is not connected and point them to the README's "Running the Skill" section. Do not imitate the analysis by hand and present it as tool output.
+If the tools below are not available, tell the user the `saf-mcp-skill` MCP server is not connected and point them to the README's "Running the Skill" section. Do not imitate the analysis by hand and present it as tool output.
 
 ## When to use it
 

@@ -1,5 +1,5 @@
 // ── STRIDE Mapping ──────────────────────────────────────────────────
-// Maps each SAFE-MCP technique to one or more STRIDE categories.
+// Maps each SAF-MCP technique to one or more STRIDE categories.
 //
 // S = Spoofing          T = Tampering         R = Repudiation
 // I = Information Disc. D = Denial of Service E = Elevation of Privilege

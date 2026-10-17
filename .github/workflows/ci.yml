@@ -53,7 +53,7 @@ jobs:
       - name: Built library imports without starting a server
         run: |
           # stdin stays open and idle; a stdio server would keep the process alive
-          sleep 30 | timeout 15 node -e "import('./dist/lib.js').then(m => console.log('safe-mcp-skill', m.VERSION))"
+          sleep 30 | timeout 15 node -e "import('./dist/lib.js').then(m => console.log('saf-mcp-skill', m.VERSION))"
 
       - name: Package contents
         run: |
