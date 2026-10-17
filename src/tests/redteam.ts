@@ -100,7 +100,8 @@ const corpus: TestCase[] = [
     id: "RT-006",
     name: "Exposed unauthenticated endpoints",
     description: "Server exposes endpoints without any auth",
-    expectedRuleIds: ["RULE-002", "RULE-003"],
+    // RULE-003 reports exposed, unauthenticated servers; RULE-002 covers unexposed ones, so only RULE-003 fires here.
+    expectedRuleIds: ["RULE-003"],
     input: {
       name: "exposed-endpoint-test",
       servers: [
@@ -312,7 +313,8 @@ const corpus: TestCase[] = [
     name: "Maximum attack surface architecture",
     description: "Architecture combining all risk factors",
     expectedRuleIds: [
-      "RULE-001", "RULE-002", "RULE-003", "RULE-005", "RULE-006",
+      // No RULE-002: the only unauthenticated server is exposed, which RULE-003 reports.
+      "RULE-001", "RULE-003", "RULE-005", "RULE-006",
       "RULE-008", "RULE-009", "RULE-010", "RULE-011", "RULE-012",
       "RULE-013", "RULE-014", "RULE-015", "RULE-016", "RULE-017", "RULE-018",
     ],

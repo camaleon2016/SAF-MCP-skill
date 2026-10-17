@@ -8,6 +8,7 @@ import {
   getMitigationsForTechnique,
   listTechniques,
 } from "./analyze.js";
+import { scanString, scanSchema, verdict, describeSignals, identifierToWords, schemaStrings, type Signal } from "./detect.js";
 
 // ── Input Types ─────────────────────────────────────────────────────
 
@@ -56,6 +57,12 @@ export interface Finding {
   technique: { id: string; name: string };
   description: string;
   evidence: string;
+  /**
+   * For content rules (RULE-001, RULE-025): "high" when the text shows a clear
+   * attack signal, "medium" when only weaker signals combine. Absent for rules
+   * that report a capability or configuration rather than suspicious content.
+   */
+  confidence?: "high" | "medium";
   mitigations: { id: string; name: string; effectiveness: string }[];
   mappings: FrameworkMappings;
 }
@@ -80,7 +87,12 @@ export interface AnalysisResult {
 interface Rule {
   id: string;
   techniqueId: string;
-  test: (input: AgentArchitecture) => string | null;
+  test: (input: AgentArchitecture) => string | RuleHit | null;
+}
+
+interface RuleHit {
+  evidence: string;
+  confidence?: "high" | "medium";
 }
 
 const EFFECTIVENESS_RANK: Record<string, number> = {
@@ -99,7 +111,8 @@ function sortByEffectiveness(list: Mitigation[]): Mitigation[] {
   );
 }
 
-function buildFinding(rule: Rule, evidence: string): Finding | null {
+function buildFinding(rule: Rule, hit: string | RuleHit): Finding | null {
+  const { evidence, confidence } = typeof hit === "string" ? { evidence: hit, confidence: undefined } : hit;
   const technique = getTechnique(rule.techniqueId);
   if (!technique) return null;
 
@@ -115,6 +128,7 @@ function buildFinding(rule: Rule, evidence: string): Finding | null {
     technique: { id: technique.id, name: technique.name },
     description: technique.description,
     evidence,
+    ...(confidence ? { confidence } : {}),
     mitigations,
     mappings: getMappings(rule.techniqueId),
   };
@@ -122,84 +136,33 @@ function buildFinding(rule: Rule, evidence: string): Finding | null {
 
 // ── Pattern Detectors ───────────────────────────────────────────────
 
-const INJECTION_PATTERNS = [
-  /ignore\s+(previous|above|all)\s+instructions/i,
-  /system\s*:\s*/i,
-  /\bdo\s+not\s+(reveal|show|display)/i,
-  /\bexecute\s+(this|the\s+following)\b/i,
-  /\boverride\b.*\binstructions?\b/i,
-  /\bact\s+as\b/i,
-  /\bpretend\s+(you are|to be)\b/i,
-  /\byou\s+are\s+now\b/i,
-  /\bnew\s+instructions?\b/i,
-  /\bforget\s+(everything|all|your)\b/i,
-  /\bdisregard\b.*\b(above|previous|prior)\b/i,
-];
-
-const UNICODE_PATTERNS = [
-  /\u200B|\u200C|\u200D|\u2060|\uFEFF/,         // zero-width
-  /[\u202A-\u202E]/,                              // bidi overrides
-  /[\uE000-\uF8FF]/,                              // PUA
-  /[\u2066-\u2069]/,                              // bidi isolates
-  /[\u00AD]/,                                     // soft hyphen
-  /[\u180E]/,                                     // Mongolian vowel separator
-  /[\u2028\u2029]/,                               // line/paragraph separator
-];
-
-const CODE_EXEC_PATTERNS = [
-  /\bsudo\b|\brm\s+-rf\b|\bchmod\s+777\b/i,
-  /\beval\s*\(/i,
-  /\bexec\s*\(/i,
-  /\bchild_process\b/i,
-  /\bFunction\s*\(/i,
-  /\bimport\s*\(/i,
-  /\brequire\s*\(/i,
-  /\b__import__\b/i,
-  /\bos\.system\b/i,
-  /\bsubprocess\b/i,
-];
-
-const MARKUP_PATTERNS = [
-  /<!--[\s\S]*?-->/,                              // HTML comments
-  /<script[\s\S]*?>/i,                            // script tags
-  /<img[^>]+onerror/i,                            // XSS via img
-  /\]\([^)]*javascript:/i,                        // markdown JS
-  /data:text\/html/i,                             // data URI
-];
-
-const TRAVERSAL_PATTERNS = [
-  /\.\.\/|\.\.\\/, // path traversal
-  /%2e%2e/i,       // encoded traversal
-  /\.\.%2f/i,      // mixed encoding
-];
-
-const SUSPICIOUS_PATTERNS = [
-  ...INJECTION_PATTERNS,
-  ...UNICODE_PATTERNS,
-  ...CODE_EXEC_PATTERNS,
-  ...MARKUP_PATTERNS,
-  ...TRAVERSAL_PATTERNS,
-];
-
-function scanText(text: string): string[] {
-  const hits: string[] = [];
-  for (const pattern of SUSPICIOUS_PATTERNS) {
-    if (pattern.test(text)) {
-      hits.push(pattern.source);
-    }
-  }
-  return hits;
+/** Whole word (or phrase) match on lowercased text; avoids "capital" matching "api". */
+function mentions(text: string, ...patterns: RegExp[]): boolean {
+  const t = text.toLowerCase();
+  return patterns.some((p) => p.test(t));
 }
 
-function scanToolDescriptions(tools: ToolDefinition[]): Map<string, string[]> {
-  const results = new Map<string, string[]>();
-  for (const tool of tools) {
-    const hits = scanText(tool.description);
-    if (hits.length > 0) {
-      results.set(tool.name, hits);
-    }
+/** Content scan of one tool for RULE-001: name, description, annotations. */
+function poisoningSignals(tool: ToolDefinition): Signal[] {
+  return [
+    ...scanString(identifierToWords(tool.name), "name"),
+    ...scanString(tool.description, "description"),
+    ...schemaStrings(tool.annotations ?? {}, "annotations").flatMap(([at, text]) => scanString(text, at)),
+  ];
+}
+
+/** Run a content scan over tools and turn it into a rule result. */
+function contentRule(tools: ToolDefinition[], scan: (t: ToolDefinition) => Signal[], prefix: string): RuleHit | null {
+  const flagged: string[] = [];
+  let high = false;
+  for (const t of tools) {
+    const v = verdict(scan(t));
+    if (!v.report) continue;
+    if (v.confidence === "high") high = true;
+    flagged.push(`${t.name}: ${describeSignals(v.signals)}`);
   }
-  return results;
+  if (flagged.length === 0) return null;
+  return { evidence: `${prefix} ${flagged.join(" | ")}`, confidence: high ? "high" : "medium" };
 }
 
 // ── Rules ───────────────────────────────────────────────────────────
@@ -210,28 +173,27 @@ const rules: Rule[] = [
     id: "RULE-001",
     techniqueId: "SAFE-T1001",
     test(input) {
-      const tools = allTools(input);
-      if (tools.length === 0) return null;
-      const hits = scanToolDescriptions(tools);
-      if (hits.size === 0) return null;
-      const details = [...hits.entries()]
-        .map(([name, patterns]) => `${name}: ${patterns.join(", ")}`)
-        .join("; ");
-      return `Suspicious patterns in tool descriptions — ${details}`;
+      return contentRule(allTools(input), poisoningSignals, "Suspicious content in tool metadata:");
     },
   },
 
-  // Supply Chain — tools from unverified servers
+  // Unauthenticated server reachable over a network transport.
+  // Stdio servers are local child processes with no listener, so they are skipped.
+  // Servers with exposed endpoints are reported by RULE-003 instead.
   {
     id: "RULE-002",
-    techniqueId: "SAFE-T1002",
+    techniqueId: "SAFE-T1005",
     test(input) {
       const servers = input.servers ?? [];
-      const unverified = servers.filter(
-        (s) => !s.authentication || s.authentication === "none",
+      const open = servers.filter(
+        (s) =>
+          (!s.authentication || s.authentication === "none") &&
+          s.transport?.toLowerCase() !== "stdio" &&
+          !(s.exposedEndpoints && s.exposedEndpoints.length > 0),
       );
-      if (unverified.length === 0) return null;
-      return `${unverified.length} server(s) without authentication: ${unverified.map((s) => s.name).join(", ")}`;
+      if (open.length === 0) return null;
+      const describe = (s: ServerDefinition): string => (s.transport ? `${s.name} (${s.transport})` : `${s.name} (transport not stated)`);
+      return `Server(s) without authentication that may be reachable over the network, including from a browser on the same machine: ${open.map(describe).join(", ")}`;
     },
   },
 
@@ -302,14 +264,12 @@ const rules: Rule[] = [
     test(input) {
       const tools = allTools(input);
       const risky = tools.filter((t) => {
-        const desc = t.description.toLowerCase();
-        return (
-          desc.includes("shell") ||
-          desc.includes("exec") ||
-          desc.includes("command") ||
-          desc.includes("run_command") ||
-          desc.includes("subprocess") ||
-          desc.includes("terminal")
+        return mentions(
+          `${identifierToWords(t.name)} ${t.description}`,
+          /\b(shell|bash|zsh|powershell|cmd\.exe|terminal|subprocess|exec)\b/,
+          /\b(run|runs|execute|executes|exec)\b[^.]{0,30}\b(commands?|scripts?|programs?|binaries|processes)\b/,
+          /\bcommand[- ]line\b|\brun command\b|\bchild process(es)?\b/,
+          /\b(start|starts|spawn|spawns|launch|launches)\b[^.]{0,30}\b(commands?|process(es)?|programs?|executables?)\b/,
         );
       });
       if (risky.length === 0) return null;
@@ -324,13 +284,7 @@ const rules: Rule[] = [
     test(input) {
       const tools = allTools(input);
       const injectable = tools.filter((t) => {
-        const desc = t.description.toLowerCase();
-        return (
-          desc.includes("user input") ||
-          desc.includes("user-provided") ||
-          desc.includes("free text") ||
-          desc.includes("natural language")
-        );
+        return mentions(t.description, /\buser[- ](input|provided|supplied)\b|\bfree[- ](text|form)\b|\bnatural language\b|\barbitrary text\b/);
       });
       if (injectable.length === 0) return null;
       return `Tools accepting free-form user input: ${injectable.map((t) => t.name).join(", ")}`;
@@ -345,14 +299,7 @@ const rules: Rule[] = [
       if (!input.fileSystemAccess) return null;
       const tools = allTools(input);
       const fileTools = tools.filter((t) => {
-        const desc = t.description.toLowerCase();
-        return (
-          desc.includes("file") ||
-          desc.includes("path") ||
-          desc.includes("directory") ||
-          desc.includes("read") ||
-          desc.includes("write")
-        );
+        return mentions(t.description, /\b(files?|filenames?|paths?|director(y|ies)|folders?|read|reads|reading|write|writes|writing)\b/);
       });
       if (fileTools.length === 0) return null;
       return `File-system tools present with filesystem access enabled: ${fileTools.map((t) => t.name).join(", ")}`;
@@ -420,13 +367,10 @@ const rules: Rule[] = [
       if (!input.networkAccess) return null;
       const tools = allTools(input);
       const netTools = tools.filter((t) => {
-        const desc = t.description.toLowerCase();
-        return (
-          desc.includes("http") ||
-          desc.includes("fetch") ||
-          desc.includes("request") ||
-          desc.includes("webhook") ||
-          desc.includes("api")
+        return mentions(
+          t.description,
+          /\bhttps?\b|\b(fetch|fetches|webhooks?|apis?|urls?|endpoints?|upload|uploads|download|downloads)\b/,
+          /\b(http|web|network|outbound|post|get)\s+requests?\b/,
         );
       });
       if (netTools.length === 0) return null;
@@ -482,13 +426,11 @@ const rules: Rule[] = [
     test(input) {
       const tools = allTools(input);
       const overprivileged = tools.filter((t) => {
-        const desc = t.description.toLowerCase();
-        return (
-          desc.includes("admin") ||
-          desc.includes("root") ||
-          desc.includes("sudo") ||
-          desc.includes("all permissions") ||
-          desc.includes("full access")
+        return mentions(
+          t.description,
+          /\bsudo\b|\bsuperuser\b|\ball permissions\b|\bfull (admin |administrator |system )?access\b|\belevated privileges?\b/,
+          /\b(admin|administrator|administrative)\s+(access|rights|privileges?|panel|console|role|permissions?)\b/,
+          /\broot\s+(access|privileges?|user|shell|permissions?)\b|\bas (root|superuser|an? admin|admin|an? administrator|administrator)\b/,
         );
       });
       if (overprivileged.length === 0) return null;
@@ -520,7 +462,7 @@ const rules: Rule[] = [
       const tools = allTools(input);
       const selfRef = tools.filter((t) => {
         const desc = t.description.toLowerCase();
-        return desc.includes("recursive") || desc.includes("loop") || desc.includes("self-invoke") || desc.includes("retry");
+        return mentions(desc, /\b(recursive\w*|recursion|loops?|looping|self[- ]invok\w*|retry|retries|retrying)\b/);
       });
       if (selfRef.length === 0) return null;
       return `Tools with self-referencing/loop patterns: ${selfRef.map((t) => t.name).join(", ")}`;
@@ -540,7 +482,7 @@ const rules: Rule[] = [
       const hasExec = unverified.some((s) =>
         (s.tools ?? []).some((t) => {
           const d = t.description.toLowerCase();
-          return d.includes("install") || d.includes("cron") || d.includes("startup") || d.includes("service");
+          return mentions(d, /\b(install\w*|cron\w*|startup|systemd|launch ?agents?|autostart|auto[- ]start|scheduled tasks?)\b|\b(system|background) services?\b/);
         }),
       );
       if (!hasExec) return null;
@@ -557,7 +499,7 @@ const rules: Rule[] = [
       const tools = allTools(input);
       const writeTools = tools.filter((t) => {
         const d = t.description.toLowerCase();
-        return d.includes("write") || d.includes("store") || d.includes("save") || d.includes("insert") || d.includes("upsert");
+        return mentions(d, /\b(write|writes|writing|wrote|store|stores|stored|storing|save|saves|saved|saving|insert\w*|upsert\w*|ingest\w*|index(es|ing)?)\b/);
       });
       if (writeTools.length === 0) return null;
       return `Write-capable tools with vector store — context memory implant risk: ${writeTools.map((t) => t.name).join(", ")}`;
@@ -595,13 +537,7 @@ const rules: Rule[] = [
     techniqueId: "SAFE-T1501",
     test(input) {
       const tools = allTools(input);
-      const poisoned = tools.filter((t) => {
-        const schema = JSON.stringify(t.inputSchema ?? t.parameters ?? {}).toLowerCase();
-        return INJECTION_PATTERNS.some((p) => p.test(schema)) ||
-               UNICODE_PATTERNS.some((p) => p.test(schema));
-      });
-      if (poisoned.length === 0) return null;
-      return `Suspicious patterns in tool schemas (full-schema poisoning): ${poisoned.map((t) => t.name).join(", ")}`;
+      return contentRule(tools, (t) => scanSchema(t.inputSchema ?? t.parameters ?? {}), "Suspicious content in tool input schemas:");
     },
   },
 
@@ -614,7 +550,7 @@ const rules: Rule[] = [
       const tools = allTools(input);
       const envTools = tools.filter((t) => {
         const d = t.description.toLowerCase();
-        return d.includes(".env") || d.includes("environment") || d.includes("config") || d.includes("secret");
+        return mentions(d, /\.env\b|\benvironment variables?\b|\benv vars?\b|\b(config|configuration|credentials?|secrets?)\s+files?\b|\b(secrets?|api keys?|access tokens?|credentials)\b/);
       });
       if (envTools.length === 0) return null;
       return `Tools with env/config access and filesystem enabled: ${envTools.map((t) => t.name).join(", ")}`;
@@ -629,7 +565,7 @@ const rules: Rule[] = [
       const tools = allTools(input);
       const disclosureRisk = tools.filter((t) => {
         const d = t.description.toLowerCase();
-        return d.includes("system prompt") || d.includes("instructions") || d.includes("policy") || d.includes("rules");
+        return mentions(d, /\bsystem (prompts?|instructions|messages?)\b|\b(initial|hidden|original) (prompt|instructions)\b|\bdeveloper messages?\b|\byour (instructions|prompt)\b|\bprompt (template|configuration)\b/);
       });
       if (disclosureRisk.length === 0) return null;
       return `Tools referencing system prompts/instructions — prompt disclosure risk: ${disclosureRisk.map((t) => t.name).join(", ")}`;
@@ -644,7 +580,7 @@ const rules: Rule[] = [
       const tools = allTools(input);
       const dbTools = tools.filter((t) => {
         const d = t.description.toLowerCase();
-        return d.includes("sql") || d.includes("database") || d.includes("query") || d.includes("table");
+        return mentions(d, /\b(sql|databases?|tables?|db|postgres\w*|mysql|sqlite|mongo\w*|warehouse|bigquery|snowflake)\b/);
       });
       if (dbTools.length === 0) return null;
       return `Tools with database access: ${dbTools.map((t) => t.name).join(", ")}`;
@@ -659,7 +595,7 @@ const rules: Rule[] = [
       const tools = allTools(input);
       const destructive = tools.filter((t) => {
         const d = t.description.toLowerCase();
-        return d.includes("delete") || d.includes("drop") || d.includes("remove") || d.includes("destroy") || d.includes("truncate");
+        return mentions(d, /\b(delet\w+|drop|drops|dropped|dropping|remov\w+|destroy\w*|truncat\w+|wipe\w*|eras\w+|purg\w+)\b/);
       });
       if (destructive.length === 0) return null;
       return `Destructive tools present: ${destructive.map((t) => t.name).join(", ")}`;
@@ -674,7 +610,7 @@ const rules: Rule[] = [
       const tools = allTools(input);
       const codeTools = tools.filter((t) => {
         const d = t.description.toLowerCase();
-        return d.includes("commit") || d.includes("push") || d.includes("pull request") || d.includes("merge") || d.includes("deploy");
+        return mentions(d, /\b(commit\w*|pull requests?|merg\w+|deploy\w*|releases? to production)\b|\bgit push\b|\bpush(es|ed|ing)?\s+(code|changes|commits?|to (a |the )?(branch|repo\w*|remote|main|master|production))\b/);
       });
       if (codeTools.length === 0) return null;
       return `Tools with code deploy/commit capabilities: ${codeTools.map((t) => t.name).join(", ")}`;
@@ -689,7 +625,7 @@ const rules: Rule[] = [
       const tools = allTools(input);
       const financial = tools.filter((t) => {
         const d = t.description.toLowerCase();
-        return d.includes("payment") || d.includes("transfer") || d.includes("transaction") || d.includes("invoice") || d.includes("wallet");
+        return mentions(d, /\b(payments?|pay|pays|wire|transactions?|invoic\w+|wallets?|refund\w*|payouts?|funds)\b|\b(transfer|send|move)s?\s+(money|funds|payments?|crypto\w*|tokens)\b|\bcharge\w*\s+(a |the )?(card|customer)\b/);
       });
       if (financial.length === 0) return null;
       return `Financial/payment tools present: ${financial.map((t) => t.name).join(", ")}`;

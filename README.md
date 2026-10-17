@@ -558,7 +558,8 @@ safe-mcp-skill/
 │   │   └── mitigations.json         # 51 active mitigations (plus 10 withdrawn IDs)
 │   ├── engine/
 │   │   ├── analyze.ts               # Lookups, search, threat profiling
-│   │   └── rules.ts                 # 32-rule analysis engine
+│   │   ├── rules.ts                 # 32-rule analysis engine
+│   │   └── detect.ts                # Text detection for tool and schema poisoning
 │   ├── governance/
 │   │   ├── access.ts                # API key + IP allowlist
 │   │   └── logger.ts                # Structured JSONL logging
@@ -574,6 +575,8 @@ safe-mcp-skill/
 │   │   └── index.ts                 # Unified mapping lookup + coverage
 │   ├── tests/
 │   │   ├── redteam.ts               # 34 red-team test cases
+│   │   ├── detection.ts             # Detection quality against the labeled corpus
+│   │   ├── detection-corpus.ts      # Labeled attacks and harmless lookalikes
 │   │   ├── catalog.ts               # Catalog integrity checks
 │   │   ├── package.ts               # Entry points and versions
 │   │   └── governance.ts            # Security model tests
@@ -604,6 +607,31 @@ safe-mcp-skill/
 ├── package.json
 └── tsconfig.json
 ```
+
+## Detection
+
+Most rules check configuration (authentication, transports, OAuth, shared memory). Two rules read the text a tool exposes to the model, and they share one detector (`src/engine/detect.ts`):
+
+| Rule | Reads |
+|---|---|
+| RULE-001 Tool poisoning | Tool name, description, and annotations |
+| RULE-025 Full schema poisoning | Every string in the input schema: descriptions, titles, defaults, enum values, examples, and property names |
+
+Before matching, the detector decodes hidden text (Unicode tag characters and embedded base64), strips invisible characters, normalizes Unicode, folds Cyrillic and Greek lookalike letters to Latin, splits identifiers such as `read_file` into words, and folds leetspeak for phrases attackers commonly disguise. It then looks for signals such as hidden instruction markup, instruction or identity overrides, concealment from the user, approval bypass, task hijacking, directions to read credential files, exfiltration through URLs or markdown images, and invisible or direction overriding characters.
+
+Each signal is **strong** or **weak**. One strong signal reports a finding with `"confidence": "high"`; weak signals report only when two different kinds appear together, with `"confidence": "medium"`. Evidence names each signal, where it was found, and the matched text.
+
+Keyword rules (shell access, network, databases, destructive actions, and others) match whole words, so "capital" is not "api" and "root cause" is not root access.
+
+### How well it works
+
+`src/tests/detection-corpus.ts` is a labeled set of attacks and harmless tools that resemble them; `npm run test:detection` must catch every attack and leave every harmless tool alone. On two sets of attack phrasings written after the detector and not used to build it, it caught 4 of 10 and 4 of 8 before those misses were fixed, while leaving 21 of 22 harmless lookalikes alone. Treat that as the honest estimate for phrasings it has not seen: it catches common and obfuscated patterns well, and novel wording less reliably.
+
+Known limits:
+
+- **English only.** Payloads written in other languages are missed (`GAP-01` in the corpus). Closing that needs a model based check, not more phrases.
+- **Pattern based.** A determined attacker can word an instruction to avoid every pattern. A clean result means no rule fired, not that the tool is safe.
+- **Metadata only.** It reads what a server says about its tools, not what the server does.
 
 ## Catalog Data
 
@@ -677,7 +705,7 @@ The skill exposes 18 tools over MCP:
 The engine runs 32 rules covering:
 
 - Tool poisoning & prompt injection (RULE-001)
-- Unauthenticated servers (RULE-002)
+- Unauthenticated network servers (RULE-002)
 - Exposed endpoints (RULE-003)
 - Overly broad OAuth scopes (RULE-004)
 - Tool shadowing / name collisions (RULE-005)
@@ -831,21 +859,22 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
 
 </details>
 
-**What comes back:** The engine returns **Critical** risk with 3 findings (the overall rating is the most severe finding, here command injection). Here's a trimmed view of the response (each finding lists every linked mitigation, strongest first; the first three are shown, and the full mappings are cut for space):
+**What comes back:** The engine returns **Critical** risk with 2 findings: the description carries an injected instruction, and the tool can run shell commands. The overall rating is the most severe finding. Here's a trimmed view of the response (each finding lists every linked mitigation, strongest first; the first three are shown, and the full mappings are cut for space):
 
 ```json
 {
   "summary": {
     "overallRisk": "Critical",
-    "totalFindings": 3,
-    "bySeverity": { "High": 2, "Critical": 1 }
+    "totalFindings": 2,
+    "bySeverity": { "High": 1, "Critical": 1 }
   },
   "findings": [
     {
       "ruleId": "RULE-001",
       "severity": "High",
       "technique": { "id": "SAFE-T1001", "name": "Tool Poisoning Attack" },
-      "evidence": "Suspicious patterns in tool descriptions — execute_code: ignore\\s+(previous|above|all)\\s+instructions, ...",
+      "evidence": "Suspicious content in tool metadata: execute_code: instruction override in description (\"ignore previous instructions\"); destructive or code execution snippet in description (\"rm -rf\")",
+      "confidence": "high",
       "mitigations": [
         { "id": "SAFE-M-1", "name": "Control/Data Flow Separation", "effectiveness": "High (Provable Security)" },
         { "id": "SAFE-M-2", "name": "Cryptographic Integrity for Tool Descriptions", "effectiveness": "High" },
@@ -874,30 +903,13 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
         "owaspLlm": [{ "id": "LLM05", "name": "Improper Output Handling" }],
         "nistAiRmf": [{ "id": "MEASURE-2.6", "function": "MEASURE" }]
       }
-    },
-    {
-      "ruleId": "RULE-027",
-      "severity": "High",
-      "technique": { "id": "SAFE-T1603", "name": "System Prompt Disclosure" },
-      "evidence": "Tools referencing system prompts/instructions — prompt disclosure risk: execute_code",
-      "mitigations": [
-        { "id": "SAFE-M-1", "name": "Control/Data Flow Separation", "effectiveness": "High (Provable Security)" },
-        { "id": "SAFE-M-14", "name": "Server Allowlisting", "effectiveness": "High" },
-        { "id": "SAFE-M-16", "name": "Token Scope Limiting", "effectiveness": "High" }
-      ],
-      "mappings": {
-        "stride": ["I"],
-        "atlas": [{ "id": "AML.T0054", "name": "LLM Jailbreak" }],
-        "owaspLlm": [{ "id": "LLM07", "name": "System Prompt Leakage" }],
-        "nistAiRmf": [{ "id": "GOVERN-1.2", "function": "GOVERN" }]
-      }
     }
   ],
   "frameworkCoverage": [
-    { "framework": "STRIDE", "totalMapped": 3 },
-    { "framework": "OWASP LLM Top 10 (2025)", "totalMapped": 3 },
-    { "framework": "MITRE ATLAS", "totalMapped": 3 },
-    { "framework": "NIST AI RMF", "totalMapped": 3 }
+    { "framework": "STRIDE", "totalMapped": 2 },
+    { "framework": "OWASP LLM Top 10 (2025)", "totalMapped": 2 },
+    { "framework": "MITRE ATLAS", "totalMapped": 2 },
+    { "framework": "NIST AI RMF", "totalMapped": 2 }
   ]
 }
 ```
@@ -906,7 +918,7 @@ Each finding maps to a specific SAFE-MCP technique ID, tells you *why* it's dang
 
 #### 4. Analyze a Full Agent Architecture
 
-Now let's scale up. This request describes a multi-server agent with shared memory, vector stores, OAuth, network access, and CLI access — plus intentional problems like unauthenticated servers, overly broad OAuth scopes, and duplicate tool names across servers (tool shadowing). The engine evaluates the entire attack surface at once:
+Now let's scale up. This request describes a multi-server agent with shared memory, vector stores, OAuth, network access, and CLI access — plus intentional problems like an unauthenticated public endpoint, OAuth without PKCE, and duplicate tool names across servers (tool shadowing). The engine evaluates the entire attack surface at once:
 
 ```bash
 curl -X POST http://127.0.0.1:3002/v1/analyze/architecture \
@@ -989,20 +1001,19 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/architecture -H "Content-Type:
 
 </details>
 
-**What comes back:** **Critical** risk with **16 findings**. The engine catches issues you might not have thought of:
+**What comes back:** **Critical** risk with **14 findings**. The engine catches issues you might not have thought of:
 
 | Finding | Why it matters |
 |---|---|
-| **Unauthenticated server** (RULE-002) | `data-server` has `authentication: "none"` — anyone can call it |
-| **Exposed endpoint** (RULE-003) | The SSE endpoint is publicly reachable |
-| **Overly broad OAuth scopes** (RULE-004) | `code-server` requests `admin` + `delete` — way more than needed |
-| **Tool shadowing** (RULE-005) | `run_query` exists on both servers — a malicious server could intercept calls |
-| **Database dump** (RULE-028) | `run_query` on a prod database with no auth = full data exfiltration risk |
+| **Exposed endpoint without authentication** (RULE-003) | `data-server` has `authentication: "none"` and a public SSE endpoint, so anyone can call it |
+| **Tool shadowing** (RULE-005) | `run_query` exists on both servers, so a malicious server could intercept calls |
+| **Dynamic transport** (RULE-009) | Tool definitions served over SSE can change after you approve them |
+| **Database dump** (RULE-028) | `run_query` reaches a production database |
 | **Code sabotage** (RULE-030) | `deploy` can push directly to production |
-| **OAuth protocol downgrade** (RULE-032) | Broad scopes enable token scope escalation |
-| **Vector store poisoning** (RULE-010) | Shared vector store can be poisoned via one compromised server |
-| **Cross-agent injection** (RULE-012) | Multi-agent + shared memory = agents can manipulate each other |
-| ...and 7 more | Credential relay, CLI weaponization, data exfiltration, etc. |
+| **OAuth without PKCE** (RULE-032) | `code-server` uses OAuth without PKCE, so intercepted codes can be redeemed |
+| **Vector store poisoning** (RULE-010) | Shared memory can be poisoned through one compromised server |
+| **Cross-agent injection** (RULE-012) | Multiple agents with shared memory can manipulate each other |
+| ...and 6 more | Credential relay, CLI weaponization, outbound data paths, and others |
 
 Each finding includes the same structure as step 3 — technique ID, severity, description, and mitigations.
 
@@ -1076,29 +1087,24 @@ curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: appli
     ]
   },
   "analysis": {
-    "summary": { "overallRisk": "Critical", "totalFindings": 3 },
+    "summary": { "overallRisk": "Critical", "totalFindings": 2 },
     "findings": [
-      {
-        "ruleId": "RULE-002",
-        "severity": "High",
-        "description": "1 server(s) without authentication: safe-mcp-skill"
-      },
       {
         "ruleId": "RULE-006",
         "severity": "Critical",
-        "description": "Tools with shell/exec capabilities: discover_and_analyze_stdio"
+        "evidence": "Tools with shell/exec capabilities: discover_and_analyze_stdio"
       },
       {
         "ruleId": "RULE-024",
         "severity": "Medium",
-        "description": "18 tools registered — high tool count increases consent-fatigue exploitation risk"
+        "evidence": "18 tools registered — high tool count increases consent-fatigue exploitation risk"
       }
     ]
   }
 }
 ```
 
-No manual JSON assembly — the skill discovers everything automatically, then tells you what's dangerous. Even the skill analyzing *itself* finds real issues: no authentication, a tool that spawns child processes, and consent fatigue from having 18 tools.
+No manual JSON assembly — the skill discovers everything automatically, then tells you what's dangerous. Even the skill analyzing *itself* finds real issues: a tool that starts child processes (`discover_and_analyze_stdio`, which is why it is off on the network servers by default) and consent fatigue from having 18 tools. It does not flag the missing authentication, because a stdio server is a local process with no network listener.
 
 #### Discover a remote (HTTP/SSE) MCP server
 
@@ -1412,7 +1418,7 @@ In a separate terminal:
 npm test
 ```
 
-Runs the 34 attack-pattern test cases, the catalog integrity checks, the package checks, and the security model tests, printing pass/fail for each.
+Runs the 34 attack-pattern test cases, the labeled detection corpus, the catalog integrity checks, the package checks, and the security model tests, printing pass/fail for each.
 
 #### 15. Stop the Server
 
@@ -1450,7 +1456,7 @@ Run from the project root directory:
 
 ```bash
 cd safe-mcp-skill
-npm test                # Red-team, catalog integrity, package, and governance suites
+npm test                # Red-team, detection, catalog integrity, package, and governance suites
 npm run typecheck       # Type-check without emitting
 npm run ci              # Full pipeline: typecheck → build → test
 ```

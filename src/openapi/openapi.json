@@ -3,7 +3,7 @@
   "info": {
     "title": "SAFE-MCP Security Analysis API",
     "description": "Analyzes MCP tool/server definitions and agent architectures against the SAFE-MCP threat framework (78 active techniques, 51 active mitigations, 32 detection rules).",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "contact": { "name": "SAFE-MCP Skill" },
     "license": { "name": "ISC" }
   },

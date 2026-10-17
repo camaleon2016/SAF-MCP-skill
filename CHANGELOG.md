@@ -2,6 +2,30 @@
 
 All notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.1.0] - Unreleased
+
+Detection quality. Tool poisoning and schema poisoning detection is rebuilt, keyword rules stop matching parts of words, and RULE-002 reports the right technique. Findings change for many inputs: fewer false alarms, more real attacks caught.
+
+### Changed
+
+- **RULE-001 and RULE-025 use a new detector** (`src/engine/detect.ts`). It decodes hidden text (Unicode tag characters, base64), strips invisible characters, folds lookalike letters and leetspeak, splits identifiers into words, and scans the tool name, description, annotations, and every schema string, including defaults, enum values, and property names.
+- **RULE-002 reports SAFE-T1005 Exposed Endpoint Exploit** instead of SAFE-T1002 Supply Chain Compromise. It no longer flags stdio servers, which have no network listener, and leaves servers with exposed endpoints to RULE-003, so the same server is not reported twice.
+- **Keyword rules match whole words.** For example RULE-006 no longer treats "Execute SQL" or "recommended" as shell access, RULE-013 no longer reads "capital" as "api", and RULE-018 no longer treats "root cause" as root access.
+- **RULE-027 fires only for references to the model's own prompt or instructions**, not for any mention of "instructions", "policy", or "rules".
+- RULE-006 now also catches tools that start processes ("starts the given command as a child process").
+- Evidence names each signal, where it was found, and the matched text, instead of printing regular expressions.
+
+### Added
+
+- `confidence` ("high" or "medium") on RULE-001 and RULE-025 findings.
+- Hostile input checks: the detector is bounded against input crafted to make patterns backtrack (a server controls the text it scans), and the suite times seven such inputs. CI jobs now time out after 15 minutes.
+- A labeled detection corpus and suite (`npm run test:detection`) covering hidden markup, ASCII smuggling, homoglyphs, leetspeak, base64 payloads, markdown image exfiltration, task hijacking, concealment, approval bypass, and schema poisoning, plus harmless tools that resemble each. Known limits are recorded in the corpus and the README's Detection section.
+
+### Fixed
+
+- Missed attacks, including the widely documented hidden `<IMPORTANT>` instruction pattern, instructions hidden in Unicode tag characters, and poisoned parameter descriptions, defaults, and names.
+- False alarms on ordinary phrasing such as "act as a concise editor", "file system: free space", "instructions for attendees", and "do not show passwords in the output".
+
 ## [2.0.0] - 2026-10-16
 
 Version 2.0.0 fixes serious issues in the skill's own security and brings its catalog in line with upstream SAF-MCP. Several defaults and outputs change, so read **Breaking changes** before upgrading.
@@ -48,5 +72,6 @@ Version 2.0.0 fixes serious issues in the skill's own security and brings its ca
 
 First release: the SAFE-MCP analysis engine with 32 rules, MCP (stdio and HTTP), REST, OpenAI function calling, and C# Semantic Kernel surfaces, auto discovery, and STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF mappings.
 
+[2.1.0]: https://github.com/camaleon2016/SAFE-MCP-skill/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/camaleon2016/SAFE-MCP-skill/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/camaleon2016/SAFE-MCP-skill/releases/tag/v1.0.0
