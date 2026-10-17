@@ -2,7 +2,7 @@
 
 All notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
-## [2.2.0] - Unreleased
+## [2.2.0] - 2026-10-17
 
 Renamed to match upstream. SAFE-MCP is now SAF-MCP (Secure Agentic Framework), and this project follows: the repository is SAF-MCP-skill, and the package and command are `saf-mcp-skill`. Nothing breaks for existing users.
 
