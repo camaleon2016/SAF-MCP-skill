@@ -213,7 +213,18 @@ npm run start:rest   # OpenAPI REST server (:3002)
 
 ## Installation
 
+### From npm
+
+```bash
+npm install saf-mcp-skill          # as a library in your project
+npx saf-mcp-skill                  # run the MCP stdio server without installing
+```
+
+Published versions carry npm provenance, so `npm audit signatures` can verify that a version was built by this repository's release workflow. The package ships prebuilt and runs no install scripts, so it installs under npm's default security settings.
+
 ### From Source (any OS)
+
+Use this to work on the skill, or to run the REST and MCP HTTP servers.
 
 ```bash
 cd saf-mcp-skill
@@ -226,7 +237,7 @@ This produces compiled JavaScript in `dist/`. The project is fully portable — 
 ### Verify the Build
 
 ```bash
-npm run ci          # typecheck → build → test (red-team, catalog, and governance suites)
+npm run ci          # typecheck → build → test (red-team, detection, catalog, package, and governance suites)
 ```
 
 ## Running the Skill
@@ -239,8 +250,8 @@ The skill only needs to be installed and built on **one** machine. Once running 
 |---|---|---|
 | **Static analysis** (`analyze_tool`, `analyze_server`, `analyze_architecture`) | Skill host only | N/A — you send JSON, no server connection involved |
 | **HTTP/SSE discovery** (`discover_and_analyze_http`) | Skill host only | **Yes** — point it at any reachable MCP server URL by IP or hostname |
-| **Config discovery** (`discover_and_analyze_config`) | Skill host only | **Partially** — `url` entries work remotely; `command` entries require the server code on the skill host |
-| **Stdio discovery** (`discover_and_analyze_stdio`) | Skill host only | **No** — spawns the target as a child process, so the server code must be local |
+| **Config discovery** (`discover_and_analyze_config`) | Skill host only | **Partially** — `url` entries work remotely; `command` entries start the server on the skill host, and are off by default on the REST and MCP HTTP servers |
+| **Stdio discovery** (`discover_and_analyze_stdio`) | Skill host only | **No** — starts the target as a child process on the skill host, so it is off by default on the REST and MCP HTTP servers |
 
 **Example remote setup:** Install the skill on machine A and start the REST server with API keys (the server refuses to listen beyond loopback without them, see [Security Model](#security-model)):
 
@@ -288,12 +299,16 @@ The server reads JSON-RPC from stdin and writes to stdout.
 {
   "mcpServers": {
     "saf-mcp": {
-      "command": "node",
-      "args": ["<path-to>/saf-mcp-skill/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "saf-mcp-skill@2.2.1"]
     }
   }
 }
 ```
+
+Pin the version (`saf-mcp-skill@2.2.1`) rather than taking whatever is latest: an MCP server runs with your permissions, so an upgrade should be a decision, not a side effect of restarting your client. On Windows, if Claude Desktop cannot find `npx`, use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "saf-mcp-skill@2.2.1"]`.
+
+To run from a clone instead, point the client at the build: `"command": "node"` with `"args": ["<path-to>/saf-mcp-skill/dist/index.js"]`.
 
 **VS Code `settings.json`:**
 ```json
@@ -301,8 +316,8 @@ The server reads JSON-RPC from stdin and writes to stdout.
   "mcp": {
     "servers": {
       "saf-mcp": {
-        "command": "node",
-        "args": ["<path-to>/saf-mcp-skill/dist/index.js"]
+        "command": "npx",
+        "args": ["-y", "saf-mcp-skill@2.2.1"]
       }
     }
   }
@@ -315,7 +330,7 @@ Use this for remote or multi-client MCP connections.
 
 ```bash
 npm run start:http              # production (from dist/)
-npm run dev:http                # development (ts-node, live reload)
+npm run dev:http                # development (runs the TypeScript directly with tsx)
 ```
 
 Default: `http://127.0.0.1:3001/v1/mcp`
@@ -473,11 +488,7 @@ console.log(result.findings);             // [{ruleId, severity, technique, ...}
 
 Importing the package has no side effects: it starts no server and never touches stdin or stdout. The package root also exports the catalog lookups (`getTechnique`, `searchTechniques`, `getMitigationsForTechnique`, and others) and `VERSION`. In library mode your program is the operator, so `discoverAndAnalyzeStdio` is allowed; it starts the command you pass, so only pass commands you trust.
 
-To use it from another project, install it from GitHub (npm builds it during install):
-
-```bash
-npm install github:camaleon2016/SAF-MCP-skill
-```
+Install it in your project with `npm install saf-mcp-skill`.
 
 ### Option 7 — Agent Skill (SKILL.md)
 
@@ -485,22 +496,27 @@ npm install github:camaleon2016/SAF-MCP-skill
 
 ## Configuration
 
-Copy `.env.example` to `.env` to customize:
+The skill reads its settings from environment variables; [`.env.example`](.env.example) lists all of them. Nothing loads a `.env` file automatically. To keep settings in a file, copy `.env.example` to `.env`, edit it, and start the server with Node's `--env-file` option (Node 20.6 or later):
 
 **Linux / macOS / WSL / Git Bash:**
 ```bash
 cp .env.example .env
+node --env-file=.env dist/openapi/serve.js
 ```
 
 **Windows PowerShell:**
 ```powershell
 Copy-Item .env.example .env
+node --env-file=.env dist/openapi/serve.js
 ```
 
 **Windows CMD:**
 ```cmd
 copy .env.example .env
+node --env-file=.env dist/openapi/serve.js
 ```
+
+Use `dist/http.js` for the MCP HTTP server. With `npm run start:rest`, settings must be set in the shell's environment instead, because npm does not pass `--env-file` through. Check the startup output: a server that should require API keys refuses to start beyond loopback without them.
 
 ### Access Control
 
@@ -563,6 +579,7 @@ saf-mcp-skill/
 │   │   ├── rules.ts                 # 32-rule analysis engine
 │   │   └── detect.ts                # Text detection for tool and schema poisoning
 │   ├── governance/
+│   │   ├── policy.ts                # Security model: discovery, browser, startup, and URL checks
 │   │   ├── access.ts                # API key + IP allowlist
 │   │   └── logger.ts                # Structured JSONL logging
 │   ├── openapi/
@@ -602,6 +619,8 @@ saf-mcp-skill/
 │   ├── catalog-sync-report.md      # Generated: catalog vs upstream
 │   └── catalog-sync-changes.md     # Generated: what the last sync changed
 ├── .github/workflows/ci.yml         # CI pipeline (Node 20 + 22)
+├── .github/workflows/publish.yml    # Publishes releases to npm with provenance
+├── RELEASING.md                     # Release process
 ├── SKILL.md                         # Agent Skill instructions
 ├── SECURITY.md                      # Vulnerability reporting
 ├── CHANGELOG.md
@@ -708,13 +727,13 @@ The engine runs 32 rules covering:
 
 - Tool poisoning & prompt injection (RULE-001)
 - Unauthenticated network servers (RULE-002)
-- Exposed endpoints (RULE-003)
+- Exposed endpoints without authentication (RULE-003)
 - Overly broad OAuth scopes (RULE-004)
 - Tool shadowing / name collisions (RULE-005)
 - Command injection via shell tools (RULE-006)
 - Prompt injection vectors (RULE-007)
 - Path traversal (RULE-008)
-- Rug-pull via dynamic transports (RULE-009)
+- Post-approval tool mutation (rug pull) via dynamic transports (RULE-009)
 - Vector store poisoning (RULE-010)
 - Cross-tool contamination (RULE-011)
 - Cross-agent injection (RULE-012)
@@ -723,7 +742,7 @@ The engine runs 32 rules covering:
 - Multimodal injection (RULE-015)
 - CLI weaponization (RULE-016)
 - Credential harvest (RULE-017)
-- Over-privileged tools (RULE-018)
+- Over-privileged tools, confused deputy (RULE-018)
 - Function spoofing (RULE-019)
 - Autonomous loop exploit (RULE-020)
 - Backdoored binaries (RULE-021)
@@ -1075,17 +1094,17 @@ curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: appli
 
 </details>
 
-**What comes back:** The response includes both the discovered server info and the full security analysis:
+**What comes back:** The response includes both the discovered server info and the full security analysis (trimmed here):
 
 ```json
 {
   "discovered": {
     "serverName": "saf-mcp-skill",
-    "serverVersion": "1.0.0",
+    "serverVersion": "2.2.1",
     "toolCount": 18,
     "tools": [
       { "name": "analyze_tool", "description": "Analyze a single MCP tool definition for SAF-MCP security risks." },
-      { "name": "discover_and_analyze_stdio", "description": "Connect to a local MCP server via stdio, automatically enumerate all its tools, and run a full SAF-MCP security analysis." }
+      { "name": "discover_and_analyze_stdio", "description": "Connect to a local MCP server via stdio, automatically enumerate all its tools, and run a full SAF-MCP security analysis. WARNING: this starts the given command as a child process on the host, ..." }
     ]
   },
   "analysis": {
@@ -1125,6 +1144,7 @@ Then from the original terminal:
 ```bash
 curl -X POST http://127.0.0.1:3002/v1/discover/http \
   -H "Content-Type: application/json" \
+  -H "X-Api-Key: $SAF_MCP_API_KEYS" \
   -d '{"url": "http://127.0.0.1:3001/v1/mcp"}'
 ```
 
@@ -1134,27 +1154,29 @@ curl -X POST http://127.0.0.1:3002/v1/discover/http \
 **PowerShell:**
 ```powershell
 $body = '{"url":"http://127.0.0.1:3001/v1/mcp"}'
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/http -ContentType "application/json" -Body $body | ConvertTo-Json -Depth 10
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/http -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAF_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
 ```
 **CMD:**
 ```cmd
-curl.exe -X POST http://127.0.0.1:3002/v1/discover/http -H "Content-Type: application/json" -d "{\"url\":\"http://127.0.0.1:3001/v1/mcp\"}"
+curl.exe -X POST http://127.0.0.1:3002/v1/discover/http -H "Content-Type: application/json" -H "X-Api-Key: %SAF_MCP_API_KEYS%" -d "{\"url\":\"http://127.0.0.1:3001/v1/mcp\"}"
 ```
 
 </details>
 
-> To analyze a remote server, replace the URL with the target's address (e.g. `http://192.168.1.50:3001/v1/mcp`). The exposed endpoint URL is automatically flagged — if the server has no authentication, the engine catches it.
+> HTTP discovery itself needs no API key or command discovery; the key is only required here because this section's REST server was started with keys. To analyze a remote server, replace the URL with the target's address (e.g. `http://192.168.1.50:3001/v1/mcp`). The endpoint URL is flagged automatically, and if the server has no authentication, the engine reports it.
 
 #### Discover all servers from a config file
 
-Paste the contents of your `claude_desktop_config.json` or VS Code MCP settings and the skill connects to every server, enumerates everything, and runs a full architecture-level analysis across all of them:
+Paste the contents of your `claude_desktop_config.json` or VS Code MCP settings and the skill connects to every server, enumerates everything, and runs a full architecture-level analysis across all of them. Every `command` entry is started as a process on the skill host, so only analyze configs whose servers you would be willing to run.
+
+This example is a config listing the skill twice, once over stdio and once through the MCP HTTP server from the previous step (keep it running):
 
 ```bash
 curl -X POST http://127.0.0.1:3002/v1/discover/config \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: $SAF_MCP_API_KEYS" \
   -d '{
-    "configJson": "{\"mcpServers\":{\"data-server\":{\"command\":\"node\",\"args\":[\"dist/index.js\"]},\"code-server\":{\"url\":\"http://localhost:4000/v1/mcp\"}}}"
+    "configJson": "{\"mcpServers\":{\"saf-mcp-stdio\":{\"command\":\"node\",\"args\":[\"dist/index.js\"]},\"saf-mcp-http\":{\"url\":\"http://127.0.0.1:3001/v1/mcp\"}}}"
   }'
 ```
 
@@ -1163,36 +1185,46 @@ curl -X POST http://127.0.0.1:3002/v1/discover/config \
 
 **PowerShell:**
 ```powershell
+# This sends your real Claude Desktop config, which starts every server listed in it.
 $config = Get-Content "$env:APPDATA\Claude\claude_desktop_config.json" -Raw
 $body = @{ configJson = $config } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/discover/config -ContentType "application/json" -Headers @{ "X-Api-Key" = $env:SAF_MCP_API_KEYS } -Body $body | ConvertTo-Json -Depth 10
 ```
 **CMD:**
 ```cmd
-curl.exe -X POST http://127.0.0.1:3002/v1/discover/config -H "Content-Type: application/json" -H "X-Api-Key: %SAF_MCP_API_KEYS%" -d "{\"configJson\":\"{\\\"mcpServers\\\":{\\\"data-server\\\":{\\\"command\\\":\\\"node\\\",\\\"args\\\":[\\\"dist/index.js\\\"]},\\\"code-server\\\":{\\\"url\\\":\\\"http://localhost:4000/v1/mcp\\\"}}}\"}"
+curl.exe -X POST http://127.0.0.1:3002/v1/discover/config -H "Content-Type: application/json" -H "X-Api-Key: %SAF_MCP_API_KEYS%" -d "{\"configJson\":\"{\\\"mcpServers\\\":{\\\"saf-mcp-stdio\\\":{\\\"command\\\":\\\"node\\\",\\\"args\\\":[\\\"dist/index.js\\\"]},\\\"saf-mcp-http\\\":{\\\"url\\\":\\\"http://127.0.0.1:3001/v1/mcp\\\"}}}\"}"
 ```
 
 </details>
 
-**What comes back:** A full architecture analysis across all servers, including cross-server issues like tool shadowing (duplicate tool names), credential relay chains, and cross-agent injection risks — things you'd never catch analyzing servers individually.
+**What comes back:** A full architecture analysis across all servers, including cross-server issues you would not catch by analyzing each server alone. Here, the two entries offer the same 18 tool names, which is exactly what a malicious server copying a trusted one looks like, so RULE-005 reports tool shadowing. Servers are labeled by their config keys (trimmed):
 
 ```json
 {
   "discovered": {
     "serversFound": 2,
     "servers": [
-      { "configName": "data-server", "serverName": "data-server", "toolCount": 3, "transport": "stdio" },
-      { "configName": "code-server", "serverName": "code-server", "toolCount": 5, "transport": "http" }
+      { "configName": "saf-mcp-stdio", "serverName": "saf-mcp-skill", "toolCount": 18, "transport": "stdio" },
+      { "configName": "saf-mcp-http", "serverName": "saf-mcp-skill", "toolCount": 18, "transport": "http" }
     ]
   },
   "analysis": {
-    "summary": { "overallRisk": "Critical", "totalFindings": 12 },
-    "findings": [ ... ]
+    "summary": { "overallRisk": "Critical", "totalFindings": 6 },
+    "findings": [
+      { "ruleId": "RULE-005", "severity": "High", "evidence": "18 tool name(s) offered by more than one server: \"analyze_architecture\" on saf-mcp-stdio and saf-mcp-http; ..." },
+      { "ruleId": "RULE-006", "severity": "Critical", "evidence": "Tools with shell/exec capabilities: ..." },
+      { "ruleId": "RULE-003", "severity": "High", "evidence": "Unauthenticated exposed endpoints on: saf-mcp-http" },
+      { "ruleId": "RULE-009", "severity": "High", "evidence": "Servers with dynamic transport (tool definitions may change at runtime): saf-mcp-http" },
+      { "ruleId": "RULE-011", "severity": "High", "evidence": "Multi-server architecture (2 servers, 36 tools) ..." },
+      { "ruleId": "RULE-024", "severity": "Medium", "evidence": "36 tools registered ..." }
+    ]
   }
 }
 ```
 
 > **MCP tool equivalent:** When using the skill via MCP (Claude Desktop, VS Code Copilot, etc.), the same functionality is available as `discover_and_analyze_stdio`, `discover_and_analyze_http`, and `discover_and_analyze_config`.
+
+> **Before steps 5-15:** stop this REST server (`Ctrl+C`) and start it again with plain `npm run start:rest`. The walkthrough below sends no API key.
 
 ---
 
@@ -1343,7 +1375,7 @@ curl.exe "http://127.0.0.1:3002/v1/mitigations?q=cryptographic"
 
 #### 11. Get the Threat Profile
 
-Returns severity distribution, unmitigated techniques, coverage gaps, and an overall coverage score:
+Returns the severity distribution across the active techniques, the critical ones, any technique with no mitigation, and the share of techniques that have at least one:
 
 ```bash
 curl http://127.0.0.1:3002/v1/threat-profile
@@ -1469,9 +1501,10 @@ Run from the project root directory:
 
 ```bash
 cd saf-mcp-skill
-npm run dev             # Stdio with ts-node (no build needed)
-npm run dev:http        # HTTP transport with ts-node
-npm run dev:rest        # REST API with ts-node
+npm run dev             # Stdio, running the TypeScript directly with tsx (no build needed)
+npm run dev:http        # MCP HTTP transport with tsx
+npm run dev:rest        # REST API with tsx
+npm run sync:catalog -- --upstream ../safe-mcp   # Resync the catalog (see Catalog Data)
 ```
 
 ## License

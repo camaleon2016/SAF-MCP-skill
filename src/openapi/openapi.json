@@ -3,12 +3,19 @@
   "info": {
     "title": "SAF-MCP Security Analysis API",
     "description": "Analyzes MCP tool/server definitions and agent architectures against the SAF-MCP threat framework (78 active techniques, 51 active mitigations, 32 detection rules).",
-    "version": "2.2.0",
-    "contact": { "name": "SAF-MCP Skill" },
-    "license": { "name": "ISC" }
+    "version": "2.2.1",
+    "contact": {
+      "name": "SAF-MCP Skill"
+    },
+    "license": {
+      "name": "ISC"
+    }
   },
   "servers": [
-    { "url": "http://127.0.0.1:3001", "description": "Local development" }
+    {
+      "url": "http://127.0.0.1:3001",
+      "description": "Local development"
+    }
   ],
   "paths": {
     "/v1/analyze/architecture": {
@@ -20,7 +27,9 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/AgentArchitecture" }
+              "schema": {
+                "$ref": "#/components/schemas/AgentArchitecture"
+              }
             }
           }
         },
@@ -29,14 +38,24 @@
             "description": "Analysis result",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/AnalysisResult" }
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResult"
+                }
               }
             }
           },
-          "400": { "$ref": "#/components/responses/BadRequest" },
-          "403": { "$ref": "#/components/responses/Forbidden" }
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
         },
-        "security": [{ "apiKey": [] }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     },
     "/v1/analyze/tool": {
@@ -48,19 +67,35 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ToolDefinition" }
+              "schema": {
+                "$ref": "#/components/schemas/ToolDefinition"
+              }
             }
           }
         },
         "responses": {
           "200": {
             "description": "Analysis result",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AnalysisResult" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResult"
+                }
+              }
+            }
           },
-          "400": { "$ref": "#/components/responses/BadRequest" },
-          "403": { "$ref": "#/components/responses/Forbidden" }
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
         },
-        "security": [{ "apiKey": [] }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     },
     "/v1/analyze/server": {
@@ -72,19 +107,35 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ServerDefinition" }
+              "schema": {
+                "$ref": "#/components/schemas/ServerDefinition"
+              }
             }
           }
         },
         "responses": {
           "200": {
             "description": "Analysis result",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AnalysisResult" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResult"
+                }
+              }
+            }
           },
-          "400": { "$ref": "#/components/responses/BadRequest" },
-          "403": { "$ref": "#/components/responses/Forbidden" }
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
         },
-        "security": [{ "apiKey": [] }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     },
     "/v1/techniques/{id}": {
@@ -92,13 +143,36 @@
         "operationId": "getTechnique",
         "summary": "Get technique details",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "SAFE-T1001" }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "SAFE-T1001"
+          }
         ],
         "responses": {
-          "200": { "description": "Technique details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Technique" } } } },
-          "404": { "description": "Not found" }
+          "200": {
+            "description": "Technique details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Technique"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
         },
-        "security": [{ "apiKey": [] }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     },
     "/v1/mitigations/{id}": {
@@ -106,13 +180,36 @@
         "operationId": "getMitigation",
         "summary": "Get mitigation details",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "example": "SAFE-M-1" }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "SAFE-M-1"
+          }
         ],
         "responses": {
-          "200": { "description": "Mitigation details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Mitigation" } } } },
-          "404": { "description": "Not found" }
+          "200": {
+            "description": "Mitigation details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mitigation"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
         },
-        "security": [{ "apiKey": [] }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     },
     "/v1/techniques": {
@@ -120,14 +217,56 @@
         "operationId": "searchTechniques",
         "summary": "Search techniques",
         "parameters": [
-          { "name": "q", "in": "query", "schema": { "type": "string" }, "description": "Search keyword" },
-          { "name": "severity", "in": "query", "schema": { "type": "string", "enum": ["Critical", "High", "Medium", "Low"] } },
-          { "name": "tactic", "in": "query", "schema": { "type": "string" }, "description": "Tactic ID filter" }
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search keyword"
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Critical",
+                "High",
+                "Medium",
+                "Low"
+              ]
+            }
+          },
+          {
+            "name": "tactic",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Tactic ID filter"
+          }
         ],
         "responses": {
-          "200": { "description": "Matching techniques", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/TechniqueSummary" } } } } }
+          "200": {
+            "description": "Matching techniques",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TechniqueSummary"
+                  }
+                }
+              }
+            }
+          }
         },
-        "security": [{ "apiKey": [] }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     },
     "/v1/mitigations": {
@@ -135,12 +274,35 @@
         "operationId": "searchMitigations",
         "summary": "Search mitigations",
         "parameters": [
-          { "name": "q", "in": "query", "schema": { "type": "string" }, "description": "Search keyword" }
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search keyword"
+          }
         ],
         "responses": {
-          "200": { "description": "Matching mitigations", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/MitigationSummary" } } } } }
+          "200": {
+            "description": "Matching mitigations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MitigationSummary"
+                  }
+                }
+              }
+            }
+          }
         },
-        "security": [{ "apiKey": [] }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     },
     "/v1/threat-profile": {
@@ -148,9 +310,22 @@
         "operationId": "getThreatProfile",
         "summary": "Get SAF-MCP threat profile",
         "responses": {
-          "200": { "description": "Threat profile", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ThreatProfile" } } } }
+          "200": {
+            "description": "Threat profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThreatProfile"
+                }
+              }
+            }
+          }
         },
-        "security": [{ "apiKey": [] }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     },
     "/v1/framework/stats": {
@@ -158,9 +333,22 @@
         "operationId": "getFrameworkStats",
         "summary": "Get framework statistics",
         "responses": {
-          "200": { "description": "Framework stats", "content": { "application/json": { "schema": { "type": "object" } } } }
+          "200": {
+            "description": "Framework stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
         },
-        "security": [{ "apiKey": [] }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     },
     "/health": {
@@ -169,7 +357,27 @@
         "summary": "Health check",
         "security": [],
         "responses": {
-          "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string" }, "version": { "type": "string" }, "apiVersion": { "type": "string" } } } } } }
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "apiVersion": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -182,15 +390,32 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/StdioDiscoveryInput" }
+              "schema": {
+                "$ref": "#/components/schemas/StdioDiscoveryInput"
+              }
             }
           }
         },
         "responses": {
-          "200": { "description": "Discovery and analysis result", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DiscoveryResult" } } } },
-          "403": { "$ref": "#/components/responses/Forbidden" }
+          "200": {
+            "description": "Discovery and analysis result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryResult"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
         },
-        "security": [{ "apiKey": [] }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     },
     "/v1/discover/http": {
@@ -202,15 +427,32 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/HttpDiscoveryInput" }
+              "schema": {
+                "$ref": "#/components/schemas/HttpDiscoveryInput"
+              }
             }
           }
         },
         "responses": {
-          "200": { "description": "Discovery and analysis result", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DiscoveryResult" } } } },
-          "403": { "$ref": "#/components/responses/Forbidden" }
+          "200": {
+            "description": "Discovery and analysis result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryResult"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
         },
-        "security": [{ "apiKey": [] }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     },
     "/v1/discover/config": {
@@ -222,15 +464,203 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ConfigDiscoveryInput" }
+              "schema": {
+                "$ref": "#/components/schemas/ConfigDiscoveryInput"
+              }
             }
           }
         },
         "responses": {
-          "200": { "description": "Config discovery and analysis result", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConfigDiscoveryResult" } } } },
-          "403": { "$ref": "#/components/responses/Forbidden" }
+          "200": {
+            "description": "Config discovery and analysis result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigDiscoveryResult"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
         },
-        "security": [{ "apiKey": [] }]
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/v1/mappings/{id}": {
+      "get": {
+        "operationId": "getFindingMappings",
+        "summary": "STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF mappings for a technique",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "SAFE-T1001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Framework mappings (empty lists for a technique with no mappings)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "stride": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "atlas": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "owaspLlm": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "nistAiRmf": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/v1/coverage": {
+      "post": {
+        "operationId": "getFrameworkCoverage",
+        "summary": "Framework coverage summary for a set of technique IDs",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "techniqueIds"
+                ],
+                "properties": {
+                  "techniqueIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "SAFE-T1001",
+                      "SAFE-T1101"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Coverage per framework",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "framework": {
+                        "type": "string"
+                      },
+                      "totalMapped": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/v1/openapi.json": {
+      "get": {
+        "operationId": "getOpenApiSpec",
+        "summary": "This OpenAPI specification",
+        "responses": {
+          "200": {
+            "description": "OpenAPI 3.1 document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/version": {
+      "get": {
+        "operationId": "getVersion",
+        "summary": "Package, API, and framework version",
+        "responses": {
+          "200": {
+            "description": "Version information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "apiVersion": {
+                      "type": "string"
+                    },
+                    "framework": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
       }
     }
   },
@@ -245,41 +675,120 @@
     "responses": {
       "BadRequest": {
         "description": "Invalid request body",
-        "content": { "application/json": { "schema": { "type": "object", "properties": { "error": { "type": "string" } } } } }
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       },
       "Forbidden": {
         "description": "Access denied",
-        "content": { "application/json": { "schema": { "type": "object", "properties": { "error": { "type": "string" } } } } }
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "schemas": {
       "ToolDefinition": {
         "type": "object",
-        "required": ["name", "description"],
+        "required": [
+          "name",
+          "description"
+        ],
         "properties": {
-          "name": { "type": "string" },
-          "description": { "type": "string" },
-          "inputSchema": { "type": "object", "additionalProperties": true },
-          "annotations": { "type": "object", "additionalProperties": true },
-          "parameters": { "type": "object", "additionalProperties": true }
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "inputSchema": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "annotations": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": true
+          }
         }
       },
       "ServerDefinition": {
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "properties": {
-          "name": { "type": "string" },
-          "transport": { "type": "string", "enum": ["stdio", "sse", "http", "websocket"] },
-          "authentication": { "type": "string" },
-          "tools": { "type": "array", "items": { "$ref": "#/components/schemas/ToolDefinition" } },
-          "permissions": { "type": "array", "items": { "type": "string" } },
-          "exposedEndpoints": { "type": "array", "items": { "type": "string" } },
+          "name": {
+            "type": "string"
+          },
+          "transport": {
+            "type": "string",
+            "enum": [
+              "stdio",
+              "sse",
+              "http",
+              "websocket"
+            ]
+          },
+          "authentication": {
+            "type": "string"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ToolDefinition"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "exposedEndpoints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "oauthConfig": {
             "type": "object",
             "properties": {
-              "scopes": { "type": "array", "items": { "type": "string" } },
-              "callbackUrls": { "type": "array", "items": { "type": "string" } },
-              "authorizationServer": { "type": "string" }
+              "scopes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "callbackUrls": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "authorizationServer": {
+                "type": "string"
+              }
             }
           }
         }
@@ -287,39 +796,96 @@
       "AgentArchitecture": {
         "type": "object",
         "properties": {
-          "name": { "type": "string" },
-          "servers": { "type": "array", "items": { "$ref": "#/components/schemas/ServerDefinition" } },
-          "tools": { "type": "array", "items": { "$ref": "#/components/schemas/ToolDefinition" } },
-          "multiAgent": { "type": "boolean" },
-          "sharedMemory": { "type": "boolean" },
-          "vectorStore": { "type": "boolean" },
-          "ragPipeline": { "type": "boolean" },
-          "multimodal": { "type": "boolean" },
-          "cliAccess": { "type": "boolean" },
-          "fileSystemAccess": { "type": "boolean" },
-          "networkAccess": { "type": "boolean" },
-          "oauthFlows": { "type": "boolean" }
+          "name": {
+            "type": "string"
+          },
+          "servers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServerDefinition"
+            }
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ToolDefinition"
+            }
+          },
+          "multiAgent": {
+            "type": "boolean"
+          },
+          "sharedMemory": {
+            "type": "boolean"
+          },
+          "vectorStore": {
+            "type": "boolean"
+          },
+          "ragPipeline": {
+            "type": "boolean"
+          },
+          "multimodal": {
+            "type": "boolean"
+          },
+          "cliAccess": {
+            "type": "boolean"
+          },
+          "fileSystemAccess": {
+            "type": "boolean"
+          },
+          "networkAccess": {
+            "type": "boolean"
+          },
+          "oauthFlows": {
+            "type": "boolean"
+          }
         }
       },
       "Finding": {
         "type": "object",
         "properties": {
-          "ruleId": { "type": "string" },
-          "severity": { "type": "string", "enum": ["Critical", "High", "Medium", "Low"] },
+          "ruleId": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "Critical",
+              "High",
+              "Medium",
+              "Low"
+            ]
+          },
           "technique": {
             "type": "object",
-            "properties": { "id": { "type": "string" }, "name": { "type": "string" } }
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
           },
-          "description": { "type": "string" },
-          "evidence": { "type": "string" },
+          "description": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
           "mitigations": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "id": { "type": "string" },
-                "name": { "type": "string" },
-                "effectiveness": { "type": "string" }
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "effectiveness": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -328,111 +894,260 @@
       "RiskSummary": {
         "type": "object",
         "properties": {
-          "overallRisk": { "type": "string", "enum": ["Critical", "High", "Medium", "Low"] },
-          "totalFindings": { "type": "integer" },
-          "bySeverity": { "type": "object", "additionalProperties": { "type": "integer" } },
-          "coverageScore": { "type": "number", "minimum": 0, "maximum": 1 }
+          "overallRisk": {
+            "type": "string",
+            "enum": [
+              "Critical",
+              "High",
+              "Medium",
+              "Low"
+            ]
+          },
+          "totalFindings": {
+            "type": "integer"
+          },
+          "bySeverity": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "coverageScore": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
         }
       },
       "AnalysisResult": {
         "type": "object",
         "properties": {
-          "timestamp": { "type": "string", "format": "date-time" },
-          "target": { "type": "string" },
-          "summary": { "$ref": "#/components/schemas/RiskSummary" },
-          "findings": { "type": "array", "items": { "$ref": "#/components/schemas/Finding" } }
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "target": {
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/RiskSummary"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            }
+          }
         }
       },
       "Technique": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "tactic": { "type": "string" },
-          "tacticName": { "type": "string" },
-          "severity": { "type": "string" },
-          "description": { "type": "string" },
-          "mitigations": { "type": "array", "items": { "type": "string" } },
-          "mitreAttackMapping": { "type": "array", "items": { "type": "string" } }
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tactic": {
+            "type": "string"
+          },
+          "tacticName": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "mitigations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mitreAttackMapping": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       },
       "Mitigation": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "category": { "type": "string" },
-          "effectiveness": { "type": "string" },
-          "description": { "type": "string" },
-          "mitigates": { "type": "array", "items": { "type": "string" } }
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "effectiveness": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "mitigates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       },
       "TechniqueSummary": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "severity": { "type": "string" },
-          "tactic": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "tactic": {
+            "type": "string"
+          }
         }
       },
       "MitigationSummary": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "category": { "type": "string" },
-          "effectiveness": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "effectiveness": {
+            "type": "string"
+          }
         }
       },
       "ThreatProfile": {
         "type": "object",
         "properties": {
-          "totalTechniques": { "type": "integer" },
-          "bySeverity": { "type": "object", "additionalProperties": { "type": "integer" } },
-          "mitigationCoverage": { "type": "number" },
-          "criticalTechniques": { "type": "array", "items": { "$ref": "#/components/schemas/TechniqueSummary" } }
+          "totalTechniques": {
+            "type": "integer"
+          },
+          "bySeverity": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "mitigationCoverage": {
+            "type": "number"
+          },
+          "criticalTechniques": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TechniqueSummary"
+            }
+          }
         }
       },
       "StdioDiscoveryInput": {
         "type": "object",
-        "required": ["command"],
+        "required": [
+          "command"
+        ],
         "properties": {
-          "command": { "type": "string", "description": "Command to start the MCP server (e.g., 'node', 'python')" },
-          "args": { "type": "array", "items": { "type": "string" }, "description": "Arguments for the command" },
-          "env": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Environment variables" },
-          "cwd": { "type": "string", "description": "Working directory" }
+          "command": {
+            "type": "string",
+            "description": "Command to start the MCP server (e.g., 'node', 'python')"
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Arguments for the command"
+          },
+          "env": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Environment variables"
+          },
+          "cwd": {
+            "type": "string",
+            "description": "Working directory"
+          }
         }
       },
       "HttpDiscoveryInput": {
         "type": "object",
-        "required": ["url"],
+        "required": [
+          "url"
+        ],
         "properties": {
-          "url": { "type": "string", "description": "MCP server URL (e.g., 'http://localhost:3001/v1/mcp')" },
-          "headers": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Custom HTTP headers" }
+          "url": {
+            "type": "string",
+            "description": "MCP server URL (e.g., 'http://localhost:3001/v1/mcp')"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Custom HTTP headers"
+          }
         }
       },
       "ConfigDiscoveryInput": {
         "type": "object",
-        "required": ["configJson"],
+        "required": [
+          "configJson"
+        ],
         "properties": {
-          "configJson": { "type": "string", "description": "The JSON content of an MCP client config file" }
+          "configJson": {
+            "type": "string",
+            "description": "The JSON content of an MCP client config file"
+          }
         }
       },
       "DiscoveredServerInfo": {
         "type": "object",
         "properties": {
-          "serverName": { "type": "string" },
-          "serverVersion": { "type": "string" },
-          "toolCount": { "type": "integer" },
-          "tools": { "type": "array", "items": { "$ref": "#/components/schemas/ToolDefinition" } }
+          "serverName": {
+            "type": "string"
+          },
+          "serverVersion": {
+            "type": "string"
+          },
+          "toolCount": {
+            "type": "integer"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ToolDefinition"
+            }
+          }
         }
       },
       "DiscoveryResult": {
         "type": "object",
         "properties": {
-          "discovered": { "$ref": "#/components/schemas/DiscoveredServerInfo" },
-          "analysis": { "$ref": "#/components/schemas/AnalysisResult" }
+          "discovered": {
+            "$ref": "#/components/schemas/DiscoveredServerInfo"
+          },
+          "analysis": {
+            "$ref": "#/components/schemas/AnalysisResult"
+          }
         }
       },
       "ConfigDiscoveryResult": {
@@ -441,11 +1156,20 @@
           "discovered": {
             "type": "object",
             "properties": {
-              "serversFound": { "type": "integer" },
-              "servers": { "type": "array", "items": { "type": "object" } }
+              "serversFound": {
+                "type": "integer"
+              },
+              "servers": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
             }
           },
-          "analysis": { "$ref": "#/components/schemas/AnalysisResult" }
+          "analysis": {
+            "$ref": "#/components/schemas/AnalysisResult"
+          }
         }
       }
     }

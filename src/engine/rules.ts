@@ -241,19 +241,35 @@ const rules: Rule[] = [
     test(input) {
       const servers = input.servers ?? [];
       if (servers.length < 2) return null;
-      const seen = new Map<string, string>();
-      const duplicates: string[] = [];
-      for (const server of servers) {
+      // Servers are told apart by position, not name: a server that copies
+      // another server's name as well as its tools is the shadowing case.
+      const nameCount = new Map<string, number>();
+      for (const s of servers) nameCount.set(s.name, (nameCount.get(s.name) ?? 0) + 1);
+      const seenLabel = new Map<string, number>();
+      const labels = servers.map((s) => {
+        if ((nameCount.get(s.name) ?? 0) < 2) return s.name;
+        const n = (seenLabel.get(s.name) ?? 0) + 1;
+        seenLabel.set(s.name, n);
+        return `${s.name} (#${n})`;
+      });
+      const owners = new Map<string, Set<number>>();
+      servers.forEach((server, i) => {
         for (const tool of server.tools ?? []) {
-          const prev = seen.get(tool.name);
-          if (prev && prev !== server.name) {
-            duplicates.push(`"${tool.name}" on ${prev} and ${server.name}`);
-          }
-          seen.set(tool.name, server.name);
+          if (!owners.has(tool.name)) owners.set(tool.name, new Set());
+          owners.get(tool.name)!.add(i);
         }
-      }
-      if (duplicates.length === 0) return null;
-      return `Duplicate tool names across servers: ${duplicates.join("; ")}`;
+      });
+      const shared = [...owners.entries()].filter(([, idx]) => idx.size > 1);
+      if (shared.length === 0) return null;
+      const SHOW = 8;
+      const listed = shared
+        .slice(0, SHOW)
+        .map(([tool, idx]) => `"${tool}" on ${[...idx].map((i) => labels[i]).join(" and ")}`)
+        .join("; ");
+      const more = shared.length > SHOW ? `; and ${shared.length - SHOW} more` : "";
+      const sameName = [...nameCount.entries()].filter(([, n]) => n > 1).map(([n]) => n);
+      const note = sameName.length ? ` Servers reporting the same name: ${sameName.join(", ")}.` : "";
+      return `${shared.length} tool name(s) offered by more than one server: ${listed}${more}.${note}`;
     },
   },
 

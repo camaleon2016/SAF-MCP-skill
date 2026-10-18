@@ -247,6 +247,8 @@ export async function discoverAndAnalyzeConfig(
 
         serverDefs.push(
           buildServerDef(discovered, {
+            // Label servers by their config key: unique, and the name the user knows.
+            name: configName,
             transport: discovered.transport,
             exposedEndpoints: [entry.url],
           }),
@@ -263,7 +265,7 @@ export async function discoverAndAnalyzeConfig(
         discovered = await discoverViaClient(client, transport);
         discovered.transport = "stdio";
 
-        serverDefs.push(buildServerDef(discovered, { transport: "stdio" }));
+        serverDefs.push(buildServerDef(discovered, { name: configName, transport: "stdio" }));
       } else {
         discoveredServers.push({
           configName,
@@ -301,8 +303,8 @@ export async function discoverAndAnalyzeConfig(
 
   const architecture: AgentArchitecture = {
     name: "config-discovered",
+    // One client config is one agent using several servers, not several agents.
     servers: serverDefs,
-    multiAgent: serverDefs.length > 1,
   };
 
   const analysis = analyzeArchitecture(architecture);

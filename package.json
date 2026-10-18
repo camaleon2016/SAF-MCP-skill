@@ -1,6 +1,6 @@
 {
   "name": "saf-mcp-skill",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Security analysis for MCP servers, tool definitions, and agent architectures against the SAF-MCP (formerly SAFE-MCP) attack technique catalog, with STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF mappings.",
   "keywords": [
     "mcp",
@@ -53,6 +53,10 @@
   "engines": {
     "node": ">=20"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "tsc && npm run copy-data",
     "copy-data": "node -e \"const fs=require('fs');fs.cpSync('src/data','dist/data',{recursive:true});fs.cpSync('src/openapi/openapi.json','dist/openapi/openapi.json');\"",
@@ -81,5 +85,8 @@
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
     "yaml": "2.9.1"
+  },
+  "allowScripts": {
+    "esbuild": false
   }
 }

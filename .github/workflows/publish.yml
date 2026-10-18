@@ -1,0 +1,66 @@
+name: Publish to npm
+
+# Runs when a GitHub Release is published. npm trusts this workflow through
+# trusted publishing (OIDC), so no npm token is stored anywhere, and every
+# version it publishes carries a provenance attestation linking it to the
+# exact commit and workflow run. See RELEASING.md.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-npm
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write # trusted publishing and provenance
+
+    steps:
+      # Actions are pinned to commits, not tags, because this job can publish.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Use npm 12.2.0 (trusted publishing needs 11.5.1 or later)
+        run: npm install -g npm@12.2.0
+
+      - name: Release tag must match package.json
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "v$VERSION" ]; then
+            echo "Release tag $TAG does not match package.json version $VERSION"
+            exit 1
+          fi
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck, build, and test
+        run: npm run ci
+
+      - name: Catalog matches the pinned upstream
+        run: |
+          COMMIT=$(node -p "require('./scripts/upstream.json').commit")
+          git clone --filter=blob:none --quiet https://github.com/safe-agentic-framework/safe-mcp.git ../safe-mcp
+          git -C ../safe-mcp checkout --quiet "$COMMIT"
+          npx tsx scripts/sync-catalog.ts --upstream ../safe-mcp --check
+
+      - name: Publish with provenance
+        run: npm publish --provenance --access public
