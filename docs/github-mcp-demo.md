@@ -141,12 +141,12 @@ The response has two sections:
   "summary": {
     "overallRisk": "...",
     "totalFindings": 5,
-    "bySeverity": { "high": 2, "medium": 3 }
+    "bySeverity": { "Critical": 1, "High": 2, "Medium": 2 }
   },
   "findings": [
     {
       "ruleId": "RULE-006",
-      "severity": "high",
+      "severity": "Critical",
       "technique": { "id": "SAFE-T1101", "name": "..." },
       "description": "...",
       "evidence": "Tool 'run_command' ...",

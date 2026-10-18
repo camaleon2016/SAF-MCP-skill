@@ -2,6 +2,31 @@
 
 All notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.2.1] - 2026-10-17
+
+Published to npm, plus fixes found while auditing the README against the code.
+
+### Added
+
+- The package is published to npm as [`saf-mcp-skill`](https://www.npmjs.com/package/saf-mcp-skill) by a GitHub Actions workflow using trusted publishing, so no npm token is stored, and each version carries a provenance attestation (`npm audit signatures` verifies it).
+- `RELEASING.md` describes the release process.
+- Package tests check that the OpenAPI spec documents every REST route, that versions quoted in the README match `package.json`, and that `package-lock.json` resolves packages only from the public npm registry.
+- `publishConfig` pins publishing to `https://registry.npmjs.org/`, so a machine configured for a private registry cannot publish there by mistake.
+
+### Changed
+
+- Install instructions use npm: `npm install saf-mcp-skill` for the library, and `npx saf-mcp-skill` in MCP client configs, pinned to a version.
+- `package.json` records that the dev dependency `esbuild` may not run its install script under npm 12; nothing in the published package runs install scripts.
+
+### Fixed
+
+- **RULE-005 missed tool shadowing between servers with the same name.** It told servers apart by name, so a server copying another server's name and tools went unreported. It now compares servers by position and notes when names collide.
+- **Config discovery reported a false cross agent risk** (RULE-012) for any config with more than one server, and labeled servers by the name they report rather than their config key. One client config is now treated as one agent, and servers are labeled by config key.
+- The OpenAPI spec now documents `/v1/mappings/{id}`, `/v1/coverage`, `/v1/openapi.json`, and `/version`, so importing it into Postman or Swagger UI shows every endpoint.
+- README corrections: settings are read from the environment, and a `.env` file is only loaded with `node --env-file=.env`; the Auto-Discovery demos send the API key they require and show real output; walkthrough steps 5 to 15 start from a default server; `dev` scripts use `tsx`, not `ts-node`.
+
+[2.2.1]: https://github.com/camaleon2016/SAF-MCP-skill/compare/v2.2.0...v2.2.1
+
 ## [2.2.0] - 2026-10-17
 
 Renamed to match upstream. SAFE-MCP is now SAF-MCP (Secure Agentic Framework), and this project follows: the repository is SAF-MCP-skill, and the package and command are `saf-mcp-skill`. Nothing breaks for existing users.

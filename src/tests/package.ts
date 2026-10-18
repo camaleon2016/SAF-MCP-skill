@@ -84,5 +84,45 @@ await test("PKG-004: entry points are wired correctly", () => {
   if (problems.length) throw new Error(problems.join("; "));
 });
 
+await test("PKG-005: the OpenAPI spec documents every REST route the server handles", () => {
+  const server = readFileSync("src/openapi/serve.ts", "utf-8");
+  const spec = JSON.parse(readFileSync("src/openapi/openapi.json", "utf-8")) as { paths: Record<string, Record<string, unknown>> };
+  const routes = new Set<string>();
+  for (const m of server.matchAll(/req\.method === "([A-Z]+)" && path === "([^"]+)"/g)) routes.add(`${m[1]!.toLowerCase()} ${m[2]}`);
+  for (const m of server.matchAll(/path\.match\(\/\^\\\/v1\\\/([a-z-]+)\\\/\(\.\+\)\$\/\)/g)) routes.add(`get /v1/${m[1]}/{id}`);
+  const missing = [...routes].filter((r) => {
+    const [method, route] = r.split(" ") as [string, string];
+    return !spec.paths[route]?.[method];
+  });
+  if (routes.size < 15) throw new Error(`found only ${routes.size} routes in serve.ts; the route pattern may have changed`);
+  if (missing.length) throw new Error(`routes missing from openapi.json: ${missing.join(", ")}`);
+});
+
+await test("PKG-006: versions quoted in the README match package.json", () => {
+  const readme = readFileSync("README.md", "utf-8");
+  const quoted = [
+    ...[...readme.matchAll(/saf-mcp-skill@(\d+\.\d+\.\d+)/g)].map((m) => m[1]!),
+    ...[...readme.matchAll(/"serverVersion": "(\d+\.\d+\.\d+)"/g)].map((m) => m[1]!),
+  ];
+  const stale = [...new Set(quoted.filter((v) => v !== pkg.version))];
+  if (stale.length) throw new Error(`README quotes ${stale.join(", ")}; package.json is ${pkg.version}`);
+});
+
+await test("PKG-007: the lockfile and publish target use only the public npm registry", () => {
+  const lock = JSON.parse(readFileSync("package-lock.json", "utf-8")) as { packages?: Record<string, { resolved?: string }> };
+  const other = new Set<string>();
+  for (const entry of Object.values(lock.packages ?? {})) {
+    if (entry.resolved && !entry.resolved.startsWith("https://registry.npmjs.org/")) other.add(new URL(entry.resolved).host);
+  }
+  if (other.size) {
+    throw new Error(
+      `package-lock.json resolves packages from ${[...other].join(", ")}. ` +
+        "This usually means npm install ran against a private or corporate registry; reinstall with --registry=https://registry.npmjs.org/.",
+    );
+  }
+  const publishTo = (JSON.parse(readFileSync("package.json", "utf-8")) as { publishConfig?: { registry?: string } }).publishConfig?.registry;
+  if (publishTo !== "https://registry.npmjs.org/") throw new Error(`publishConfig.registry is ${publishTo ?? "unset"}`);
+});
+
 console.log(`\n  Total: ${passed + failed} | Passed: ${passed} | Failed: ${failed}\n`);
 process.exit(failed > 0 ? 1 : 0);
