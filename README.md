@@ -300,13 +300,13 @@ The server reads JSON-RPC from stdin and writes to stdout.
   "mcpServers": {
     "saf-mcp": {
       "command": "npx",
-      "args": ["-y", "saf-mcp-skill@2.4.0"]
+      "args": ["-y", "saf-mcp-skill@2.4.1"]
     }
   }
 }
 ```
 
-Pin the version (`saf-mcp-skill@2.4.0`) rather than taking whatever is latest: an MCP server runs with your permissions, so an upgrade should be a decision, not a side effect of restarting your client. On Windows, if Claude Desktop cannot find `npx`, use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "saf-mcp-skill@2.4.0"]`.
+Pin the version (`saf-mcp-skill@2.4.1`) rather than taking whatever is latest: an MCP server runs with your permissions, so an upgrade should be a decision, not a side effect of restarting your client. On Windows, if Claude Desktop cannot find `npx`, use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "saf-mcp-skill@2.4.1"]`.
 
 To run from a clone instead, point the client at the build: `"command": "node"` with `"args": ["<path-to>/saf-mcp-skill/dist/index.js"]`.
 
@@ -317,17 +317,17 @@ To run from a clone instead, point the client at the build: `"command": "node"` 
     "saf-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "saf-mcp-skill@2.4.0"]
+      "args": ["-y", "saf-mcp-skill@2.4.1"]
     }
   }
 }
 ```
 
-VS Code asks you to trust the server the first time it starts it. The tools work in Copilot Chat's **Agent** mode, where they appear in the tools picker; **MCP: List Servers** shows each server's status and logs. On Windows, if the server fails to start because `npx` is not found, use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "saf-mcp-skill@2.4.0"]`. Older VS Code builds read servers from `settings.json` under `"mcp": { "servers": ... }`; `analyze_config` understands all three formats.
+VS Code asks you to trust the server the first time it starts it. The tools work in Copilot Chat's **Agent** mode, where they appear in the tools picker; **MCP: List Servers** shows each server's status and logs. On Windows, if the server fails to start because `npx` is not found, use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "saf-mcp-skill@2.4.1"]`. Older VS Code builds read servers from `settings.json` under `"mcp": { "servers": ... }`; `analyze_config` understands all three formats.
 
 ### Option 2 — MCP over HTTP
 
-Use this for remote or multi-client MCP connections.
+Use this for remote or multi-client MCP connections, including Microsoft 365 Copilot (see [Microsoft 365 Copilot](#microsoft-365-copilot-copilot-studio)).
 
 ```bash
 npm run start:http              # production (from dist/)
@@ -542,7 +542,8 @@ The skill can start processes and make outbound requests, so its own surface is 
 | `SAF_MCP_ALLOW_INSECURE_BIND` | `false` | Allows a non loopback `HOST` without API keys. |
 | `SAF_MCP_CORS_ORIGINS` | none | Browser origins allowed to call the API. Requests carrying any other `Origin` are refused. |
 | `SAF_MCP_ALLOWED_HOSTS` | loopback names when bound to loopback | Accepted `Host` header values. Blocks DNS rebinding. |
-| `SAF_MCP_ALLOW_PRIVATE_URLS` | allowed on a loopback bind, blocked when exposed | Whether URL discovery may reach private and loopback ranges. Cloud metadata and link local addresses are always blocked. |
+| `SAF_MCP_EXPOSED` | `false` | Declares that a loopback bound server is reachable from outside through a tunnel or reverse proxy. Requires API keys and blocks private URLs, as a non loopback bind does. Also implied by `SAF_MCP_TRUST_PROXY=true` or a public name in `SAF_MCP_ALLOWED_HOSTS`. A server not configured as exposed refuses requests that carry forwarding headers (`X-Forwarded-For` and similar). |
+| `SAF_MCP_ALLOW_PRIVATE_URLS` | allowed when local, blocked when exposed | Whether URL discovery may reach private and loopback ranges. Cloud metadata and link local addresses are always blocked. |
 
 POST requests must be `Content-Type: application/json`. Discovery refusals return `403` with `"error": "Blocked by policy"` and the reason.
 
@@ -1125,6 +1126,28 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/analyze/config -Con
 
 Remote (`url`) servers are reported with authentication "unknown", since their sign-in usually lives in the client rather than the file. The MCP tool equivalent is `analyze_config`, which clients can run without an approval prompt because it is read only.
 
+### Microsoft 365 Copilot (Copilot Studio)
+
+Microsoft 365 Copilot reaches MCP servers only over HTTPS with the Streamable HTTP transport, from Microsoft's cloud, so the skill runs as the MCP HTTP server behind a tunnel or on a host, with an API key. Use a Copilot Studio agent: it supports API key authentication. Declarative agents built with the Microsoft 365 Agents Toolkit require OAuth or Entra sign in, which the skill does not implement. You need a Copilot Studio license, and publishing an agent into Microsoft 365 Copilot needs your tenant admin's approval; the Copilot Studio test pane works without publishing.
+
+**1. Run the MCP HTTP server as exposed** (from a clone, after `npm run build`):
+
+```bash
+export SAF_MCP_API_KEYS="$(openssl rand -hex 24)"
+SAF_MCP_EXPOSED=true SAF_MCP_REQUIRE_API_KEY=true \
+  SAF_MCP_ALLOWED_HOSTS=<your-tunnel-host>,localhost npm run start:http
+```
+
+`SAF_MCP_EXPOSED=true` tells the skill that it is reachable from outside even though it listens on `127.0.0.1`: it then requires the API key and refuses private URLs in URL discovery. Command discovery stays off, as on any network server.
+
+**2. Expose it over HTTPS.** For example, with Microsoft Dev Tunnels: `devtunnel host -p 3001 --allow-anonymous`. The tunnel is anonymous because Copilot Studio cannot sign in to it; the API key is what protects the server. Put the tunnel's host name in `SAF_MCP_ALLOWED_HOSTS` (step 1). If you skip `SAF_MCP_EXPOSED`, the skill refuses tunneled requests and says what to set.
+
+**3. Add it to a Copilot Studio agent.** In the agent, open **Tools**, select **Add a tool**, then **New tool**, then **Model Context Protocol**. Enter a name, a description, and the server URL `https://<your-tunnel-host>/v1/mcp`. Choose **API key** authentication, sent in a header named `X-Api-Key`. Generative orchestration must be on for MCP tools to be used.
+
+**4. Test it** in the Copilot Studio test pane with the prompts below. Paste configs rather than referring to files: the agent cannot read your disk.
+
+Stop the tunnel when the demo is over. Before tunneling from a work device into a work tenant, check that your organization allows it.
+
 ### Try It in Claude Desktop or GitHub Copilot
 
 With the skill connected to Claude Desktop or to Copilot Chat in Agent mode (see [Option 1](#option-1--mcp-stdio-transport)), ask in plain language; the assistant picks the tool.
@@ -1207,7 +1230,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: appli
 {
   "discovered": {
     "serverName": "saf-mcp-skill",
-    "serverVersion": "2.4.0",
+    "serverVersion": "2.4.1",
     "toolCount": 19,
     "tools": [
       { "name": "analyze_tool", "description": "Analyze a single MCP tool definition for SAF-MCP security risks." },

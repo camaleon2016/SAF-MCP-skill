@@ -2,6 +2,25 @@
 
 All notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.4.1] - 2026-10-19
+
+A security fix for servers behind a tunnel or reverse proxy, documented setup for Microsoft 365 Copilot and GitHub Copilot, and a demo config.
+
+### Security
+
+- **A loopback server behind a tunnel or reverse proxy was treated as local.** The skill decided whether it was exposed from the address it binds to, so a tunnel forwarding public traffic to `127.0.0.1` left it without required API keys, and URL discovery could reach private and loopback addresses on the host's network. Now:
+  - `SAF_MCP_EXPOSED=true` declares that a loopback server is reachable from outside. It requires API keys at startup and blocks private URLs. `SAF_MCP_TRUST_PROXY=true` or a public name in `SAF_MCP_ALLOWED_HOSTS` implies it.
+  - A server not configured as exposed refuses requests that carry forwarding headers (`X-Forwarded-For`, `X-Forwarded-Host`, `Forwarded`, and similar), with a message naming the settings to use.
+  - Local use without a tunnel is unchanged.
+
+### Added
+
+- Setup for Microsoft 365 Copilot through a Copilot Studio agent, over a tunnel with an API key.
+- Current setup for GitHub Copilot in VS Code (`mcp.json`, Agent mode), and a "Try it" section with demo prompts for Claude Desktop and GitHub Copilot.
+- `examples/risky-mcp-config.json`, a deliberately risky config for demos, with a test that keeps its documented findings accurate.
+
+[2.4.1]: https://github.com/camaleon2016/SAF-MCP-skill/compare/v2.4.0...v2.4.1
+
 ## [2.4.0] - 2026-10-19
 
 Coverage you can see, and rules for dangerous combinations of tools. 43 rules now cover 41 of the 78 active techniques, and every other technique says why it is not covered.
