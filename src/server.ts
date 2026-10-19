@@ -27,6 +27,7 @@ import {
   discoverAndAnalyzeConfig,
 } from "./discovery.js";
 import { VERSION } from "./version.js";
+import { analyzeConfig } from "./config.js";
 
 // ── Server ──────────────────────────────────────────────────────────
 
@@ -54,6 +55,14 @@ const ServerDefinitionSchema = z.object({
   permissions: z.array(z.string()).optional(),
   exposedEndpoints: z.array(z.string()).optional(),
   oauthConfig: OAuthConfigSchema.optional(),
+  launch: z
+    .object({
+      command: z.string(),
+      args: z.array(z.string()).optional(),
+      env: z.record(z.string(), z.string()).optional(),
+    })
+    .optional()
+    .describe("How a client launches the server (from an MCP client config): command, arguments, environment"),
 });
 
 const ArchitectureSchema = z.object({
@@ -110,6 +119,24 @@ srv.registerTool(
   async ({ server: srv }) => ({
     content: [{ type: "text", text: JSON.stringify(analyzeServer(srv), null, 2) }],
   }),
+);
+
+srv.registerTool(
+  "analyze_config",
+  {
+    title: "Analyze MCP Client Config (no servers started)",
+    description:
+      "Analyze an MCP client config (Claude Desktop claude_desktop_config.json, VS Code settings or mcp.json) without starting or connecting to any server. Checks how each server is launched: unpinned packages, unpinned container images, containers with host access, plaintext secrets, and lookalike server names. Secret values are never echoed.",
+    annotations: { readOnlyHint: true, openWorldHint: false },
+    inputSchema: { configJson: z.string().describe("The config file contents as a JSON string") },
+  },
+  async ({ configJson }) => {
+    try {
+      return { content: [{ type: "text", text: JSON.stringify(analyzeConfig(configJson), null, 2) }] };
+    } catch (err) {
+      return { content: [{ type: "text", text: err instanceof Error ? err.message : String(err) }], isError: true };
+    }
+  },
 );
 
 srv.registerTool(

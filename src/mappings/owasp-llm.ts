@@ -84,6 +84,13 @@ const OWASP_LLM_MAP: Record<string, OwaspLlmRef[]> = {
   "SAFE-T1803": refs("LLM02"),
   // Data Exfiltration — sensitive info disclosure
   "SAFE-T1910": refs("LLM02"),
+  // Added in 2.3.0, mirroring the closest existing technique noted on each line; review before relying on them.
+  "SAFE-T1402": refs("LLM01"),
+  "SAFE-T1404": refs("LLM01"),
+  "SAFE-T1004": refs("LLM03"),
+  "SAFE-T1911": refs("LLM02"), // as SAFE-T1910
+  "SAFE-T1406": refs("LLM06"),
+  "SAFE-T1303": refs("LLM06"),
   // Data Destruction — excessive agency
   "SAFE-T2101": refs("LLM06"),
   // Code Sabotage — excessive agency, improper output handling

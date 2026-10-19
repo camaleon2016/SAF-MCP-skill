@@ -1,3 +1,4 @@
+import { analyzeConfig } from "./config.js";
 import type {
   ToolDefinition,
   ServerDefinition,
@@ -249,6 +250,19 @@ export const openAiFunctions = [
       parameters: { type: "object", properties: {} },
     },
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "analyze_config",
+      description:
+        "Analyze an MCP client config (Claude Desktop or VS Code) without starting any server: unpinned packages and images, containers with host access, plaintext secrets, lookalike server names.",
+      parameters: {
+        type: "object",
+        properties: { configJson: { type: "string", description: "The config file contents as a JSON string" } },
+        required: ["configJson"],
+      },
+    },
+  },
 ];
 
 // ── Dispatcher ──────────────────────────────────────────────────────
@@ -259,6 +273,8 @@ export function dispatch(name: string, args: Record<string, unknown>): string {
   switch (name) {
     case "analyze_architecture":
       return JSON.stringify(analyzeArchitecture(args["architecture"] as AgentArchitecture));
+    case "analyze_config":
+      return JSON.stringify(analyzeConfig(args["configJson"] as string));
     case "analyze_tool":
       return JSON.stringify(analyzeTool(args["tool"] as ToolDefinition));
     case "analyze_server":

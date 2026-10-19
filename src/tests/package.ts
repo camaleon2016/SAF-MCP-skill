@@ -124,5 +124,20 @@ await test("PKG-007: the lockfile and publish target use only the public npm reg
   if (publishTo !== "https://registry.npmjs.org/") throw new Error(`publishConfig.registry is ${publishTo ?? "unset"}`);
 });
 
+await test("PKG-008: the README tool table lists exactly the registered MCP tools", () => {
+  const server = readFileSync("src/server.ts", "utf-8");
+  const readme = readFileSync("README.md", "utf-8");
+  const registered = new Set([...server.matchAll(/registerTool\(\s*"([a-z_]+)"/g)].map((m) => m[1]!));
+  const section = readme.slice(readme.indexOf("## MCP Tools"), readme.indexOf("## Rules Engine"));
+  const listed = new Set([...section.matchAll(/^\| `([a-z_]+)` \|/gm)].map((m) => m[1]!));
+  const claimed = Number(/exposes (\d+) tools/.exec(section)?.[1]);
+  const problems = [
+    ...[...registered].filter((t) => !listed.has(t)).map((t) => `${t} missing from README`),
+    ...[...listed].filter((t) => !registered.has(t)).map((t) => `${t} in README but not registered`),
+    ...(claimed !== registered.size ? [`README says ${claimed} tools; ${registered.size} are registered`] : []),
+  ];
+  if (problems.length) throw new Error(problems.join("; "));
+});
+
 console.log(`\n  Total: ${passed + failed} | Passed: ${passed} | Failed: ${failed}\n`);
 process.exit(failed > 0 ? 1 : 0);

@@ -129,6 +129,13 @@ const ATLAS_MAP: Record<string, AtlasRef[]> = {
   "SAFE-T1910": [
     ref("AML.T0086", "Exfiltration via AI Agent Tool"),
   ],
+  // Added in 2.3.0, mirroring the closest existing technique noted on each line; review before relying on them.
+  "SAFE-T1402": [ref("AML.T0110", "AI Agent Tool Poisoning"), ref("AML.T0051", "LLM Prompt Injection")], // as SAFE-T1001
+  "SAFE-T1404": [ref("AML.T0051", "LLM Prompt Injection")],
+  "SAFE-T1004": [ref("AML.T0104", "Publish Poisoned AI Agent Tool"), ref("AML.T0010", "ML Supply Chain Compromise")],
+  "SAFE-T1911": [ref("AML.T0086", "Exfiltration via AI Agent Tool")], // as SAFE-T1910
+  "SAFE-T1406": [ref("AML.T0110", "AI Agent Tool Poisoning"), ref("AML.T0081", "Modify AI Agent Configuration")],
+  "SAFE-T1303": [ref("AML.T0053", "AI Agent Tool Invocation")], // as SAFE-T1101
   // Data Destruction
   "SAFE-T2101": [
     ref("AML.T0053", "AI Agent Tool Invocation"),

@@ -265,7 +265,14 @@ export async function discoverAndAnalyzeConfig(
         discovered = await discoverViaClient(client, transport);
         discovered.transport = "stdio";
 
-        serverDefs.push(buildServerDef(discovered, { name: configName, transport: "stdio" }));
+        serverDefs.push(
+          buildServerDef(discovered, {
+            name: configName,
+            transport: "stdio",
+            // Lets the launch rules (unpinned packages, container flags, plaintext secrets) apply.
+            launch: { command: entry.command, args: entry.args ?? [], env: entry.env ?? {} },
+          }),
+        );
       } else {
         discoveredServers.push({
           configName,

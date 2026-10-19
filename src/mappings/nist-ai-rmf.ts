@@ -79,6 +79,13 @@ const NIST_AI_RMF_MAP: Record<string, NistAiRmfRef[]> = {
   "SAFE-T1803": [gov("GOVERN-1.4"), man("MANAGE-2.4")],
   // Data Exfiltration — monitoring + response
   "SAFE-T1910": [mea("MEASURE-2.7"), man("MANAGE-2.4")],
+  // Added in 2.3.0, mirroring the closest existing technique noted on each line; review before relying on them.
+  "SAFE-T1402": [gov("GOVERN-1.2"), mea("MEASURE-2.6"), man("MANAGE-2.4")], // as SAFE-T1001
+  "SAFE-T1404": [gov("GOVERN-1.2"), mea("MEASURE-2.6")],
+  "SAFE-T1004": [gov("GOVERN-1.5"), map("MAP-3.4"), mea("MEASURE-2.6")], // as SAFE-T1203
+  "SAFE-T1911": [mea("MEASURE-2.7"), man("MANAGE-2.4")], // as SAFE-T1910
+  "SAFE-T1406": [gov("GOVERN-1.2"), mea("MEASURE-2.6"), man("MANAGE-2.4")],
+  "SAFE-T1303": [mea("MEASURE-2.7"), man("MANAGE-2.4"), gov("GOVERN-1.2")],
   // Data Destruction — incident response
   "SAFE-T2101": [man("MANAGE-2.4"), man("MANAGE-4.1")],
   // Code Sabotage — integrity monitoring

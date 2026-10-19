@@ -65,6 +65,13 @@ export const STRIDE_MAP: Record<string, StrideCategory[]> = {
   // Data Exfiltration via Network — information disclosure
   "SAFE-T1910": ["I"],
   // Data Destruction — tampering, denial of service
+  // Added in 2.3.0, mirroring the closest existing technique noted on each line; review before relying on them.
+  "SAFE-T1402": ["T", "S"], // as SAFE-T1001
+  "SAFE-T1404": ["R", "T"],
+  "SAFE-T1004": ["S"],
+  "SAFE-T1911": ["I"], // as SAFE-T1910
+  "SAFE-T1406": ["T", "R"],
+  "SAFE-T1303": ["E"],
   "SAFE-T2101": ["T", "D"],
   // Code Sabotage — tampering, repudiation
   "SAFE-T2103": ["T", "R"],
