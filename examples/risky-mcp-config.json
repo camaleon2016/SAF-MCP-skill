@@ -1,0 +1,25 @@
+{
+  "servers": {
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/me/Documents"]
+    },
+    "fetch": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-fetch==0.6.2"]
+    },
+    "github": {
+      "type": "stdio",
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "demo-not-a-real-secret-0123456789" }
+    },
+    "sandbox": {
+      "type": "stdio",
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "--privileged", "example/sandbox:1.2"]
+    }
+  }
+}

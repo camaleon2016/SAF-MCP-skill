@@ -139,5 +139,14 @@ await test("PKG-008: the README tool table lists exactly the registered MCP tool
   if (problems.length) throw new Error(problems.join("; "));
 });
 
+await test("PKG-009: the demo config produces exactly the findings its documentation lists", async () => {
+  const { analyzeConfig } = await import("../config.js");
+  const raw = readFileSync("examples/risky-mcp-config.json", "utf-8");
+  const result = analyzeConfig(raw);
+  const rules = result.analysis.findings.map((f) => f.ruleId).sort().join(",");
+  if (rules !== "RULE-038,RULE-039,RULE-040") throw new Error(`got ${rules}; examples/README.md lists RULE-038, RULE-039, RULE-040`);
+  if (JSON.stringify(result).includes("demo-not-a-real-secret")) throw new Error("the placeholder secret appears in the output");
+});
+
 console.log(`\n  Total: ${passed + failed} | Passed: ${passed} | Failed: ${failed}\n`);
 process.exit(failed > 0 ? 1 : 0);
