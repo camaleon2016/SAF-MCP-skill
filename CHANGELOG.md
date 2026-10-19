@@ -2,6 +2,24 @@
 
 All notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.4.0] - 2026-10-19
+
+Coverage you can see, and rules for dangerous combinations of tools. 43 rules now cover 41 of the 78 active techniques, and every other technique says why it is not covered.
+
+### Added
+
+- **Coverage status for every technique**, computed from the rules and upstream's detection registry rather than assigned by hand: `detected` (a rule finds evidence or a risky configuration), `exposure` (rules report that an architecture has what the attack needs), `open` (no rule yet, though upstream lists it as observable in content), or `runtime` (only observable outside static analysis, with a link to upstream's detection rule). `get_technique` returns it, `get_framework_stats` includes a summary, and `docs/coverage.md` lists every technique.
+- **A `basis` on every finding**: `evidence`, `configuration`, or `exposure`, so exposure findings read as design questions rather than incidents.
+- **Combination rules**:
+  - RULE-041, SAFE-T1914 Tool-to-Tool Exfil: a tool that reads private data plus a tool that sends data out. When untrusted content can also reach the agent, the evidence names the full path.
+  - RULE-042, SAFE-T1703 Tool-Chaining Pivot: untrusted content (web pages, inbound email, issues) reaching an agent that can also act (shell, delete, deploy, pay).
+  - RULE-043, SAFE-T1913 HTTP POST Exfil: a tool that sends requests to any URL the model chooses.
+- The catalog sync imports each technique's detection modalities and a link to its upstream detection rule.
+- STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF mappings for the new techniques, each mirroring the closest existing technique and marked for review.
+- Tests keep `docs/coverage.md` and the README's coverage numbers in step with the code. The detection corpus grows to 54 attacks and 55 harmless lookalikes.
+
+[2.4.0]: https://github.com/camaleon2016/SAF-MCP-skill/compare/v2.3.0...v2.4.0
+
 ## [2.3.0] - 2026-10-18
 
 Eight new rules and a config check that starts nothing. Coverage grows from 31 to 38 of the 78 active techniques.

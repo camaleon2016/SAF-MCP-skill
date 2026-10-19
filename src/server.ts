@@ -28,6 +28,7 @@ import {
 } from "./discovery.js";
 import { VERSION } from "./version.js";
 import { analyzeConfig } from "./config.js";
+import { describeTechnique, getCoverageSummary } from "./engine/coverage.js";
 
 // ── Server ──────────────────────────────────────────────────────────
 
@@ -148,7 +149,7 @@ srv.registerTool(
     inputSchema: { id: z.string().describe("Technique ID such as SAFE-T1001") },
   },
   async ({ id }) => {
-    const technique = getTechnique(id);
+    const technique = describeTechnique(id);
     if (!technique) {
       return { content: [{ type: "text", text: `Technique ${id} not found` }] };
     }
@@ -341,7 +342,7 @@ srv.registerTool(
     inputSchema: {},
   },
   async () => {
-    const stats = getFrameworkStats();
+    const stats = { ...getFrameworkStats(), coverage: getCoverageSummary() };
     return { content: [{ type: "text", text: JSON.stringify(stats, null, 2) }] };
   },
 );

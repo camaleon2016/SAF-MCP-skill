@@ -72,6 +72,8 @@ export interface Finding {
    * that report a capability or configuration rather than suspicious content.
    */
   confidence?: "high" | "medium";
+  /** "evidence", "configuration", or "exposure": what the finding rests on. */
+  basis: Basis;
   mitigations: { id: string; name: string; effectiveness: string }[];
   mappings: FrameworkMappings;
 }
@@ -96,8 +98,17 @@ export interface AnalysisResult {
 interface Rule {
   id: string;
   techniqueId: string;
+  /**
+   * What a finding from this rule rests on:
+   * - "evidence": the content itself shows an attack (hidden instructions, concealment)
+   * - "configuration": a specific risky setting (no auth, unpinned launch, privileged container)
+   * - "exposure": the architecture has what an attack needs, with no sign it is being used
+   */
+  basis: Basis;
   test: (input: AgentArchitecture) => string | RuleHit | null;
 }
+
+export type Basis = "evidence" | "configuration" | "exposure";
 
 interface RuleHit {
   evidence: string;
@@ -138,6 +149,7 @@ function buildFinding(rule: Rule, hit: string | RuleHit): Finding | null {
     description: technique.description,
     evidence,
     ...(confidence ? { confidence } : {}),
+    basis: rule.basis,
     mitigations,
     mappings: getMappings(rule.techniqueId),
   };
@@ -282,6 +294,27 @@ function looksLikeSecret(name: string, value: string): boolean {
 /** Never echo a secret: first four characters only. */
 const mask = (v: string): string => `${v.trim().slice(0, 4)}…`;
 
+// ── Capability classification (for combination rules) ───────────────
+
+const PRIVATE_READ = [
+  /\b(read|reads|reading|get|gets|list|lists|search|searches|query|queries|retrieve\w*|access\w*|view|views|open|opens|export\w*)\b[^.]{0,40}\b(files?|documents?|emails?|inbox|mailbox|messages?|database|records?|contacts|calendar|notes|repositor(y|ies)|source code|secrets?|credentials?|customers?|tickets?|drive|spreadsheets?)\b/,
+];
+const OUTBOUND_SEND = [
+  /\b(send|sends|post|posts|upload\w*|publish\w*|forward\w*|share|shares)\b[^.]{0,40}\b(emails?|messages?|slack|teams|webhooks?|urls?|https?|endpoints?|servers?|channels?|issues?|comments?|gists?|requests?|recipients?|anyone|external)\b/,
+  /\b(send|sends)\s+(an?\s+)?emails?\b|\bhttp\s+(post|requests?)\b|\bwebhooks?\b/,
+];
+const UNTRUSTED_READ = [
+  /\b(fetch|fetches|read|reads|get|gets|browse|browses|scrape\w*|load|loads|open|opens|download\w*|search|searches)\b[^.]{0,40}\b(web ?pages?|websites?|urls?|internet|the web|inbox|incoming|emails?|issues?|pull requests?|comments?|rss|feeds?|public)\b/,
+];
+const PRIVILEGED_ACT = [
+  /\b(shell|bash|powershell|terminal|subprocess)\b|\b(run|runs|execute|executes)\b[^.]{0,30}\b(commands?|scripts?|code|programs?)\b/,
+  /\b(delet\w+|drop|drops|destroy\w*|truncat\w+|wipe\w*|overwrit\w+|deploy\w*|merg\w+|commit\w*|transfer\w*|pay|pays|payments?|refund\w*|install\w*)\b/,
+  /\b(write|writes|writing)\s+(to\s+)?(files?|disk|the file ?system)\b/,
+];
+
+const capability = (t: ToolDefinition, patterns: RegExp[]): boolean => mentions(`${identifierToWords(t.name)} ${t.description}`, ...patterns);
+const names = (tools: ToolDefinition[]): string => tools.map((t) => t.name).join(", ");
+
 /** Run a content scan over tools and turn it into a rule result. */
 function contentRule(tools: ToolDefinition[], scan: (t: ToolDefinition) => Signal[], prefix: string): RuleHit | null {
   const flagged: string[] = [];
@@ -303,6 +336,7 @@ const rules: Rule[] = [
   {
     id: "RULE-001",
     techniqueId: "SAFE-T1001",
+    basis: "evidence",
     test(input) {
       return contentRule(allTools(input), poisoningSignals, "Suspicious content in tool metadata:");
     },
@@ -314,6 +348,7 @@ const rules: Rule[] = [
   {
     id: "RULE-002",
     techniqueId: "SAFE-T1005",
+    basis: "configuration",
     test(input) {
       const servers = input.servers ?? [];
       const open = servers.filter(
@@ -332,6 +367,7 @@ const rules: Rule[] = [
   {
     id: "RULE-003",
     techniqueId: "SAFE-T1005",
+    basis: "configuration",
     test(input) {
       const servers = input.servers ?? [];
       const exposed = servers.filter(
@@ -348,6 +384,7 @@ const rules: Rule[] = [
   {
     id: "RULE-004",
     techniqueId: "SAFE-T1007",
+    basis: "configuration",
     test(input) {
       if (!input.oauthFlows) return null;
       const servers = input.servers ?? [];
@@ -369,6 +406,7 @@ const rules: Rule[] = [
   {
     id: "RULE-005",
     techniqueId: "SAFE-T1008",
+    basis: "configuration",
     test(input) {
       const servers = input.servers ?? [];
       if (servers.length < 2) return null;
@@ -408,6 +446,7 @@ const rules: Rule[] = [
   {
     id: "RULE-006",
     techniqueId: "SAFE-T1101",
+    basis: "exposure",
     test(input) {
       const tools = allTools(input);
       const risky = tools.filter((t) => {
@@ -428,6 +467,7 @@ const rules: Rule[] = [
   {
     id: "RULE-007",
     techniqueId: "SAFE-T1102",
+    basis: "exposure",
     test(input) {
       const tools = allTools(input);
       const injectable = tools.filter((t) => {
@@ -442,6 +482,7 @@ const rules: Rule[] = [
   {
     id: "RULE-008",
     techniqueId: "SAFE-T1105",
+    basis: "exposure",
     test(input) {
       if (!input.fileSystemAccess) return null;
       const tools = allTools(input);
@@ -457,6 +498,7 @@ const rules: Rule[] = [
   {
     id: "RULE-009",
     techniqueId: "SAFE-T1201",
+    basis: "configuration",
     test(input) {
       const servers = input.servers ?? [];
       const dynamic = servers.filter(
@@ -474,6 +516,7 @@ const rules: Rule[] = [
   {
     id: "RULE-010",
     techniqueId: "SAFE-T2106",
+    basis: "exposure",
     test(input) {
       if (!input.vectorStore && !input.sharedMemory) return null;
       return "Vector store or shared memory enabled — susceptible to context memory poisoning across sessions";
@@ -484,6 +527,7 @@ const rules: Rule[] = [
   {
     id: "RULE-011",
     techniqueId: "SAFE-T1701",
+    basis: "exposure",
     test(input) {
       const servers = input.servers ?? [];
       if (servers.length < 2) return null;
@@ -500,6 +544,7 @@ const rules: Rule[] = [
   {
     id: "RULE-012",
     techniqueId: "SAFE-T1705",
+    basis: "exposure",
     test(input) {
       if (!input.multiAgent) return null;
       return "Multi-agent architecture — susceptible to cross-agent instruction injection via shared message bus";
@@ -510,6 +555,7 @@ const rules: Rule[] = [
   {
     id: "RULE-013",
     techniqueId: "SAFE-T1910",
+    basis: "exposure",
     test(input) {
       if (!input.networkAccess) return null;
       const tools = allTools(input);
@@ -529,6 +575,7 @@ const rules: Rule[] = [
   {
     id: "RULE-014",
     techniqueId: "SAFE-T3001",
+    basis: "exposure",
     test(input) {
       if (!input.ragPipeline) return null;
       return "RAG pipeline enabled — susceptible to backdoor attacks via retrieval manipulation";
@@ -539,6 +586,7 @@ const rules: Rule[] = [
   {
     id: "RULE-015",
     techniqueId: "SAFE-T1110",
+    basis: "exposure",
     test(input) {
       if (!input.multimodal) return null;
       return "Multimodal input processing enabled — susceptible to prompt injection via images/audio";
@@ -549,6 +597,7 @@ const rules: Rule[] = [
   {
     id: "RULE-016",
     techniqueId: "SAFE-T1111",
+    basis: "exposure",
     test(input) {
       if (!input.cliAccess) return null;
       return "CLI access enabled — AI agent CLI tools can be weaponized for reconnaissance and data exfiltration";
@@ -559,6 +608,7 @@ const rules: Rule[] = [
   {
     id: "RULE-017",
     techniqueId: "SAFE-T1502",
+    basis: "exposure",
     test(input) {
       if (!input.fileSystemAccess) return null;
       return "File system access enabled — credentials (.env, SSH keys, cloud configs) may be harvestable";
@@ -570,6 +620,7 @@ const rules: Rule[] = [
     id: "RULE-018",
     // Was SAFE-T1104 (Over-Privileged Tool Abuse), deprecated upstream and replaced by SAFE-T1302.
     techniqueId: "SAFE-T1302",
+    basis: "exposure",
     test(input) {
       const tools = allTools(input);
       const overprivileged = tools.filter((t) => {
@@ -591,6 +642,7 @@ const rules: Rule[] = [
   {
     id: "RULE-019",
     techniqueId: "SAFE-T1103",
+    basis: "configuration",
     test(input) {
       const servers = input.servers ?? [];
       const noSchema = servers.flatMap((s) => s.tools ?? []).filter(
@@ -605,6 +657,7 @@ const rules: Rule[] = [
   {
     id: "RULE-020",
     techniqueId: "SAFE-T1106",
+    basis: "exposure",
     test(input) {
       const tools = allTools(input);
       const selfRef = tools.filter((t) => {
@@ -620,6 +673,7 @@ const rules: Rule[] = [
   {
     id: "RULE-021",
     techniqueId: "SAFE-T1203",
+    basis: "exposure",
     test(input) {
       const servers = input.servers ?? [];
       const unverified = servers.filter(
@@ -641,6 +695,7 @@ const rules: Rule[] = [
   {
     id: "RULE-022",
     techniqueId: "SAFE-T1204",
+    basis: "exposure",
     test(input) {
       if (!input.vectorStore) return null;
       const tools = allTools(input);
@@ -657,6 +712,7 @@ const rules: Rule[] = [
   {
     id: "RULE-023",
     techniqueId: "SAFE-T1304",
+    basis: "exposure",
     test(input) {
       if (!input.oauthFlows) return null;
       const servers = input.servers ?? [];
@@ -671,6 +727,7 @@ const rules: Rule[] = [
   {
     id: "RULE-024",
     techniqueId: "SAFE-T1403",
+    basis: "configuration",
     test(input) {
       const tools = allTools(input);
       if (tools.length < 15) return null;
@@ -682,6 +739,7 @@ const rules: Rule[] = [
   {
     id: "RULE-025",
     techniqueId: "SAFE-T1501",
+    basis: "evidence",
     test(input) {
       const tools = allTools(input);
       return contentRule(tools, (t) => scanSchema(t.inputSchema ?? t.parameters ?? {}), "Suspicious content in tool input schemas:");
@@ -692,6 +750,7 @@ const rules: Rule[] = [
   {
     id: "RULE-026",
     techniqueId: "SAFE-T1503",
+    basis: "exposure",
     test(input) {
       if (!input.fileSystemAccess) return null;
       const tools = allTools(input);
@@ -708,6 +767,7 @@ const rules: Rule[] = [
   {
     id: "RULE-027",
     techniqueId: "SAFE-T1603",
+    basis: "exposure",
     test(input) {
       const tools = allTools(input);
       const disclosureRisk = tools.filter((t) => {
@@ -723,6 +783,7 @@ const rules: Rule[] = [
   {
     id: "RULE-028",
     techniqueId: "SAFE-T1803",
+    basis: "exposure",
     test(input) {
       const tools = allTools(input);
       const dbTools = tools.filter((t) => {
@@ -738,6 +799,7 @@ const rules: Rule[] = [
   {
     id: "RULE-029",
     techniqueId: "SAFE-T2101",
+    basis: "exposure",
     test(input) {
       const tools = allTools(input);
       const destructive = tools.filter((t) => {
@@ -753,6 +815,7 @@ const rules: Rule[] = [
   {
     id: "RULE-030",
     techniqueId: "SAFE-T2103",
+    basis: "exposure",
     test(input) {
       const tools = allTools(input);
       const codeTools = tools.filter((t) => {
@@ -768,6 +831,7 @@ const rules: Rule[] = [
   {
     id: "RULE-031",
     techniqueId: "SAFE-T2104",
+    basis: "exposure",
     test(input) {
       const tools = allTools(input);
       const financial = tools.filter((t) => {
@@ -783,6 +847,7 @@ const rules: Rule[] = [
   {
     id: "RULE-032",
     techniqueId: "SAFE-T1408",
+    basis: "configuration",
     test(input) {
       if (!input.oauthFlows) return null;
       const servers = input.servers ?? [];
@@ -803,6 +868,7 @@ const rules: Rule[] = [
   {
     id: "RULE-033",
     techniqueId: "SAFE-T1402",
+    basis: "evidence",
     test(input) {
       return signalKindRule(
         allTools(input),
@@ -816,6 +882,7 @@ const rules: Rule[] = [
   {
     id: "RULE-034",
     techniqueId: "SAFE-T1404",
+    basis: "evidence",
     test(input) {
       return signalKindRule(allTools(input), (s) => s.kind === "concealment", "Tool metadata tells the model to hide behavior from the user:");
     },
@@ -825,6 +892,7 @@ const rules: Rule[] = [
   {
     id: "RULE-035",
     techniqueId: "SAFE-T1004",
+    basis: "configuration",
     test(input) {
       const servers = input.servers ?? [];
       if (servers.length < 2) return null;
@@ -851,6 +919,7 @@ const rules: Rule[] = [
   {
     id: "RULE-036",
     techniqueId: "SAFE-T1911",
+    basis: "evidence",
     test(input) {
       return signalKindRule(allTools(input), (s) => s.kind === "paramexfil", "Tool metadata directs data into a parameter:");
     },
@@ -860,6 +929,7 @@ const rules: Rule[] = [
   {
     id: "RULE-037",
     techniqueId: "SAFE-T1406",
+    basis: "evidence",
     test(input) {
       const ACTS = /\b(delet\w+|remov\w+|drop|drops|destroy\w*|truncat\w+|wip(e|es|ing)|overwrit\w+|writ(e|es|ing)|modif(y|ies)|updat(e|es)|send|sends|post|posts|upload\w*|transfer\w*|pay|deploy\w*|install\w*|kill\w*|shutdown)\b|\b(run|runs|execut\w+)\s+(an?\s+|the\s+|any\s+|arbitrary\s+)?(shell\s+|system\s+)?(commands?|scripts?|code|programs?|binar(y|ies))\b/;
       const flagged = allTools(input).filter((t) => {
@@ -878,6 +948,7 @@ const rules: Rule[] = [
   {
     id: "RULE-038",
     techniqueId: "SAFE-T1002",
+    basis: "configuration",
     test(input) {
       const problems: string[] = [];
       for (const s of input.servers ?? []) {
@@ -911,6 +982,7 @@ const rules: Rule[] = [
   {
     id: "RULE-039",
     techniqueId: "SAFE-T1303",
+    basis: "configuration",
     test(input) {
       const problems: string[] = [];
       for (const s of input.servers ?? []) {
@@ -939,6 +1011,7 @@ const rules: Rule[] = [
   {
     id: "RULE-040",
     techniqueId: "SAFE-T1502",
+    basis: "configuration",
     test(input) {
       const problems: string[] = [];
       for (const s of input.servers ?? []) {
@@ -959,6 +1032,61 @@ const rules: Rule[] = [
       return problems.length
         ? `Plaintext secrets in the client config, readable by anything that can read the file: ${problems.join("; ")}`
         : null;
+    },
+  },
+
+  // ── 2.4.0: capability combinations ──────────────────────────────
+
+  // Tool-to-Tool Exfil: one tool can read private data and another can send it out
+  {
+    id: "RULE-041",
+    techniqueId: "SAFE-T1914",
+    basis: "exposure",
+    test(input) {
+      const tools = allTools(input);
+      const readers = tools.filter((t) => capability(t, PRIVATE_READ));
+      const senders = tools.filter((t) => capability(t, OUTBOUND_SEND));
+      if (readers.length === 0 || senders.length === 0) return null;
+      if (readers.length === 1 && senders.length === 1 && readers[0] === senders[0]) return null;
+      const untrusted = tools.filter((t) => capability(t, UNTRUSTED_READ));
+      const trifecta = untrusted.length
+        ? ` Untrusted content also reaches this agent (${names(untrusted)}), so an injected instruction could drive the whole path: private data, untrusted input, and a way out.`
+        : "";
+      return `Private data can be read by ${names(readers)} and sent out by ${names(senders)}.${trifecta}`;
+    },
+  },
+
+  // Tool-Chaining Pivot: untrusted content can steer a tool that changes things
+  {
+    id: "RULE-042",
+    techniqueId: "SAFE-T1703",
+    basis: "exposure",
+    test(input) {
+      const tools = allTools(input);
+      const untrusted = tools.filter((t) => capability(t, UNTRUSTED_READ));
+      const actors = tools.filter((t) => capability(t, PRIVILEGED_ACT) && !untrusted.includes(t));
+      if (untrusted.length === 0 || actors.length === 0) return null;
+      return `Content from untrusted sources (${names(untrusted)}) reaches an agent that can also act through ${names(actors)}; an instruction hidden in that content could trigger those actions.`;
+    },
+  },
+
+  // HTTP POST Exfil: a tool that sends requests to any URL the model chooses
+  {
+    id: "RULE-043",
+    techniqueId: "SAFE-T1913",
+    basis: "exposure",
+    test(input) {
+      const flagged = allTools(input).filter((t) => {
+        const text = `${identifierToWords(t.name)} ${t.description}`;
+        const anyUrl = mentions(text, /\b(any|arbitrary|given|specified|provided|custom|user supplied)\s+(urls?|endpoints?|address(es)?|hosts?|domains?)\b/);
+        const sends = mentions(text, /\b(send|sends|post|posts|put|request|requests|call|calls|upload\w*|webhook\w*)\b/);
+        const schema = (t.inputSchema ?? t.parameters ?? {}) as { properties?: Record<string, unknown> };
+        const props = Object.keys(schema.properties ?? {}).map((k) => k.toLowerCase());
+        const schemaShape = props.some((p) => p === "url" || p === "endpoint") && props.some((p) => ["method", "body", "data", "payload"].includes(p));
+        return (anyUrl && sends) || schemaShape;
+      });
+      if (flagged.length === 0) return null;
+      return `Tools that can send requests to any URL the model chooses: ${names(flagged)}`;
     },
   },
 ];
@@ -986,8 +1114,8 @@ function computeCoverageScore(findings: Finding[]): number {
 // ── Public API ──────────────────────────────────────────────────────
 
 /** Rule id to technique id, for tests and documentation. */
-export function listRules(): Array<{ id: string; techniqueId: string }> {
-  return rules.map((r) => ({ id: r.id, techniqueId: r.techniqueId }));
+export function listRules(): Array<{ id: string; techniqueId: string; basis: Basis }> {
+  return rules.map((r) => ({ id: r.id, techniqueId: r.techniqueId, basis: r.basis }));
 }
 
 export function analyzeArchitecture(input: AgentArchitecture): AnalysisResult {

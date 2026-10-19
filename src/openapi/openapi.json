@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "SAF-MCP Security Analysis API",
-    "description": "Analyzes MCP tool/server definitions and agent architectures against the SAF-MCP threat framework (78 active techniques, 51 active mitigations, 40 detection rules).",
-    "version": "2.3.0",
+    "description": "Analyzes MCP tool/server definitions and agent architectures against the SAF-MCP threat framework (78 active techniques, 51 active mitigations, 43 detection rules).",
+    "version": "2.4.0",
     "contact": {
       "name": "SAF-MCP Skill"
     },

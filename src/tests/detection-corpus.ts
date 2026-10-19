@@ -262,6 +262,31 @@ export const ATTACKS: DetectionCase[] = [
     input: { name: "corpus", tools: [{ name: "exec_cmd", description: "Runs shell commands on the host.", annotations: { readOnlyHint: true } }] },
     mustFire: ["RULE-037"],
   },
+  // ── 2.4.0 combination rules ──
+  {
+    id: "ATK-51",
+    label: "reads the inbox and can post to Slack (exfiltration path, trifecta)",
+    input: { name: "corpus", tools: [{ name: "read_email", description: "Reads emails from the user's inbox." }, { name: "post_slack", description: "Posts a message to a Slack channel." }] },
+    mustFire: ["RULE-041"],
+  },
+  {
+    id: "ATK-52",
+    label: "fetches web pages and can run shell commands (pivot)",
+    input: { name: "corpus", tools: [{ name: "fetch_page", description: "Fetches a web page by URL and returns its text." }, { name: "run_shell", description: "Runs shell commands on the host." }] },
+    mustFire: ["RULE-042"],
+  },
+  {
+    id: "ATK-53",
+    label: "sends HTTP requests to any URL",
+    input: { name: "corpus", tools: [{ name: "http_request", description: "Send an HTTP POST request to any URL with a JSON body." }] },
+    mustFire: ["RULE-043"],
+  },
+  {
+    id: "ATK-54",
+    label: "generic request tool by schema shape (url plus method and body)",
+    input: { name: "corpus", tools: [{ name: "call_api", description: "Calls an API.", inputSchema: { type: "object", properties: { url: { type: "string" }, method: { type: "string" }, body: { type: "string" } } } }] },
+    mustFire: ["RULE-043"],
+  },
   {
     id: "GAP-01",
     label: "override written in Spanish",
@@ -357,6 +382,11 @@ export const BENIGN: DetectionCase[] = [
     input: { name: "corpus", tools: [{ name: "scan", description: "Connects to a server and runs a full security analysis of its tools.", annotations: { readOnlyHint: true } }] },
     mustNotFire: ["RULE-037"],
   },
+  // ── 2.4.0 combination rules: lookalikes ──
+  { id: "OK-53", label: "read only file tools", input: { name: "corpus", tools: [{ name: "read_file", description: "Reads a file from the project." }, { name: "list_files", description: "Lists files in a folder." }] }, mustNotFire: ["RULE-041", "RULE-042"] },
+  { id: "OK-54", label: "sender without a private data reader", input: { name: "corpus", tools: [{ name: "send_email", description: "Sends an email to a recipient." }, { name: "get_weather", description: "Gets the weather for a city." }] }, mustNotFire: ["RULE-041"] },
+  { id: "OK-55", label: "fixed public API", input: { name: "corpus", tools: [{ name: "weather", description: "Gets the weather forecast for a city from the National Weather Service." }] }, mustNotFire: ["RULE-043"] },
+  { id: "OK-56", label: "web fetch and summarize, no acting tool", input: { name: "corpus", tools: [{ name: "fetch_page", description: "Fetches a web page by URL and returns its text." }, { name: "summarize", description: "Summarizes text." }] }, mustNotFire: ["RULE-042"] },
   { id: "OK-17", label: "delete after the user confirms", input: tool("delete_event", "Deletes a calendar event after the user confirms."), mustNotFire: ["RULE-001"] },
   { id: "OK-18", label: "reads the README", input: tool("readme", "Reads the project's README file and returns its sections."), mustNotFire: ["RULE-001"] },
   { id: "OK-19", label: "Slack message to a chosen channel", input: tool("slack", "Sends a Slack message to a channel the user chooses."), mustNotFire: ["RULE-001"] },

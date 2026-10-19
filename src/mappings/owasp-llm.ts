@@ -84,6 +84,10 @@ const OWASP_LLM_MAP: Record<string, OwaspLlmRef[]> = {
   "SAFE-T1803": refs("LLM02"),
   // Data Exfiltration — sensitive info disclosure
   "SAFE-T1910": refs("LLM02"),
+  // Added in 2.4.0, mirroring the closest existing technique noted on each line; review before relying on them.
+  "SAFE-T1914": refs("LLM02"), // as SAFE-T1910
+  "SAFE-T1913": refs("LLM02"), // as SAFE-T1910
+  "SAFE-T1703": refs("LLM05"), // as SAFE-T1701
   // Added in 2.3.0, mirroring the closest existing technique noted on each line; review before relying on them.
   "SAFE-T1402": refs("LLM01"),
   "SAFE-T1404": refs("LLM01"),

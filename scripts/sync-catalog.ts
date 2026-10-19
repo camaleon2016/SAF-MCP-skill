@@ -98,6 +98,7 @@ function firstSentence(paragraph: string): string {
 interface Technique {
   id: string; name: string; tactic: string; tacticName: string; severity: string; description: string;
   mitigations: string[]; aliases?: string[]; lifecycleStatus?: string; replacedBy?: string[];
+  detectionModalities?: string[]; upstreamDetectionRule?: string;
   severitySource?: string; upstreamSeverity?: string; severityRationale?: string;
   deprecationReason?: string; profiles?: string[]; [k: string]: unknown;
 }
@@ -235,6 +236,22 @@ for (const up of registry.techniques) {
   }
   t.profiles = [...(up.profiles ?? [])];
 }
+// Detection modalities and native detection rules from upstream's detection registry.
+const detectionRegistry = parseYaml(readText(join(upstreamDir, "detections", "registry.yml"))) as {
+  techniques?: Record<string, { modalities?: string[] }>;
+};
+for (const t of techData.techniques) {
+  const upId = t.id.replace(/^SAFE-/, "SAF-");
+  const modalities = detectionRegistry.techniques?.[upId]?.modalities;
+  if (modalities?.length) t.detectionModalities = [...modalities].sort(); else delete t.detectionModalities;
+  const rulePath = join(upstreamDir, "techniques", upId, "detection-rule.yml");
+  if (existsSync(rulePath)) {
+    t.upstreamDetectionRule = `https://github.com/safe-agentic-framework/safe-mcp/blob/${pinned.commit}/techniques/${upId}/detection-rule.yml`;
+  } else {
+    delete t.upstreamDetectionRule;
+  }
+}
+
 const upstreamTechIds = new Set(registry.techniques.map((t) => toLocal(t.technique_id)));
 const notUpstream = techData.techniques.filter((t) => !upstreamTechIds.has(t.id)).map((t) => t.id);
 if (notUpstream.length) throw new Error(`Local techniques missing upstream (IDs are permanent upstream, so this needs a look): ${notUpstream.join(", ")}`);

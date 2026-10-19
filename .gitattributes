@@ -2,3 +2,4 @@
 # matches the checked out files byte for byte on every platform.
 src/data/*.json text eol=lf
 docs/catalog-sync-*.md text eol=lf
+docs/coverage.md text eol=lf

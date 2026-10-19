@@ -74,6 +74,10 @@ export interface Technique {
    * (scripts/severity-overrides.json, with severityRationale), or "local"
    * (upstream states none).
    */
+  /** Upstream detection registry: where this technique can be observed (content, runtime, gateway, ...). */
+  detectionModalities?: string[];
+  /** Upstream's native detection rule for this technique, at the pinned upstream commit. */
+  upstreamDetectionRule?: string;
   severitySource?: "upstream" | "override" | "local";
   upstreamSeverity?: Severity;
   severityRationale?: string;
