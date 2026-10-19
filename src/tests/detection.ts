@@ -10,7 +10,9 @@ let gaps = 0;
 function run(cases: DetectionCase[]): { ok: number; total: number } {
   let ok = 0;
   for (const c of cases) {
-    const fired = new Set(analyzeArchitecture(c.input).findings.map((f) => f.ruleId));
+    const result = analyzeArchitecture(c.input);
+    const fired = new Set(result.findings.map((f) => f.ruleId));
+    const echoed = (c.mustNotEcho ?? []).filter((secret) => JSON.stringify(result).includes(secret));
     const missed = (c.mustFire ?? []).filter((r) => !fired.has(r));
     const wrong = (c.mustNotFire ?? []).filter((r) => fired.has(r));
     if (c.knownGap) {
@@ -19,12 +21,16 @@ function run(cases: DetectionCase[]): { ok: number; total: number } {
       console.log(`  ~ [GAP]  ${c.id}: ${c.label}\n      ${now ? "now detected; promote it to a normal case" : c.knownGap}`);
       continue;
     }
-    if (missed.length === 0 && wrong.length === 0) {
+    if (missed.length === 0 && wrong.length === 0 && echoed.length === 0) {
       ok++;
       console.log(`  ✓ [PASS] ${c.id}: ${c.label}`);
     } else {
       failed++;
-      const why = [missed.length && `missed ${missed.join(", ")}`, wrong.length && `false positive ${wrong.join(", ")}`]
+      const why = [
+        missed.length && `missed ${missed.join(", ")}`,
+        wrong.length && `false positive ${wrong.join(", ")}`,
+        echoed.length && "a secret appears in the output",
+      ]
         .filter(Boolean)
         .join("; ");
       console.log(`  ✗ [FAIL] ${c.id}: ${c.label}\n      ${why} (fired: ${[...fired].join(", ") || "none"})`);

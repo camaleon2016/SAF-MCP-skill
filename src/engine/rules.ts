@@ -8,7 +8,7 @@ import {
   getMitigationsForTechnique,
   listTechniques,
 } from "./analyze.js";
-import { scanString, scanSchema, verdict, describeSignals, identifierToWords, schemaStrings, type Signal } from "./detect.js";
+import { scanString, scanSchema, verdict, describeSignals, identifierToWords, schemaStrings, nameKey, type Signal } from "./detect.js";
 
 // ── Input Types ─────────────────────────────────────────────────────
 
@@ -31,6 +31,15 @@ export interface ServerDefinition {
     scopes?: string[] | undefined;
     callbackUrls?: string[] | undefined;
     authorizationServer?: string | undefined;
+  } | undefined;
+  /**
+   * How a client starts this server (from an MCP client config): the command,
+   * its arguments, and environment. Values are inspected, never echoed in full.
+   */
+  launch?: {
+    command: string;
+    args?: string[] | undefined;
+    env?: Record<string, string> | undefined;
   } | undefined;
 }
 
@@ -150,6 +159,128 @@ function poisoningSignals(tool: ToolDefinition): Signal[] {
     ...schemaStrings(tool.annotations ?? {}, "annotations").flatMap(([at, text]) => scanString(text, at)),
   ];
 }
+
+/** All content signals for one tool: metadata plus input schema. */
+function allSignals(tool: ToolDefinition): Signal[] {
+  return [...poisoningSignals(tool), ...scanSchema(tool.inputSchema ?? tool.parameters ?? {})];
+}
+
+/** A rule that reports tools carrying strong signals of the given kinds. */
+function signalKindRule(
+  tools: ToolDefinition[],
+  matches: (s: Signal) => boolean,
+  prefix: string,
+): RuleHit | null {
+  const flagged: string[] = [];
+  for (const t of tools) {
+    const hits = allSignals(t).filter((s) => s.strength === "strong" && matches(s));
+    if (hits.length) flagged.push(`${t.name}: ${describeSignals(hits)}`);
+  }
+  return flagged.length ? { evidence: `${prefix} ${flagged.join(" | ")}`, confidence: "high" } : null;
+}
+
+// ── Launch command analysis (MCP client configs) ────────────────────
+
+const baseCommand = (command: string): string =>
+  (command.split(/[\\/]/).pop() ?? command).toLowerCase().replace(/\.(exe|cmd|bat|ps1)$/, "");
+
+/** Docker run flags that take a separate value. */
+const DOCKER_VALUE_FLAGS = new Set([
+  "-e", "--env", "-v", "--volume", "--name", "-p", "--publish", "--network", "--net", "-u", "--user", "--mount",
+  "--env-file", "-w", "--workdir", "--entrypoint", "--platform", "--cap-add", "--cap-drop", "--pid", "--ipc",
+  "-l", "--label", "--add-host", "--dns", "--security-opt", "-m", "--memory", "--cpus", "--gpus", "--device",
+  "--tmpfs", "--ulimit", "--restart", "--hostname", "-h", "--userns", "--runtime", "--log-driver", "--pull",
+]);
+
+interface DockerRun {
+  flags: Array<[string, string | undefined]>;
+  image: string | undefined;
+}
+
+function parseDockerRun(args: string[]): DockerRun | undefined {
+  const i = args.findIndex((a) => a === "run" || a === "create");
+  if (i === -1) return undefined;
+  const flags: Array<[string, string | undefined]> = [];
+  let image: string | undefined;
+  for (let j = i + 1; j < args.length; j++) {
+    const a = args[j]!;
+    if (a.startsWith("-")) {
+      const eq = a.indexOf("=");
+      if (eq !== -1) flags.push([a.slice(0, eq), a.slice(eq + 1)]);
+      else if (DOCKER_VALUE_FLAGS.has(a)) flags.push([a, args[++j]]);
+      else flags.push([a, undefined]);
+      continue;
+    }
+    image = a;
+    break;
+  }
+  return { flags, image };
+}
+
+/** Package launchers that fetch and run a package on every start. */
+const LAUNCHERS: Record<string, { skip: Set<string>; pinned: (spec: string) => boolean }> = (() => {
+  const npmPinned = (spec: string): boolean => {
+    const at = spec.lastIndexOf("@");
+    return at > 0 && /^\d+\.\d+\.\d+(-[0-9a-z.]+)?$/i.test(spec.slice(at + 1));
+  };
+  const pyPinned = (spec: string): boolean => /==\d+(\.\d+)*$|@\d+\.\d+(\.\d+)?$/.test(spec);
+  const npmSkip = new Set(["-y", "--yes", "-p", "--package", "--quiet", "-q", "exec", "dlx", "x"]);
+  return {
+    npx: { skip: npmSkip, pinned: npmPinned },
+    bunx: { skip: npmSkip, pinned: npmPinned },
+    pnpx: { skip: npmSkip, pinned: npmPinned },
+    pnpm: { skip: npmSkip, pinned: npmPinned },
+    yarn: { skip: npmSkip, pinned: npmPinned },
+    npm: { skip: npmSkip, pinned: npmPinned },
+    uvx: { skip: new Set(["--from", "--with", "-q", "--quiet"]), pinned: pyPinned },
+    pipx: { skip: new Set(["run", "--spec", "-q", "--quiet"]), pinned: pyPinned },
+  };
+})();
+
+const isLauncher = (a: string): boolean => Object.prototype.hasOwnProperty.call(LAUNCHERS, baseCommand(a));
+const isShellWrapper = (base: string): boolean => base === "cmd" || base === "powershell" || base === "pwsh";
+
+/** The launcher and its arguments, unwrapping "cmd /c npx ..." style wrappers. */
+function unwrapLauncher(command: string, args: string[]): { launcher: string; argv: string[] } | undefined {
+  const base = baseCommand(command);
+  if (isShellWrapper(base)) {
+    const k = args.findIndex(isLauncher);
+    return k === -1 ? undefined : { launcher: baseCommand(args[k]!), argv: args.slice(k + 1) };
+  }
+  return isLauncher(base) ? { launcher: base, argv: args } : undefined;
+}
+
+/** The package a launcher will fetch, or undefined if this is not a launcher invocation. */
+function launchedPackage(command: string, args: string[]): { pkg: string; pinned: boolean } | undefined {
+  const u = unwrapLauncher(command, args);
+  if (!u) return undefined;
+  const spec = LAUNCHERS[u.launcher]!;
+  if ((u.launcher === "npm" && u.argv[0] !== "exec") || ((u.launcher === "pnpm" || u.launcher === "yarn") && u.argv[0] !== "dlx")) {
+    return undefined;
+  }
+  const pkg = u.argv.find((a) => !spec.skip.has(a) && !a.startsWith("-"));
+  return pkg ? { pkg, pinned: spec.pinned(pkg) } : undefined;
+}
+
+/** Token shapes with a well known prefix. Matching values are masked in evidence. */
+const SECRET_SHAPES: RegExp[] = [
+  /^gh[pousr]_[A-Za-z0-9]{20,}$/, /^github_pat_[A-Za-z0-9_]{20,}$/, /^sk-ant-[A-Za-z0-9_-]{20,}$/,
+  /^sk-(proj-)?[A-Za-z0-9_-]{20,}$/, /^xox[abprs]-[A-Za-z0-9-]{10,}$/, /^AKIA[0-9A-Z]{16}$/,
+  /^AIza[0-9A-Za-z_-]{30,}$/, /^(sk|rk)_live_[A-Za-z0-9]{16,}$/, /^glpat-[A-Za-z0-9_-]{20,}$/,
+  /^npm_[A-Za-z0-9]{30,}$/, /^hf_[A-Za-z0-9]{30,}$/,
+];
+const SECRET_NAME = /(token|secret|password|passwd|api[_-]?key|access[_-]?key|private[_-]?key|credential|auth)/i;
+const PLACEHOLDER = /^\$\{|^\$[A-Z_]+$|^<.*>$|^%[A-Z_]+%$|your[_-]|xxx|changeme|example|placeholder|\*\*\*/i;
+
+function looksLikeSecret(name: string, value: string): boolean {
+  const v = value.trim();
+  if (!v || PLACEHOLDER.test(v)) return false;
+  if (SECRET_SHAPES.some((re) => re.test(v))) return true;
+  return SECRET_NAME.test(name) && v.length >= 20 && /[A-Za-z]/.test(v) && /\d/.test(v) && !/\s/.test(v);
+}
+
+/** Never echo a secret: first four characters only. */
+const mask = (v: string): string => `${v.trim().slice(0, 4)}…`;
 
 /** Run a content scan over tools and turn it into a rule result. */
 function contentRule(tools: ToolDefinition[], scan: (t: ToolDefinition) => Signal[], prefix: string): RuleHit | null {
@@ -663,6 +794,171 @@ const rules: Rule[] = [
       });
       if (noPkce.length === 0) return null;
       return `OAuth servers without PKCE enforcement: ${noPkce.map((s) => s.name).join(", ")}`;
+    },
+  },
+
+  // ── 2.3.0: specific techniques for existing content signals ─────
+
+  // Instruction Steganography: hidden or invisible text in tool metadata or schemas
+  {
+    id: "RULE-033",
+    techniqueId: "SAFE-T1402",
+    test(input) {
+      return signalKindRule(
+        allTools(input),
+        (s) => s.kind === "invisible" || s.kind === "encoded" || s.label === "instruction in an HTML comment",
+        "Hidden content in tool metadata:",
+      );
+    },
+  },
+
+  // Response Tampering: the model is told to keep actions from the user
+  {
+    id: "RULE-034",
+    techniqueId: "SAFE-T1404",
+    test(input) {
+      return signalKindRule(allTools(input), (s) => s.kind === "concealment", "Tool metadata tells the model to hide behavior from the user:");
+    },
+  },
+
+  // Server Impersonation: distinct servers presenting the same or a lookalike name
+  {
+    id: "RULE-035",
+    techniqueId: "SAFE-T1004",
+    test(input) {
+      const servers = input.servers ?? [];
+      if (servers.length < 2) return null;
+      const groups = new Map<string, string[]>();
+      for (const s of servers) {
+        const key = nameKey(s.name);
+        if (!key) continue;
+        groups.set(key, [...(groups.get(key) ?? []), s.name]);
+      }
+      const clashes = [...groups.values()].filter((g) => g.length > 1);
+      if (clashes.length === 0) return null;
+      // Lookalikes can render identically, so say which names hide non-ASCII letters.
+      const show = (n: string): string => {
+        const odd = [...n].filter((c) => c.charCodeAt(0) > 127);
+        return odd.length
+          ? `"${n}" (contains ${odd.map((c) => `U+${c.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}`).join(", ")})`
+          : `"${n}"`;
+      };
+      return `Servers with the same or lookalike names: ${clashes.map((g) => g.map(show).join(" and ")).join("; ")}`;
+    },
+  },
+
+  // Parameter Exfiltration: metadata directs secrets or user data into a parameter
+  {
+    id: "RULE-036",
+    techniqueId: "SAFE-T1911",
+    test(input) {
+      return signalKindRule(allTools(input), (s) => s.kind === "paramexfil", "Tool metadata directs data into a parameter:");
+    },
+  },
+
+  // Metadata Manipulation: annotations understate what the tool does
+  {
+    id: "RULE-037",
+    techniqueId: "SAFE-T1406",
+    test(input) {
+      const ACTS = /\b(delet\w+|remov\w+|drop|drops|destroy\w*|truncat\w+|wip(e|es|ing)|overwrit\w+|writ(e|es|ing)|modif(y|ies)|updat(e|es)|send|sends|post|posts|upload\w*|transfer\w*|pay|deploy\w*|install\w*|kill\w*|shutdown)\b|\b(run|runs|execut\w+)\s+(an?\s+|the\s+|any\s+|arbitrary\s+)?(shell\s+|system\s+)?(commands?|scripts?|code|programs?|binar(y|ies))\b/;
+      const flagged = allTools(input).filter((t) => {
+        const a = t.annotations ?? {};
+        const claimsSafe = a["readOnlyHint"] === true || a["destructiveHint"] === false;
+        return claimsSafe && mentions(`${identifierToWords(t.name)} ${t.description}`, ACTS);
+      });
+      if (flagged.length === 0) return null;
+      return `Annotations claim read only or non destructive, but the tool describes changing or sending data: ${flagged.map((t) => t.name).join(", ")}`;
+    },
+  },
+
+  // ── 2.3.0: launch configuration (MCP client configs) ────────────
+
+  // Supply Chain Compromise: servers fetched unpinned at every launch, or piped from the web
+  {
+    id: "RULE-038",
+    techniqueId: "SAFE-T1002",
+    test(input) {
+      const problems: string[] = [];
+      for (const s of input.servers ?? []) {
+        if (!s.launch) continue;
+        const { command } = s.launch;
+        const args = s.launch.args ?? [];
+        const launched = launchedPackage(command, args);
+        if (launched && !launched.pinned) {
+          problems.push(`${s.name} runs "${launched.pkg}" without an exact version, so each launch can fetch different code`);
+        }
+        if (baseCommand(command) === "docker") {
+          const run = parseDockerRun(args);
+          if (run?.image && !run.image.includes("@sha256:")) {
+            const lastPart = run.image.split("/").pop() ?? run.image;
+            const tagged = lastPart.includes(":") && !lastPart.endsWith(":latest");
+            problems.push(
+              `${s.name} runs image "${run.image}" ${tagged ? "by tag, which can be moved" : "with no fixed version"}; pin it by digest (@sha256:...)`,
+            );
+          }
+        }
+        const joined = `${command} ${args.join(" ")}`;
+        if (/\b(curl|wget|iwr|invoke-webrequest|irm|invoke-restmethod)\b[^|]*\|\s*(sudo\s+)?(ba|z)?sh\b|\b(iwr|irm|invoke-webrequest|invoke-restmethod)\b[^|]*\|\s*iex\b/i.test(joined)) {
+          problems.push(`${s.name} downloads a script and runs it at launch`);
+        }
+      }
+      return problems.length ? `Launch commands that can run unreviewed code: ${problems.join("; ")}` : null;
+    },
+  },
+
+  // Sandbox Escape: containers launched with host level access
+  {
+    id: "RULE-039",
+    techniqueId: "SAFE-T1303",
+    test(input) {
+      const problems: string[] = [];
+      for (const s of input.servers ?? []) {
+        if (!s.launch || baseCommand(s.launch.command) !== "docker") continue;
+        const run = parseDockerRun(s.launch.args ?? []);
+        if (!run) continue;
+        const found = new Set<string>();
+        for (const [flag, value] of run.flags) {
+          const v = (value ?? "").toLowerCase();
+          if (flag === "--privileged") found.add("--privileged");
+          if (flag === "--cap-add" && /^(all|sys_admin|sys_ptrace|sys_module|net_admin|dac_read_search)$/.test(v)) found.add(`--cap-add ${value}`);
+          if ((flag === "-v" || flag === "--volume" || flag === "--mount") && (/^\/:|source=\/(,|$)/.test(v) || v.includes("docker.sock") || v.includes("docker_engine"))) {
+            found.add(`${flag} ${value}`);
+          }
+          if ((flag === "--pid" || flag === "--ipc" || flag === "--userns") && v === "host") found.add(`${flag}=host`);
+          if ((flag === "-u" || flag === "--user") && (v === "0" || v === "root" || v.startsWith("0:") || v.startsWith("root:"))) found.add(`${flag} ${value}`);
+          if (flag === "--security-opt" && /unconfined|no-new-privileges[:=]false/.test(v)) found.add(`--security-opt ${value}`);
+        }
+        if (found.size) problems.push(`${s.name}: ${[...found].join(", ")}`);
+      }
+      return problems.length ? `Containers launched with access to the host: ${problems.join("; ")}` : null;
+    },
+  },
+
+  // File-Based Credential Harvest: plaintext secrets stored in a client config
+  {
+    id: "RULE-040",
+    techniqueId: "SAFE-T1502",
+    test(input) {
+      const problems: string[] = [];
+      for (const s of input.servers ?? []) {
+        if (!s.launch) continue;
+        const found: string[] = [];
+        for (const [name, value] of Object.entries(s.launch.env ?? {})) {
+          if (typeof value === "string" && looksLikeSecret(name, value)) found.push(`${name} (${mask(value)})`);
+        }
+        const args = s.launch.args ?? [];
+        args.forEach((a, i) => {
+          const eq = a.indexOf("=");
+          const [flag, value] = eq > 0 ? [a.slice(0, eq), a.slice(eq + 1)] : [args[i - 1] ?? "", a];
+          const shaped = SECRET_SHAPES.some((re) => re.test(value.trim()));
+          if (shaped || (flag.startsWith("-") && looksLikeSecret(flag, value))) found.push(`argument ${i + 1} (${mask(value)})`);
+        });
+        if (found.length) problems.push(`${s.name}: ${[...new Set(found)].join(", ")}`);
+      }
+      return problems.length
+        ? `Plaintext secrets in the client config, readable by anything that can read the file: ${problems.join("; ")}`
+        : null;
     },
   },
 ];

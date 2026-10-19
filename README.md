@@ -11,7 +11,7 @@ The skill is callable from any agent framework — MCP (stdio or HTTP), OpenAI f
 ### How it works
 
 1. **You send** a JSON description of a tool, server, or full agent architecture — or just **point the skill at a running MCP server** (local or remote) and it auto-discovers all tools and configurations for you
-2. **The engine runs 32 rules** that check for prompt injection, credential theft, data exfiltration, command injection, and 28 other attack patterns
+2. **The engine runs 40 rules** that check for prompt injection, credential theft, data exfiltration, command injection, and 36 other attack patterns
 3. **You get back** a risk rating (low → critical), specific findings with cross-references to STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF, plus actionable mitigations for each issue
 
 ## Prerequisites
@@ -300,13 +300,13 @@ The server reads JSON-RPC from stdin and writes to stdout.
   "mcpServers": {
     "saf-mcp": {
       "command": "npx",
-      "args": ["-y", "saf-mcp-skill@2.2.1"]
+      "args": ["-y", "saf-mcp-skill@2.3.0"]
     }
   }
 }
 ```
 
-Pin the version (`saf-mcp-skill@2.2.1`) rather than taking whatever is latest: an MCP server runs with your permissions, so an upgrade should be a decision, not a side effect of restarting your client. On Windows, if Claude Desktop cannot find `npx`, use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "saf-mcp-skill@2.2.1"]`.
+Pin the version (`saf-mcp-skill@2.3.0`) rather than taking whatever is latest: an MCP server runs with your permissions, so an upgrade should be a decision, not a side effect of restarting your client. On Windows, if Claude Desktop cannot find `npx`, use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "saf-mcp-skill@2.3.0"]`.
 
 To run from a clone instead, point the client at the build: `"command": "node"` with `"args": ["<path-to>/saf-mcp-skill/dist/index.js"]`.
 
@@ -317,7 +317,7 @@ To run from a clone instead, point the client at the build: `"command": "node"` 
     "servers": {
       "saf-mcp": {
         "command": "npx",
-        "args": ["-y", "saf-mcp-skill@2.2.1"]
+        "args": ["-y", "saf-mcp-skill@2.3.0"]
       }
     }
   }
@@ -372,6 +372,7 @@ Endpoints:
 | POST | `/v1/analyze/architecture` | Full architecture analysis |
 | POST | `/v1/analyze/tool` | Single tool analysis |
 | POST | `/v1/analyze/server` | Server definition analysis |
+| POST | `/v1/analyze/config` | MCP client config check (starts nothing) |
 | POST | `/v1/discover/stdio` | Auto-discover & analyze a local MCP server (stdio) |
 | POST | `/v1/discover/http` | Auto-discover & analyze a remote MCP server (HTTP/SSE) |
 | POST | `/v1/discover/config` | Auto-discover & analyze all servers in a config file |
@@ -600,8 +601,9 @@ saf-mcp-skill/
 │   │   ├── package.ts               # Entry points and versions
 │   │   └── governance.ts            # Security model tests
 │   ├── types.ts                     # TypeScript type definitions
+│   ├── config.ts                    # Static MCP client config analysis (starts nothing)
 │   ├── discovery.ts                 # Auto-discovery via stdio, HTTP, or config
-│   ├── server.ts                    # MCP server (18 tools)
+│   ├── server.ts                    # MCP server (19 tools)
 │   ├── http.ts                      # MCP HTTP transport
 │   ├── openai.ts                    # OpenAI function definitions
 │   ├── lib.ts                       # Library entry point (no side effects)
@@ -643,6 +645,10 @@ Before matching, the detector decodes hidden text (Unicode tag characters and em
 Each signal is **strong** or **weak**. One strong signal reports a finding with `"confidence": "high"`; weak signals report only when two different kinds appear together, with `"confidence": "medium"`. Evidence names each signal, where it was found, and the matched text.
 
 Keyword rules (shell access, network, databases, destructive actions, and others) match whole words, so "capital" is not "api" and "root cause" is not root access.
+
+### Launch configuration checks
+
+Rules 038 to 040 read how a client starts each server: `npx`, `uvx`, and similar launchers without an exact version; Docker images without a digest; `curl ... | sh`; containers with `--privileged`, the Docker socket, the host root, or root user; and secrets written into `env` or arguments. They apply to `analyze_config` (which starts nothing), to config discovery, and to any server definition that includes a `launch` block. Secret values are reported as their first four characters only.
 
 ### How well it works
 
@@ -698,13 +704,14 @@ Upstream renamed the framework from SAF-MCP to SAF-MCP, so IDs now appear as `SA
 
 ## MCP Tools
 
-The skill exposes 18 tools over MCP:
+The skill exposes 19 tools over MCP:
 
 | Tool | Description |
 |---|---|
 | `analyze_architecture` | Full security analysis of an agent architecture |
 | `analyze_tool` | Analyze a single MCP tool definition |
 | `analyze_server` | Analyze an MCP server definition |
+| `analyze_config` | Check an MCP client config (Claude Desktop, VS Code) without starting any server: launch commands, container flags, plaintext secrets, lookalike names |
 | `discover_and_analyze_stdio` | Connect to a local MCP server (stdio), auto-enumerate tools, and analyze |
 | `discover_and_analyze_http` | Connect to a remote MCP server (HTTP/SSE), auto-enumerate tools, and analyze |
 | `discover_and_analyze_config` | Parse an MCP config file, connect to all servers, and analyze the full architecture |
@@ -723,7 +730,7 @@ The skill exposes 18 tools over MCP:
 
 ## Rules Engine
 
-The engine runs 32 rules covering:
+The engine runs 40 rules covering:
 
 - Tool poisoning & prompt injection (RULE-001)
 - Unauthenticated network servers (RULE-002)
@@ -757,6 +764,14 @@ The engine runs 32 rules covering:
 - Code sabotage (RULE-030)
 - Fraudulent transactions (RULE-031)
 - OAuth protocol downgrade (RULE-032)
+- Instruction steganography: hidden or invisible text (RULE-033)
+- Response tampering: hiding actions from the user (RULE-034)
+- Server impersonation: same or lookalike server names (RULE-035)
+- Parameter exfiltration: secrets or user data steered into parameters (RULE-036)
+- Metadata manipulation: annotations that understate a tool (RULE-037)
+- Unpinned packages, unpinned images, and scripts piped to a shell at launch (RULE-038)
+- Containers launched with host access (RULE-039)
+- Plaintext secrets in a client config, never echoed (RULE-040)
 
 ## Demo
 
@@ -1040,6 +1055,47 @@ Each finding includes the same structure as step 3 — technique ID, severity, d
 
 ---
 
+### Check a Client Config (nothing is started)
+
+Paste an MCP client config and the skill checks how each server would be launched, without starting or connecting to anything. This works on the default REST server; no API key or command discovery needed.
+
+**Linux / macOS / WSL / Git Bash:**
+```bash
+curl -X POST http://127.0.0.1:3002/v1/analyze/config \
+  -H "Content-Type: application/json" \
+  -d '{"configJson": "{\"mcpServers\":{\"filesystem\":{\"command\":\"npx\",\"args\":[\"-y\",\"@modelcontextprotocol/server-filesystem\",\"/Users/me/Documents\"]},\"fetch\":{\"command\":\"uvx\",\"args\":[\"mcp-server-fetch==0.6.2\"]},\"github\":{\"command\":\"docker\",\"args\":[\"run\",\"-i\",\"--rm\",\"-e\",\"GITHUB_PERSONAL_ACCESS_TOKEN\",\"ghcr.io/github/github-mcp-server\"],\"env\":{\"GITHUB_PERSONAL_ACCESS_TOKEN\":\"demo-not-a-real-secret-0123456789\"}},\"sandbox\":{\"command\":\"docker\",\"args\":[\"run\",\"-i\",\"--rm\",\"--privileged\",\"example/sandbox:1.2\"]}}}"}'
+```
+
+**Windows PowerShell** (checks your own Claude Desktop config; nothing in it is started):
+```powershell
+$config = Get-Content "$env:APPDATA\Claude\claude_desktop_config.json" -Raw
+$body = @{ configJson = $config } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3002/v1/analyze/config -ContentType "application/json" -Body $body | ConvertTo-Json -Depth 10
+```
+
+**What comes back** for the example (trimmed). The pinned `fetch` server produces nothing; the token is reported by name and its first four characters only:
+
+```json
+{
+  "servers": [
+    { "configName": "filesystem", "transport": "stdio", "command": "npx", "envVars": 0 },
+    { "configName": "fetch", "transport": "stdio", "command": "uvx", "envVars": 0 },
+    { "configName": "github", "transport": "stdio", "command": "docker", "envVars": 1 },
+    { "configName": "sandbox", "transport": "stdio", "command": "docker", "envVars": 0 }
+  ],
+  "analysis": {
+    "summary": { "overallRisk": "Critical", "totalFindings": 3 },
+    "findings": [
+      { "ruleId": "RULE-038", "severity": "High", "evidence": "Launch commands that can run unreviewed code: filesystem runs \"@modelcontextprotocol/server-filesystem\" without an exact version, ...; github runs image \"ghcr.io/github/github-mcp-server\" with no fixed version; ...; sandbox runs image \"example/sandbox:1.2\" by tag, which can be moved; ..." },
+      { "ruleId": "RULE-039", "severity": "Critical", "evidence": "Containers launched with access to the host: sandbox: --privileged" },
+      { "ruleId": "RULE-040", "severity": "High", "evidence": "Plaintext secrets in the client config, readable by anything that can read the file: github: GITHUB_PERSONAL_ACCESS_TOKEN (demo…)" }
+    ]
+  }
+}
+```
+
+Remote (`url`) servers are reported with authentication "unknown", since their sign-in usually lives in the client rather than the file. The MCP tool equivalent is `analyze_config`, which clients can run without an approval prompt because it is read only.
+
 ### Auto-Discovery (no JSON needed)
 
 > **Prerequisite:** Stdio and config discovery start processes, so they are off on the REST server by default. For these demos, restart the REST server with command discovery and an API key, as shown in [Security Model](#security-model):
@@ -1100,8 +1156,8 @@ curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: appli
 {
   "discovered": {
     "serverName": "saf-mcp-skill",
-    "serverVersion": "2.2.1",
-    "toolCount": 18,
+    "serverVersion": "2.3.0",
+    "toolCount": 19,
     "tools": [
       { "name": "analyze_tool", "description": "Analyze a single MCP tool definition for SAF-MCP security risks." },
       { "name": "discover_and_analyze_stdio", "description": "Connect to a local MCP server via stdio, automatically enumerate all its tools, and run a full SAF-MCP security analysis. WARNING: this starts the given command as a child process on the host, ..." }
@@ -1118,14 +1174,14 @@ curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: appli
       {
         "ruleId": "RULE-024",
         "severity": "Medium",
-        "evidence": "18 tools registered — high tool count increases consent-fatigue exploitation risk"
+        "evidence": "19 tools registered — high tool count increases consent-fatigue exploitation risk"
       }
     ]
   }
 }
 ```
 
-No manual JSON assembly — the skill discovers everything automatically, then tells you what's dangerous. Even the skill analyzing *itself* finds real issues: a tool that starts child processes (`discover_and_analyze_stdio`, which is why it is off on the network servers by default) and consent fatigue from having 18 tools. It does not flag the missing authentication, because a stdio server is a local process with no network listener.
+No manual JSON assembly — the skill discovers everything automatically, then tells you what's dangerous. Even the skill analyzing *itself* finds real issues: a tool that starts child processes (`discover_and_analyze_stdio`, which is why it is off on the network servers by default) and consent fatigue from having 19 tools. It does not flag the missing authentication, because a stdio server is a local process with no network listener.
 
 #### Discover a remote (HTTP/SSE) MCP server
 
@@ -1197,26 +1253,26 @@ curl.exe -X POST http://127.0.0.1:3002/v1/discover/config -H "Content-Type: appl
 
 </details>
 
-**What comes back:** A full architecture analysis across all servers, including cross-server issues you would not catch by analyzing each server alone. Here, the two entries offer the same 18 tool names, which is exactly what a malicious server copying a trusted one looks like, so RULE-005 reports tool shadowing. Servers are labeled by their config keys (trimmed):
+**What comes back:** A full architecture analysis across all servers, including cross-server issues you would not catch by analyzing each server alone. Here, the two entries offer the same 19 tool names, which is exactly what a malicious server copying a trusted one looks like, so RULE-005 reports tool shadowing. Servers are labeled by their config keys (trimmed):
 
 ```json
 {
   "discovered": {
     "serversFound": 2,
     "servers": [
-      { "configName": "saf-mcp-stdio", "serverName": "saf-mcp-skill", "toolCount": 18, "transport": "stdio" },
-      { "configName": "saf-mcp-http", "serverName": "saf-mcp-skill", "toolCount": 18, "transport": "http" }
+      { "configName": "saf-mcp-stdio", "serverName": "saf-mcp-skill", "toolCount": 19, "transport": "stdio" },
+      { "configName": "saf-mcp-http", "serverName": "saf-mcp-skill", "toolCount": 19, "transport": "http" }
     ]
   },
   "analysis": {
     "summary": { "overallRisk": "Critical", "totalFindings": 6 },
     "findings": [
-      { "ruleId": "RULE-005", "severity": "High", "evidence": "18 tool name(s) offered by more than one server: \"analyze_architecture\" on saf-mcp-stdio and saf-mcp-http; ..." },
+      { "ruleId": "RULE-005", "severity": "High", "evidence": "19 tool name(s) offered by more than one server: \"analyze_architecture\" on saf-mcp-stdio and saf-mcp-http; ..." },
       { "ruleId": "RULE-006", "severity": "Critical", "evidence": "Tools with shell/exec capabilities: ..." },
       { "ruleId": "RULE-003", "severity": "High", "evidence": "Unauthenticated exposed endpoints on: saf-mcp-http" },
       { "ruleId": "RULE-009", "severity": "High", "evidence": "Servers with dynamic transport (tool definitions may change at runtime): saf-mcp-http" },
-      { "ruleId": "RULE-011", "severity": "High", "evidence": "Multi-server architecture (2 servers, 36 tools) ..." },
-      { "ruleId": "RULE-024", "severity": "Medium", "evidence": "36 tools registered ..." }
+      { "ruleId": "RULE-011", "severity": "High", "evidence": "Multi-server architecture (2 servers, 38 tools) ..." },
+      { "ruleId": "RULE-024", "severity": "Medium", "evidence": "38 tools registered ..." }
     ]
   }
 }

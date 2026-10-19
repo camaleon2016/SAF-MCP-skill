@@ -26,10 +26,11 @@ Do not use it for live incident response. It describes exposure by design, not a
 | The user has | Use | Tools |
 |---|---|---|
 | A definition: tool JSON, a tool list, a design | Describe | `analyze_tool`, `analyze_server`, `analyze_architecture` |
+| An MCP client config file (Claude Desktop, VS Code) | Check config | `analyze_config` (starts nothing) |
 | Something running, or an MCP config file | Discover | `discover_and_analyze_http`, `discover_and_analyze_stdio`, `discover_and_analyze_config` |
 | A question about the catalog itself | Look up | `get_technique`, `search_techniques`, `get_mitigations_for_technique`, `get_finding_mappings`, `rank_mitigations` |
 
-Prefer Describe when the user can give you the definitions. It runs nothing.
+Prefer Describe when the user can give you the definitions, and `analyze_config` when they share a client config. Neither starts anything. `analyze_config` reports unpinned packages and images, containers with host access, plaintext secrets (masked), and lookalike server names.
 
 ## Before any discovery that starts a process
 

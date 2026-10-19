@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "SAF-MCP Security Analysis API",
-    "description": "Analyzes MCP tool/server definitions and agent architectures against the SAF-MCP threat framework (78 active techniques, 51 active mitigations, 32 detection rules).",
-    "version": "2.2.1",
+    "description": "Analyzes MCP tool/server definitions and agent architectures against the SAF-MCP threat framework (78 active techniques, 51 active mitigations, 40 detection rules).",
+    "version": "2.3.0",
     "contact": {
       "name": "SAF-MCP Skill"
     },
@@ -661,6 +661,63 @@
           }
         },
         "security": []
+      }
+    },
+    "/v1/analyze/config": {
+      "post": {
+        "operationId": "analyzeConfig",
+        "summary": "Analyze an MCP client config without starting any server",
+        "description": "Checks launch commands, container flags, plaintext secrets, and server names in a Claude Desktop or VS Code MCP config. Starts nothing and never echoes secret values.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "configJson"
+                ],
+                "properties": {
+                  "configJson": {
+                    "type": "string",
+                    "description": "The config file contents as a JSON string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Servers found and the analysis",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "servers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "analysis": {
+                      "$ref": "#/components/schemas/AnalysisResult"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The config could not be parsed"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
       }
     }
   },

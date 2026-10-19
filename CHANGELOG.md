@@ -2,6 +2,33 @@
 
 All notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.3.0] - 2026-10-18
+
+Eight new rules and a config check that starts nothing. Coverage grows from 31 to 38 of the 78 active techniques.
+
+### Added
+
+- **`analyze_config`** (MCP tool, `POST /v1/analyze/config`, library and OpenAI function): checks a Claude Desktop or VS Code MCP config without starting or connecting to any server. It is read only, so clients can run it without an approval prompt.
+- **Rules for findings the detector already saw**, now reported under their specific techniques:
+  - RULE-033, SAFE-T1402 Instruction Steganography: invisible characters, hidden Unicode tag text, base64 payloads, and HTML comments in tool metadata.
+  - RULE-034, SAFE-T1404 Response Tampering: instructions to hide behavior from the user.
+  - RULE-035, SAFE-T1004 Server Impersonation: servers with the same or lookalike names, including lookalike letters from other scripts, which the evidence names by code point.
+  - RULE-036, SAFE-T1911 Parameter Exfiltration: instructions to put secrets or the user's data into a parameter.
+  - RULE-037, SAFE-T1406 Metadata Manipulation: annotations claiming read only or non destructive on a tool that deletes, sends, or runs commands.
+- **Launch configuration rules**, for `analyze_config`, config discovery, and any server definition with a `launch` block:
+  - RULE-038, SAFE-T1002 Supply Chain Compromise: `npx`, `uvx`, and similar launchers without an exact version, Docker images without a digest, and scripts piped to a shell at launch.
+  - RULE-039, SAFE-T1303 Sandbox Escape: containers with `--privileged`, the Docker socket, the host root, the host PID or IPC namespace, or the root user.
+  - RULE-040, SAFE-T1502 File-Based Credential Harvest: plaintext secrets in a config's `env` or arguments. Values are reported as their first four characters only.
+- Server definitions accept an optional `launch` block (command, arguments, environment).
+- STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF mappings for the new techniques, each mirroring the closest existing technique and marked for review.
+- The detection corpus grows to 50 attacks and 51 harmless lookalikes, and checks that no secret ever appears in a result. A package test checks that the README's tool table matches the registered tools.
+
+### Changed
+
+- Config discovery passes each server's launch details to the engine, so the launch rules apply there too.
+
+[2.3.0]: https://github.com/camaleon2016/SAF-MCP-skill/compare/v2.2.1...v2.3.0
+
 ## [2.2.1] - 2026-10-17
 
 Published to npm, plus fixes found while auditing the README against the code.

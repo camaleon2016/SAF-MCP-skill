@@ -36,6 +36,10 @@ export type {
   NistAiRmfRef,
 } from "./mappings/index.js";
 
+// Static MCP client config analysis (starts nothing)
+export { analyzeConfig, parseClientConfig } from "./config.js";
+export type { ConfigAnalysisResult, ClientConfigEntry } from "./config.js";
+
 // Discovery (stdio discovery starts the target as a child process)
 export {
   discoverAndAnalyzeStdio,

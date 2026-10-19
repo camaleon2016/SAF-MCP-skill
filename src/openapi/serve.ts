@@ -17,6 +17,7 @@ import {
   analyzeServer,
 } from "../engine/rules.js";
 import type { AgentArchitecture, ToolDefinition, ServerDefinition } from "../engine/rules.js";
+import { analyzeConfig } from "../config.js";
 import {
   getTechnique,
   getMitigation,
@@ -142,6 +143,21 @@ const httpServer = createServer(async (req, res) => {
       audit("rest_call", { clientIp, toolName: "analyze_tool", duration: Math.round(performance.now() - start) });
       return;
     }
+    if (req.method === "POST" && path === "/v1/analyze/config") {
+      const body = (await readBody(req)) as { configJson?: unknown };
+      try {
+        const config = body?.configJson;
+        if (typeof config !== "string" && (typeof config !== "object" || config === null)) {
+          throw new Error('Send {"configJson": "<the config file contents>"}');
+        }
+        json(res, 200, analyzeConfig(config as string | Record<string, unknown>));
+      } catch (err) {
+        json(res, 400, { error: "Invalid config", detail: err instanceof Error ? err.message : String(err) });
+      }
+      audit("rest_call", { clientIp, toolName: "analyze_config", duration: Math.round(performance.now() - start) });
+      return;
+    }
+
     if (req.method === "POST" && path === "/v1/analyze/server") {
       const body = await readBody(req) as ServerDefinition;
       json(res, 200, analyzeServer(body));

@@ -59,6 +59,15 @@ function normalize(text: string): string {
 
 const leetFold = (s: string): string => s.replace(/[013457@$!]/g, (c) => LEET[c] ?? c);
 
+/**
+ * Key for comparing server names: lowercase, lookalike letters folded to
+ * Latin, and separators removed, so "GitHub", "git-hub", and a Cyrillic
+ * "gіthub" all compare equal.
+ */
+export function nameKey(name: string): string {
+  return normalize(name).replace(/[^a-z0-9]/g, "");
+}
+
 /** "contentOfIdRsaFile" or "content_of_id_rsa_file" -> "content of id rsa file". */
 export function identifierToWords(name: string): string {
   return name
@@ -146,6 +155,12 @@ const PATTERNS: Pattern[] = [
     re: /!\[[^\]]{0,100}\]\(\s{0,5}https?:\/\/[^)\s?&#]{0,200}[?&#][^)]{0,300}?(\{[^}]{0,50}\}|conversation|history|chat|secret|token|key|password|data=)/,
   },
   { kind: "exfiltration", label: "markdown image from a remote URL", strength: "weak", re: /!\[[^\]]{0,100}\]\(\s{0,5}https?:\/\/[^)]{0,300}\)/ },
+  {
+    kind: "paramexfil",
+    label: "directs user data or secrets into a parameter",
+    strength: "strong",
+    re: /\b(put|pass|include|append|add|insert|place|embed|attach|send|copy)\b[^.]{0,60}\b(the user'?s?|any|all|every|previous|prior|last|their)\b[^.]{0,30}\b(api keys?|keys?|tokens?|passwords?|secrets?|credentials?|messages?|conversation|chat history|history|emails?|files?|contacts|data)\b[^.]{0,60}\b(in|into|as|to|inside)\s+(the\s+)?['"]?[\w-]{1,40}['"]?\s+(field|parameter|param|argument|arg)\b|\b(any|all|every)\s+(api keys?|tokens?|passwords?|secrets?|credentials?)\b[^.]{0,60}\b(put|pass|include|append|add|insert|place|embed)\s+(it|them)\s+(in|into|as|to)\s+(the\s+)?['"]?[\w-]{1,40}/,
+  },
   { kind: "crosstool", label: "silently copies messages to an extra recipient", strength: "strong", re: /\b(always|also|secretly)\s+(bcc|cc)\b/ },
   { kind: "crosstool", label: "changes how another tool behaves", strength: "weak", re: /\bwhen (the |any )?[\w-]{1,60} tool is (called|used|invoked)\b/ },
 
