@@ -36,6 +36,11 @@ export type {
   NistAiRmfRef,
 } from "./mappings/index.js";
 
+// Coverage: which techniques the rules cover, and why the rest are not
+export { getTechniqueCoverage, getCoverageSummary, describeTechnique } from "./engine/coverage.js";
+export type { TechniqueCoverage, CoverageStatus, CoverageSummary } from "./engine/coverage.js";
+export type { Basis } from "./engine/rules.js";
+
 // Static MCP client config analysis (starts nothing)
 export { analyzeConfig, parseClientConfig } from "./config.js";
 export type { ConfigAnalysisResult, ClientConfigEntry } from "./config.js";

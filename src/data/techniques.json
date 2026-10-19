@@ -103,7 +103,11 @@
         "mcp",
         "model-lifecycle"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "model-lifecycle"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T2107/detection-rule.yml"
     },
     {
       "id": "SAFE-T1001",
@@ -202,7 +206,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1001/detection-rule.yml"
     },
     {
       "id": "SAFE-T1002",
@@ -251,7 +260,12 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1002/detection-rule.yml"
     },
     {
       "id": "SAFE-T1003",
@@ -300,7 +314,12 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1003/detection-rule.yml"
     },
     {
       "id": "SAFE-T1004",
@@ -350,7 +369,14 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint",
+        "identity",
+        "network",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1004/detection-rule.yml"
     },
     {
       "id": "SAFE-T1005",
@@ -397,7 +423,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "network",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1005/detection-rule.yml"
     },
     {
       "id": "SAFE-T1006",
@@ -442,7 +474,12 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1006/detection-rule.yml"
     },
     {
       "id": "SAFE-T1007",
@@ -490,7 +527,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "identity",
+        "network",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1007/detection-rule.yml"
     },
     {
       "id": "SAFE-T1008",
@@ -545,7 +588,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1008/detection-rule.yml"
     },
     {
       "id": "SAFE-T1009",
@@ -601,7 +649,14 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "identity",
+        "network",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1009/detection-rule.yml"
     },
     {
       "id": "SAFE-T1101",
@@ -653,7 +708,12 @@
         "mcp",
         "code-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1101/detection-rule.yml"
     },
     {
       "id": "SAFE-T1102",
@@ -699,7 +759,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1102/detection-rule.yml"
     },
     {
       "id": "SAFE-T1103",
@@ -728,7 +793,11 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1103/detection-rule.yml"
     },
     {
       "id": "SAFE-T1104",
@@ -758,7 +827,8 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1104/detection-rule.yml"
     },
     {
       "id": "SAFE-T1105",
@@ -783,7 +853,13 @@
         "mcp",
         "code-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint",
+        "gateway",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1105/detection-rule.yml"
     },
     {
       "id": "SAFE-T1106",
@@ -808,7 +884,11 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1106/detection-rule.yml"
     },
     {
       "id": "SAFE-T1109",
@@ -842,7 +922,8 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1109/detection-rule.yml"
     },
     {
       "id": "SAFE-T1110",
@@ -873,7 +954,13 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "multimodal",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1110/detection-rule.yml"
     },
     {
       "id": "SAFE-T1111",
@@ -898,7 +985,11 @@
         "core",
         "code-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1111/detection-rule.yml"
     },
     {
       "id": "SAFE-T1112",
@@ -922,7 +1013,11 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1112/detection-rule.yml"
     },
     {
       "id": "SAFE-T1201",
@@ -956,7 +1051,12 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1201/detection-rule.yml"
     },
     {
       "id": "SAFE-T1202",
@@ -984,7 +1084,11 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "identity"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1202/detection-rule.yml"
     },
     {
       "id": "SAFE-T1203",
@@ -1012,7 +1116,12 @@
         "mcp",
         "code-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1203/detection-rule.yml"
     },
     {
       "id": "SAFE-T1204",
@@ -1042,7 +1151,12 @@
         "mcp",
         "rag-memory"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "memory",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1204/detection-rule.yml"
     },
     {
       "id": "SAFE-T1205",
@@ -1073,7 +1187,8 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1205/detection-rule.yml"
     },
     {
       "id": "SAFE-T1206",
@@ -1100,7 +1215,11 @@
         "mcp",
         "code-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1206/detection-rule.yml"
     },
     {
       "id": "SAFE-T1207",
@@ -1126,7 +1245,11 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1207/detection-rule.yml"
     },
     {
       "id": "SAFE-T2106",
@@ -1155,7 +1278,12 @@
         "mcp",
         "rag-memory"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "memory",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T2106/detection-rule.yml"
     },
     {
       "id": "SAFE-T1301",
@@ -1190,7 +1318,8 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1301/detection-rule.yml"
     },
     {
       "id": "SAFE-T1302",
@@ -1219,7 +1348,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "identity",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1302/detection-rule.yml"
     },
     {
       "id": "SAFE-T1303",
@@ -1247,7 +1381,12 @@
         "mcp",
         "code-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1303/detection-rule.yml"
     },
     {
       "id": "SAFE-T1304",
@@ -1273,7 +1412,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "identity",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1304/detection-rule.yml"
     },
     {
       "id": "SAFE-T1305",
@@ -1300,7 +1445,12 @@
         "mcp",
         "code-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1305/detection-rule.yml"
     },
     {
       "id": "SAFE-T1306",
@@ -1332,7 +1482,8 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1306/detection-rule.yml"
     },
     {
       "id": "SAFE-T1307",
@@ -1360,7 +1511,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "identity",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1307/detection-rule.yml"
     },
     {
       "id": "SAFE-T1308",
@@ -1388,7 +1545,12 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "identity",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1308/detection-rule.yml"
     },
     {
       "id": "SAFE-T1309",
@@ -1422,7 +1584,8 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1309/detection-rule.yml"
     },
     {
       "id": "SAFE-T1401",
@@ -1458,7 +1621,11 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1401/detection-rule.yml"
     },
     {
       "id": "SAFE-T1402",
@@ -1495,7 +1662,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1402/detection-rule.yml"
     },
     {
       "id": "SAFE-T1403",
@@ -1524,7 +1696,12 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "identity",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1403/detection-rule.yml"
     },
     {
       "id": "SAFE-T1404",
@@ -1552,7 +1729,12 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1404/detection-rule.yml"
     },
     {
       "id": "SAFE-T1405",
@@ -1580,7 +1762,12 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1405/detection-rule.yml"
     },
     {
       "id": "SAFE-T1406",
@@ -1609,7 +1796,12 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1406/detection-rule.yml"
     },
     {
       "id": "SAFE-T1407",
@@ -1637,7 +1829,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "identity",
+        "network"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1407/detection-rule.yml"
     },
     {
       "id": "SAFE-T1408",
@@ -1665,7 +1863,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "identity",
+        "network"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1408/detection-rule.yml"
     },
     {
       "id": "SAFE-T1501",
@@ -1688,7 +1892,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1501/detection-rule.yml"
     },
     {
       "id": "SAFE-T1502",
@@ -1713,7 +1922,12 @@
         "mcp",
         "code-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1502/detection-rule.yml"
     },
     {
       "id": "SAFE-T1503",
@@ -1739,7 +1953,12 @@
         "mcp",
         "code-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1503/detection-rule.yml"
     },
     {
       "id": "SAFE-T1504",
@@ -1762,7 +1981,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "identity",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1504/detection-rule.yml"
     },
     {
       "id": "SAFE-T1505",
@@ -1790,7 +2015,12 @@
         "mcp",
         "rag-memory"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "identity",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1505/detection-rule.yml"
     },
     {
       "id": "SAFE-T1506",
@@ -1817,7 +2047,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "local"
+      "severitySource": "local",
+      "detectionModalities": [
+        "gateway",
+        "identity",
+        "network"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1506/detection-rule.yml"
     },
     {
       "id": "SAFE-T1507",
@@ -1844,7 +2080,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "identity",
+        "network",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1507/detection-rule.yml"
     },
     {
       "id": "SAFE-T1601",
@@ -1869,7 +2111,11 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1601/detection-rule.yml"
     },
     {
       "id": "SAFE-T1602",
@@ -1892,7 +2138,11 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1602/detection-rule.yml"
     },
     {
       "id": "SAFE-T1603",
@@ -1917,7 +2167,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1603/detection-rule.yml"
     },
     {
       "id": "SAFE-T1604",
@@ -1938,7 +2193,12 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1604/detection-rule.yml"
     },
     {
       "id": "SAFE-T1605",
@@ -1961,7 +2221,11 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1605/detection-rule.yml"
     },
     {
       "id": "SAFE-T1606",
@@ -1985,7 +2249,12 @@
         "mcp",
         "code-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1606/detection-rule.yml"
     },
     {
       "id": "SAFE-T1701",
@@ -2013,7 +2282,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1701/detection-rule.yml"
     },
     {
       "id": "SAFE-T1702",
@@ -2045,7 +2319,8 @@
         "mcp",
         "rag-memory"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1702/detection-rule.yml"
     },
     {
       "id": "SAFE-T1703",
@@ -2072,7 +2347,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1703/detection-rule.yml"
     },
     {
       "id": "SAFE-T1704",
@@ -2102,7 +2382,13 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "network",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1704/detection-rule.yml"
     },
     {
       "id": "SAFE-T1705",
@@ -2130,7 +2416,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1705/detection-rule.yml"
     },
     {
       "id": "SAFE-T1706",
@@ -2153,7 +2444,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "identity",
+        "network",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1706/detection-rule.yml"
     },
     {
       "id": "SAFE-T1707",
@@ -2176,7 +2473,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "identity",
+        "network"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1707/detection-rule.yml"
     },
     {
       "id": "SAFE-T1801",
@@ -2201,7 +2504,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1801/detection-rule.yml"
     },
     {
       "id": "SAFE-T1802",
@@ -2226,7 +2534,11 @@
         "mcp",
         "code-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1802/detection-rule.yml"
     },
     {
       "id": "SAFE-T1803",
@@ -2249,7 +2561,11 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1803/detection-rule.yml"
     },
     {
       "id": "SAFE-T1804",
@@ -2275,7 +2591,11 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1804/detection-rule.yml"
     },
     {
       "id": "SAFE-T1805",
@@ -2303,7 +2623,12 @@
         "mcp",
         "rag-memory"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "memory",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1805/detection-rule.yml"
     },
     {
       "id": "SAFE-T1901",
@@ -2330,7 +2655,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "network",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1901/detection-rule.yml"
     },
     {
       "id": "SAFE-T1902",
@@ -2358,7 +2688,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1902/detection-rule.yml"
     },
     {
       "id": "SAFE-T1903",
@@ -2385,7 +2720,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "endpoint",
+        "network",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1903/detection-rule.yml"
     },
     {
       "id": "SAFE-T1904",
@@ -2410,7 +2751,13 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "identity",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1904/detection-rule.yml"
     },
     {
       "id": "SAFE-T1910",
@@ -2436,7 +2783,13 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "network",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1910/detection-rule.yml"
     },
     {
       "id": "SAFE-T1911",
@@ -2462,7 +2815,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1911/detection-rule.yml"
     },
     {
       "id": "SAFE-T1912",
@@ -2494,7 +2852,8 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1912/detection-rule.yml"
     },
     {
       "id": "SAFE-T1913",
@@ -2520,7 +2879,13 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "gateway",
+        "network",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1913/detection-rule.yml"
     },
     {
       "id": "SAFE-T1914",
@@ -2550,7 +2915,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1914/detection-rule.yml"
     },
     {
       "id": "SAFE-T1915",
@@ -2576,7 +2946,11 @@
       "profiles": [
         "financial-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "on-chain"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T1915/detection-rule.yml"
     },
     {
       "id": "SAFE-T2101",
@@ -2599,7 +2973,11 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T2101/detection-rule.yml"
     },
     {
       "id": "SAFE-T2102",
@@ -2623,7 +3001,11 @@
       "profiles": [
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T2102/detection-rule.yml"
     },
     {
       "id": "SAFE-T2103",
@@ -2649,7 +3031,12 @@
         "mcp",
         "code-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T2103/detection-rule.yml"
     },
     {
       "id": "SAFE-T2104",
@@ -2674,7 +3061,12 @@
         "mcp",
         "financial-agent"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "identity",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T2104/detection-rule.yml"
     },
     {
       "id": "SAFE-T2105",
@@ -2700,7 +3092,12 @@
         "core",
         "mcp"
       ],
-      "severitySource": "upstream"
+      "severitySource": "upstream",
+      "detectionModalities": [
+        "content",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T2105/detection-rule.yml"
     },
     {
       "id": "SAFE-T3001",
@@ -2727,7 +3124,12 @@
         "mcp",
         "rag-memory"
       ],
-      "severitySource": "local"
+      "severitySource": "local",
+      "detectionModalities": [
+        "memory",
+        "runtime"
+      ],
+      "upstreamDetectionRule": "https://github.com/safe-agentic-framework/safe-mcp/blob/d3d40297c478d2680d315399b6aaf317e5aa15b8/techniques/SAF-T3001/detection-rule.yml"
     }
   ],
   "tacticDistribution": {

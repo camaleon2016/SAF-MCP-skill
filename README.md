@@ -11,8 +11,8 @@ The skill is callable from any agent framework — MCP (stdio or HTTP), OpenAI f
 ### How it works
 
 1. **You send** a JSON description of a tool, server, or full agent architecture — or just **point the skill at a running MCP server** (local or remote) and it auto-discovers all tools and configurations for you
-2. **The engine runs 40 rules** that check for prompt injection, credential theft, data exfiltration, command injection, and 36 other attack patterns
-3. **You get back** a risk rating (low → critical), specific findings with cross-references to STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF, plus actionable mitigations for each issue
+2. **The engine runs 43 rules** that check for prompt injection, credential theft, data exfiltration, command injection, and 39 other attack patterns
+3. **You get back** a risk rating (low → critical), specific findings with cross-references to STRIDE, MITRE ATLAS, OWASP LLM Top 10, and NIST AI RMF, plus actionable mitigations for each issue Each finding says what it rests on: evidence in the content, a risky configuration, or exposure (the architecture has what an attack needs).
 
 ## Prerequisites
 
@@ -300,13 +300,13 @@ The server reads JSON-RPC from stdin and writes to stdout.
   "mcpServers": {
     "saf-mcp": {
       "command": "npx",
-      "args": ["-y", "saf-mcp-skill@2.3.0"]
+      "args": ["-y", "saf-mcp-skill@2.4.0"]
     }
   }
 }
 ```
 
-Pin the version (`saf-mcp-skill@2.3.0`) rather than taking whatever is latest: an MCP server runs with your permissions, so an upgrade should be a decision, not a side effect of restarting your client. On Windows, if Claude Desktop cannot find `npx`, use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "saf-mcp-skill@2.3.0"]`.
+Pin the version (`saf-mcp-skill@2.4.0`) rather than taking whatever is latest: an MCP server runs with your permissions, so an upgrade should be a decision, not a side effect of restarting your client. On Windows, if Claude Desktop cannot find `npx`, use `"command": "cmd"` with `"args": ["/c", "npx", "-y", "saf-mcp-skill@2.4.0"]`.
 
 To run from a clone instead, point the client at the build: `"command": "node"` with `"args": ["<path-to>/saf-mcp-skill/dist/index.js"]`.
 
@@ -317,7 +317,7 @@ To run from a clone instead, point the client at the build: `"command": "node"` 
     "servers": {
       "saf-mcp": {
         "command": "npx",
-        "args": ["-y", "saf-mcp-skill@2.3.0"]
+        "args": ["-y", "saf-mcp-skill@2.4.0"]
       }
     }
   }
@@ -578,7 +578,8 @@ saf-mcp-skill/
 │   ├── engine/
 │   │   ├── analyze.ts               # Lookups, search, threat profiling
 │   │   ├── rules.ts                 # 32-rule analysis engine
-│   │   └── detect.ts                # Text detection for tool and schema poisoning
+│   │   ├── detect.ts                # Text detection for tool and schema poisoning
+│   │   └── coverage.ts              # Which techniques the rules cover, and why the rest are not
 │   ├── governance/
 │   │   ├── policy.ts                # Security model: discovery, browser, startup, and URL checks
 │   │   ├── access.ts                # API key + IP allowlist
@@ -611,6 +612,7 @@ saf-mcp-skill/
 │   └── index.ts                     # The saf-mcp-skill command (MCP stdio server)
 ├── scripts/
 │   ├── sync-catalog.ts              # Syncs src/data from upstream SAF-MCP
+│   ├── generate-coverage.ts         # Writes docs/coverage.md
 │   ├── severity-overrides.json      # Deliberate departures from upstream severity
 │   └── upstream.json                # Pinned upstream commit
 ├── plugins/
@@ -618,6 +620,7 @@ saf-mcp-skill/
 │       └── SafeMcpSkill/            # C# Semantic Kernel plugin
 ├── docs/
 │   ├── github-mcp-demo.md          # GitHub MCP Server scanning demo
+│   ├── coverage.md                 # Generated: coverage of every technique
 │   ├── catalog-sync-report.md      # Generated: catalog vs upstream
 │   └── catalog-sync-changes.md     # Generated: what the last sync changed
 ├── .github/workflows/ci.yml         # CI pipeline (Node 20 + 22)
@@ -659,6 +662,23 @@ Known limits:
 - **English only.** Payloads written in other languages are missed (`GAP-01` in the corpus). Closing that needs a model based check, not more phrases.
 - **Pattern based.** A determined attacker can word an instruction to avoid every pattern. A clean result means no rule fired, not that the tool is safe.
 - **Metadata only.** It reads what a server says about its tools, not what the server does.
+
+## Coverage
+
+Not every technique can be seen without running the system. Each technique gets a coverage status, computed from the rules and from upstream's detection registry rather than assigned by hand:
+
+| Status | Techniques | Meaning |
+|---|---|---|
+| detected | 17 | A rule finds evidence or a risky configuration |
+| exposure | 24 | Rules report that an architecture has what the attack needs |
+| open | 4 | No rule yet, though upstream lists it as observable in content |
+| runtime | 33 | Only observable outside static analysis; links to upstream's detection rule |
+
+43 rules cover 41 of the 78 active techniques. [`docs/coverage.md`](docs/coverage.md) lists every technique with its status, rules, and upstream modalities; `get_technique` returns the same information, and `get_framework_stats` includes the summary. The document is generated (`npm run coverage:doc`), and `npm test` fails if it falls out of date.
+
+Each finding also carries a `basis`: `evidence` (the content shows an attack), `configuration` (a specific risky setting), or `exposure` (the architecture has what an attack needs, with no sign it is in use). Read exposure findings as design questions rather than incidents.
+
+Upstream's detection registry lists analytics for every active technique, but none for the `static` modality, which is what this skill does. `docs/coverage.md` is written to serve as the mapping document for registering the skill as an upstream provider.
 
 ## Catalog Data
 
@@ -730,7 +750,7 @@ The skill exposes 19 tools over MCP:
 
 ## Rules Engine
 
-The engine runs 40 rules covering:
+The engine runs 43 rules covering:
 
 - Tool poisoning & prompt injection (RULE-001)
 - Unauthenticated network servers (RULE-002)
@@ -772,6 +792,9 @@ The engine runs 40 rules covering:
 - Unpinned packages, unpinned images, and scripts piped to a shell at launch (RULE-038)
 - Containers launched with host access (RULE-039)
 - Plaintext secrets in a client config, never echoed (RULE-040)
+- Exfiltration paths: a tool that reads private data plus a tool that sends data out (RULE-041)
+- Pivots: untrusted content reaching an agent that can also act (RULE-042)
+- Requests to any URL the model chooses (RULE-043)
 
 ## Demo
 
@@ -911,6 +934,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
       "technique": { "id": "SAFE-T1001", "name": "Tool Poisoning Attack" },
       "evidence": "Suspicious content in tool metadata: execute_code: instruction override in description (\"ignore previous instructions\"); destructive or code execution snippet in description (\"rm -rf\")",
       "confidence": "high",
+      "basis": "evidence",
       "mitigations": [
         { "id": "SAFE-M-1", "name": "Control/Data Flow Separation", "effectiveness": "High (Provable Security)" },
         { "id": "SAFE-M-2", "name": "Cryptographic Integrity for Tool Descriptions", "effectiveness": "High" },
@@ -928,6 +952,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/tool -H "Content-Type: applica
       "severity": "Critical",
       "technique": { "id": "SAFE-T1101", "name": "Command Injection" },
       "evidence": "Tools with shell/exec capabilities: execute_code",
+      "basis": "exposure",
       "mitigations": [
         { "id": "SAFE-M-9", "name": "Sandboxed Testing", "effectiveness": "High" },
         { "id": "SAFE-M-11", "name": "Behavioral Monitoring", "effectiveness": "High" },
@@ -1037,7 +1062,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/architecture -H "Content-Type:
 
 </details>
 
-**What comes back:** **Critical** risk with **14 findings**. The engine catches issues you might not have thought of:
+**What comes back:** **Critical** risk with **15 findings**. The engine catches issues you might not have thought of:
 
 | Finding | Why it matters |
 |---|---|
@@ -1046,6 +1071,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/architecture -H "Content-Type:
 | **Dynamic transport** (RULE-009) | Tool definitions served over SSE can change after you approve them |
 | **Database dump** (RULE-028) | `run_query` reaches a production database |
 | **Code sabotage** (RULE-030) | `deploy` can push directly to production |
+| **Exfiltration path** (RULE-041) | `run_query` reads the production database and `send_email` can send data out |
 | **OAuth without PKCE** (RULE-032) | `code-server` uses OAuth without PKCE, so intercepted codes can be redeemed |
 | **Vector store poisoning** (RULE-010) | Shared memory can be poisoned through one compromised server |
 | **Cross-agent injection** (RULE-012) | Multiple agents with shared memory can manipulate each other |
@@ -1156,7 +1182,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/discover/stdio -H "Content-Type: appli
 {
   "discovered": {
     "serverName": "saf-mcp-skill",
-    "serverVersion": "2.3.0",
+    "serverVersion": "2.4.0",
     "toolCount": 19,
     "tools": [
       { "name": "analyze_tool", "description": "Analyze a single MCP tool definition for SAF-MCP security risks." },
@@ -1325,7 +1351,7 @@ curl.exe -X POST http://127.0.0.1:3002/v1/analyze/server -H "Content-Type: appli
 
 #### 6. Look Up a Technique
 
-Get full detail on any technique by its ID — sub-techniques, mitigations, attack vectors, MITRE mappings, and real-world incidents:
+Get full detail on any technique by its ID — sub-techniques, mitigations, attack vectors, MITRE mappings, real-world incidents, and its coverage (which rules cover it, or why none do):
 
 ```bash
 curl http://127.0.0.1:3002/v1/techniques/SAFE-T1001
@@ -1453,7 +1479,7 @@ curl.exe http://127.0.0.1:3002/v1/threat-profile
 
 #### 12. Get Framework Statistics
 
-Returns totals (86 techniques with 78 active, 14 tactics, 51 active mitigations), tactic distribution, and defense-in-depth guidance:
+Returns totals (86 techniques with 78 active, 14 tactics, 51 active mitigations), tactic distribution, defense-in-depth guidance, and the coverage summary:
 
 ```bash
 curl http://127.0.0.1:3002/v1/framework/stats

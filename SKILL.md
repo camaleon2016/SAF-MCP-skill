@@ -48,6 +48,7 @@ Prefer Describe when the user can give you the definitions, and `analyze_config`
 - `summary.overallRisk` is the highest severity among the findings.
 - Each finding has a `ruleId`, a `technique` (ID and name), the `evidence` that triggered it, `mitigations` sorted strongest first, and `mappings` for the four frameworks.
 - Findings from RULE-001 (tool poisoning) and RULE-025 (schema poisoning) carry a `confidence`. "high" means a clear attack signal such as hidden instruction markup or concealment from the user; "medium" means only weaker signals appeared together. The evidence names each signal and quotes the text that triggered it.
+- Every finding has a `basis`. "evidence" means the content shows an attack; "configuration" means a specific risky setting; "exposure" means the architecture has what an attack needs, with no sign it is in use. Present exposure findings as design questions, not incidents.
 - Severities come from upstream SAF-MCP. A technique with `severitySource: "override"` is rated differently on purpose; its `severityRationale` says why.
 - A deprecated technique names its `replacedBy` techniques. Withdrawn mitigations resolve by ID but are never recommended.
 
@@ -73,5 +74,6 @@ IDs work in either form and any case: `SAF-T1001`, `SAFE-T1001`, `saf-m-1`. Resu
 ## Limits to state when relevant
 
 - It reads metadata and configuration, not server source code.
+- Its rules cover 41 of 78 active techniques. `get_technique` shows each technique's coverage; for runtime only techniques it links upstream's detection rule, which is the right next step when the user needs that technique covered.
 - It is not a runtime guard, a penetration test, or a compliance attestation.
 - Mappings support a threat model; they do not certify controls.

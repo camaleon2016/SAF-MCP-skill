@@ -1,4 +1,5 @@
 import { analyzeConfig } from "./config.js";
+import { describeTechnique, getCoverageSummary } from "./engine/coverage.js";
 import type {
   ToolDefinition,
   ServerDefinition,
@@ -280,7 +281,7 @@ export function dispatch(name: string, args: Record<string, unknown>): string {
     case "analyze_server":
       return JSON.stringify(analyzeServer(args["server"] as ServerDefinition));
     case "get_technique": {
-      const t = getTechnique(args["id"] as string);
+      const t = describeTechnique(args["id"] as string);
       return t ? JSON.stringify(t) : JSON.stringify({ error: "Technique not found" });
     }
     case "get_mitigation": {
@@ -302,7 +303,7 @@ export function dispatch(name: string, args: Record<string, unknown>): string {
     case "rank_mitigations":
       return JSON.stringify(rankMitigationsByImpact().slice(0, 20));
     case "get_framework_stats":
-      return JSON.stringify(getFrameworkStats());
+      return JSON.stringify({ ...getFrameworkStats(), coverage: getCoverageSummary() });
     default:
       return JSON.stringify({ error: `Unknown function: ${name}` });
   }

@@ -14,6 +14,8 @@ import {
   rankMitigationsByImpact,
 } from "../engine/analyze.js";
 import { getMappings } from "../mappings/index.js";
+import { renderCoverageMarkdown, getCoverageSummary, coverageFor } from "../engine/coverage.js";
+import { readFileSync, existsSync } from "node:fs";
 import { listRules, analyzeTool } from "../engine/rules.js";
 
 let passed = 0;
@@ -190,6 +192,46 @@ test("CAT-014: every severity traces to upstream or a documented override", () =
       .map((t) => t.id),
     "overrides without a rationale, or equal to upstream",
   );
+});
+
+test("CAT-015: docs/coverage.md matches the rules and catalog", () => {
+  const { commit } = JSON.parse(readFileSync("scripts/upstream.json", "utf-8")) as { commit: string };
+  const current = existsSync("docs/coverage.md") ? readFileSync("docs/coverage.md", "utf-8").replace(/\r\n/g, "\n") : "";
+  if (current !== renderCoverageMarkdown(commit)) throw new Error("out of date; run npm run coverage:doc");
+});
+
+test("CAT-016: every active technique has a coverage status, and the counts add up", () => {
+  const active = techniques.filter((t) => t.lifecycleStatus !== "deprecated");
+  const statuses = active.map((t) => coverageFor(t).status);
+  assertEmpty(active.filter((_, i) => !["detected", "exposure", "open", "runtime"].includes(statuses[i]!)).map((t) => t.id), "techniques without a status");
+  const s = getCoverageSummary();
+  const total = s.byStatus.detected + s.byStatus.exposure + s.byStatus.open + s.byStatus.runtime;
+  if (total !== active.length) throw new Error(`statuses add to ${total}, ${active.length} active techniques`);
+  assertEmpty(active.filter((t) => !t.detectionModalities?.length).map((t) => t.id), "active techniques without upstream modalities");
+});
+
+test("CAT-017: every rule declares a basis", () => {
+  assertEmpty(
+    listRules().filter((r) => !["evidence", "configuration", "exposure"].includes(r.basis)).map((r) => r.id),
+    "rules without a valid basis",
+  );
+});
+
+test("CAT-018: coverage numbers quoted in the README match the computed coverage", () => {
+  const readme = readFileSync("README.md", "utf-8");
+  const section = readme.slice(readme.indexOf("## Coverage"), readme.indexOf("## Catalog Data"));
+  const s = getCoverageSummary();
+  const problems: string[] = [];
+  for (const status of ["detected", "exposure", "open", "runtime"] as const) {
+    const quoted = Number(new RegExp(`^\\| ${status} \\| (\\d+) \\|`, "m").exec(section)?.[1]);
+    if (quoted !== s.byStatus[status]) problems.push(`${status}: README ${quoted}, computed ${s.byStatus[status]}`);
+  }
+  const m = /(\d+) rules cover (\d+) of the (\d+) active techniques/.exec(section);
+  const covered = s.byStatus.detected + s.byStatus.exposure;
+  if (!m || Number(m[1]) !== s.rules || Number(m[2]) !== covered || Number(m[3]) !== s.activeTechniques) {
+    problems.push(`summary line should read "${s.rules} rules cover ${covered} of the ${s.activeTechniques} active techniques"`);
+  }
+  if (problems.length) throw new Error(problems.join("; "));
 });
 
 console.log(`\n  Total: ${passed + failed} | Passed: ${passed} | Failed: ${failed}\n`);

@@ -18,6 +18,7 @@ import {
 } from "../engine/rules.js";
 import type { AgentArchitecture, ToolDefinition, ServerDefinition } from "../engine/rules.js";
 import { analyzeConfig } from "../config.js";
+import { describeTechnique, getCoverageSummary } from "../engine/coverage.js";
 import {
   getTechnique,
   getMitigation,
@@ -169,7 +170,7 @@ const httpServer = createServer(async (req, res) => {
     const techniqueMatch = path.match(/^\/v1\/techniques\/(.+)$/);
     if (req.method === "GET" && techniqueMatch) {
       const id = decodeURIComponent(techniqueMatch[1]!);
-      const t = getTechnique(id);
+      const t = describeTechnique(id);
       if (!t) { json(res, 404, { error: `Technique ${id} not found` }); return; }
       json(res, 200, t);
       return;
@@ -209,7 +210,7 @@ const httpServer = createServer(async (req, res) => {
       return;
     }
     if (req.method === "GET" && path === "/v1/framework/stats") {
-      json(res, 200, getFrameworkStats());
+      json(res, 200, { ...getFrameworkStats(), coverage: getCoverageSummary() });
       return;
     }
 
