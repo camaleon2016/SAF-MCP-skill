@@ -52,7 +52,7 @@ const GOV_VARS = [
   "HOST", "SAF_MCP_REQUIRE_API_KEY", "SAF_MCP_API_KEYS", "SAF_MCP_REQUIRE_IP_ALLOWLIST",
   "SAF_MCP_IP_ALLOWLIST", "SAF_MCP_TRUST_PROXY", "SAF_MCP_ALLOW_INSECURE_BIND",
   "SAF_MCP_ALLOW_COMMAND_DISCOVERY", "SAF_MCP_ALLOW_PRIVATE_URLS", "SAF_MCP_CORS_ORIGINS",
-  "SAF_MCP_ALLOWED_HOSTS",
+  "SAF_MCP_ALLOWED_HOSTS", "SAF_MCP_EXPOSED",
 ];
 /** The same settings under the pre 2.2.0 prefix, cleared between tests too. */
 const ALL_VARS = [...GOV_VARS, ...GOV_VARS.filter((k) => k.startsWith("SAF_MCP_")).map((k) => k.replace("SAF_MCP_", "SAFE_MCP_"))];
@@ -213,6 +213,50 @@ await test("GOV-016: settings with the old SAFE_MCP_ prefix still enforce securi
 await test("GOV-017: when both prefixes are set, SAF_MCP_ wins", () => {
   withEnv({ SAF_MCP_REQUIRE_API_KEY: "true", SAF_MCP_API_KEYS: KEY, SAFE_MCP_REQUIRE_API_KEY: "false" });
   assert(!checkAccess(fakeReq({})).allowed, "the new setting (keys required) should win");
+});
+
+await test("GOV-018: SAF_MCP_EXPOSED on a loopback bind requires API keys", async () => {
+  withEnv({ SAF_MCP_EXPOSED: "true" });
+  setNetworkMode("127.0.0.1");
+  await throwsPolicy(() => enforceStartupPolicy("127.0.0.1"), "exposed without keys");
+  withEnv({ SAF_MCP_EXPOSED: "true", SAF_MCP_REQUIRE_API_KEY: "true", SAF_MCP_API_KEYS: KEY });
+  setNetworkMode("127.0.0.1");
+  enforceStartupPolicy("127.0.0.1");
+});
+
+await test("GOV-019: a public name in SAF_MCP_ALLOWED_HOSTS implies exposed", async () => {
+  withEnv({ SAF_MCP_ALLOWED_HOSTS: "demo.devtunnels.ms,localhost" });
+  setNetworkMode("127.0.0.1");
+  await throwsPolicy(() => enforceStartupPolicy("127.0.0.1"), "public allowed host without keys");
+  withEnv({ SAF_MCP_ALLOWED_HOSTS: "localhost,127.0.0.1" });
+  setNetworkMode("127.0.0.1");
+  enforceStartupPolicy("127.0.0.1"); // loopback names only: still local
+});
+
+await test("GOV-020: a forwarded request to a server not configured as exposed is refused", () => {
+  withEnv({});
+  setNetworkMode("127.0.0.1");
+  for (const h of ["x-forwarded-for", "x-forwarded-host", "forwarded"]) {
+    const r = checkBrowserSafety(fakeReq({ headers: { [h]: "203.0.113.9" } }));
+    assert(!r.allowed && /proxy or tunnel/.test(r.reason ?? ""), `${h} should be refused`);
+  }
+  assert(checkBrowserSafety(fakeReq({})).allowed, "a plain local request is still allowed");
+});
+
+await test("GOV-021: an exposed server accepts forwarded requests and blocks private URLs", async () => {
+  withEnv({ SAF_MCP_EXPOSED: "true", SAF_MCP_REQUIRE_API_KEY: "true", SAF_MCP_API_KEYS: KEY, SAF_MCP_ALLOWED_HOSTS: "demo.devtunnels.ms" });
+  setNetworkMode("127.0.0.1");
+  const r = checkBrowserSafety(fakeReq({ headers: { host: "demo.devtunnels.ms", "x-forwarded-for": "203.0.113.9" } }));
+  assert(r.allowed, `forwarded request should pass: ${r.reason}`);
+  await throwsPolicy(() => assertUrlAllowed("http://127.0.0.1:8080/admin"), "loopback target when exposed");
+  await throwsPolicy(() => assertUrlAllowed("http://192.168.1.10/"), "LAN target when exposed");
+});
+
+await test("GOV-022: local use without a tunnel is unchanged", async () => {
+  withEnv({});
+  setNetworkMode("127.0.0.1");
+  enforceStartupPolicy("127.0.0.1");
+  await assertUrlAllowed("http://127.0.0.1:3001/v1/mcp");
 });
 
 // ── End to end against a live REST server ─────────────────────────

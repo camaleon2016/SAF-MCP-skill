@@ -96,6 +96,20 @@ export function isNetworkMode(): boolean {
   return networkMode;
 }
 
+/**
+ * Whether the server is reachable from outside this machine. Binding beyond
+ * loopback is one way; a tunnel or reverse proxy forwarding to 127.0.0.1 is
+ * another, and the bind address cannot show it. So the operator can say so
+ * (SAF_MCP_EXPOSED=true), and trusting a proxy or accepting a non-loopback
+ * Host name implies it.
+ */
+export function isExposed(): boolean {
+  if (!networkMode) return false;
+  if (!isLoopbackHost(bindHost)) return true;
+  if (envFlag("EXPOSED") === true || envFlag("TRUST_PROXY") === true) return true;
+  return envList("ALLOWED_HOSTS").some((h) => !isLoopbackHost(hostWithoutPort(h.toLowerCase())));
+}
+
 // ── Address helpers ─────────────────────────────────────────────────
 
 /** Strip IPv6 brackets, zone ids, and IPv4 mapped prefixes. */
@@ -174,9 +188,12 @@ export function enforceStartupPolicy(host: string): void {
   }
   if (ips.length > 0) buildBlockList(ips, "SAF_MCP_IP_ALLOWLIST"); // validates entries
 
-  if (!isLoopbackHost(host) && !requireKey && envFlag("ALLOW_INSECURE_BIND") !== true) {
+  if (isExposed() && !requireKey && envFlag("ALLOW_INSECURE_BIND") !== true) {
+    const why = !isLoopbackHost(host)
+      ? `HOST=${host} is reachable from other machines`
+      : "The server is configured as reachable from outside (SAF_MCP_EXPOSED, SAF_MCP_TRUST_PROXY, or a public name in SAF_MCP_ALLOWED_HOSTS)";
     throw new PolicyError(
-      `HOST=${host} is reachable from other machines but API keys are not required. ` +
+      `${why} but API keys are not required. ` +
         "Set SAF_MCP_REQUIRE_API_KEY=true and SAF_MCP_API_KEYS, or set SAF_MCP_ALLOW_INSECURE_BIND=true if you accept the risk.",
     );
   }
@@ -203,7 +220,20 @@ function hostWithoutPort(hostHeader: string): string {
  *  1. Cross origin requests from a web page the user happens to visit.
  *  2. DNS rebinding, where attacker.example resolves to 127.0.0.1.
  */
+const FORWARDING_HEADERS = ["x-forwarded-for", "x-forwarded-host", "x-forwarded-proto", "forwarded", "x-real-ip"];
+
 export function checkBrowserSafety(req: IncomingMessage): { allowed: boolean; reason?: string } {
+  // A tunnel or proxy in front of a server that thinks it is local: refuse,
+  // because that server is not requiring keys or blocking private URLs.
+  if (networkMode && !isExposed() && FORWARDING_HEADERS.some((h) => req.headers[h] !== undefined)) {
+    return {
+      allowed: false,
+      reason:
+        "This request came through a proxy or tunnel, but the server is not configured as exposed. " +
+        "Set SAF_MCP_EXPOSED=true with SAF_MCP_REQUIRE_API_KEY=true and SAF_MCP_API_KEYS.",
+    };
+  }
+
   // Host header
   const allowedHosts = envList("ALLOWED_HOSTS").map((h) => h.toLowerCase());
   const hostHeader = (req.headers.host ?? "").toLowerCase();
@@ -308,8 +338,7 @@ export async function assertUrlAllowed(rawUrl: string): Promise<URL> {
     ? [hostname]
     : (await lookup(hostname, { all: true })).map((a) => a.address);
 
-  const blockPrivate =
-    networkMode && !isLoopbackHost(bindHost) && envFlag("ALLOW_PRIVATE_URLS") !== true;
+  const blockPrivate = isExposed() && envFlag("ALLOW_PRIVATE_URLS") !== true;
 
   for (const a of addrs) {
     if (blockListHas(ALWAYS_BLOCKED, a)) {
